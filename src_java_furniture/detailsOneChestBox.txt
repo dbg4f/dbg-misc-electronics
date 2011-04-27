@@ -1,0 +1,5 @@
+CHEST_BOX_FRONT/box2-front
+CHEST_BOX_BACK/box2-back
+CHEST_BOX_FOOT/box2-foot
+CHEST_BOX_SIDE/box2-side1
+CHEST_BOX_SIDE/box2-side2

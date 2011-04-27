@@ -1,0 +1,100 @@
+<f1:contact tempid="1">
+  <f1:firstname>Contact1</f1:firstname>
+  <f1:lastname>Public1</f1:lastname>
+ 
+  <f1:tel type="home" indx="1">
+    <f1:number>00001</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="businessfax" indx="1">
+    <f1:number>00001</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="business" indx="1">
+    <f1:number>00001</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="homefax" indx="1">
+    <f1:number>00001</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="mobile" indx="1">
+    <f1:number>00001</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+ </f1:contact> 
+<f1:contact tempid="1">
+  <f1:firstname>Contact2</f1:firstname>
+  <f1:lastname>Public2</f1:lastname>
+ 
+  <f1:tel type="home" indx="1">
+    <f1:number>00002</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="businessfax" indx="1">
+    <f1:number>00002</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="business" indx="1">
+    <f1:number>00002</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="homefax" indx="1">
+    <f1:number>00002</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="mobile" indx="1">
+    <f1:number>00002</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+ </f1:contact> 
+<f1:contact tempid="1">
+  <f1:firstname>Contact3</f1:firstname>
+  <f1:lastname>Public3</f1:lastname>
+ 
+  <f1:tel type="home" indx="1">
+    <f1:number>00003</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="businessfax" indx="1">
+    <f1:number>00003</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="business" indx="1">
+    <f1:number>00003</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="homefax" indx="1">
+    <f1:number>00003</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="mobile" indx="1">
+    <f1:number>00003</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+ </f1:contact> 
+<f1:contact tempid="1">
+  <f1:firstname>Contact4</f1:firstname>
+  <f1:lastname>Public4</f1:lastname>
+ 
+  <f1:tel type="home" indx="1">
+    <f1:number>00004</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="businessfax" indx="1">
+    <f1:number>00004</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="business" indx="1">
+    <f1:number>00004</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="homefax" indx="1">
+    <f1:number>00004</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+     <f1:tel type="mobile" indx="1">
+    <f1:number>00004</f1:number>
+   <f1:preference>0</f1:preference>
+   </f1:tel>
+ </f1:contact> 
