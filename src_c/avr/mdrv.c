@@ -24,6 +24,11 @@ static unsigned char 			USART_TxBuf[USART_TX_BUFFER_SIZE];
 static volatile unsigned char 	USART_TxHead;
 static volatile unsigned char 	USART_TxTail;
 
+static unsigned char 	INTC_on;
+static unsigned char 	INTC_target;
+static unsigned char 	INTC_counter;
+
+
 /* Prototypes */
 void 			USART0_Init( unsigned int baudrate );
 unsigned char 	USART0_Receive();
@@ -38,6 +43,10 @@ unsigned char	DIR_get();
 
 void 			DIR_setup();
 void 			PWM_setup();
+void 			INTC_init();
+void 			INTC_cancel(); 
+void 			INTC_start(unsigned char target);
+unsigned char 	merge(unsigned char vH, unsigned char vL);
 
 
 
@@ -65,6 +74,8 @@ int main()
 	PWM_setup();
 
 	DIR_setup();
+
+	INTC_init();
 
 	sei();           /* Enable interrupts => enable UART interrupts */
 
@@ -154,6 +165,32 @@ int main()
 			USART0_Transmit(pwm_value); 
 
 		}
+		// get interrupts counter
+		else if (command_code == 10) 
+		{
+			USART0_Transmit(INTC_counter >> 4); 
+			USART0_Transmit(INTC_counter); 
+
+		}
+		// schedule PWM1 off
+		else if (command_code == 11) 
+		{			
+			pwmH = USART0_Receive();
+			pwmL = USART0_Receive();
+			INTC_start(merge(pwmH, pwmL));
+			USART0_Transmit(INTC_counter); 
+		}
+		// cancel schedule PWM1
+		else if (command_code == 12) 
+		{			
+			INTC_cancel();
+			USART0_Transmit(INTC_counter); 
+		}
+		// get schedule status
+		else if (command_code == 13) 
+		{						
+			USART0_Transmit(INTC_on); 
+		}
 		// unknown command
 		else 
 		{
@@ -161,29 +198,24 @@ int main()
 		}
 		
 
-
-		//pwm0 = USART0_Receive();
-		//pwm0L = USART0_Receive();
-		//pwm1 = USART0_Receive();
-		//pwm1L = USART0_Receive();
-		
-		//dir  = USART0_Receive();
-
-		//pwm0 = ((pwm0H & 0x7F) << 1);// + (pwm0L & 0x7);
-		//pwm1 = ((pwm1H & 0x7F) << 1);// + (pwm1L & 0x7);
-
-		//PWM0_set(pwm0);
-		//PWM1_set(pwm1);
-		//DIR_set(dir);		
-		
-
-		//USART0_Receive();
-		
-		//USART0_Transmit(pwm0 + pwm1 + dir); 
 	}
 
 	return 0;
 }
+
+
+unsigned char merge(unsigned char vH, unsigned char vL)
+{
+	return ((vH << 4) & 0xF0) + (vL & 0xF);
+}
+
+
+unsigned char getH(unsigned char v)
+{
+	return v >> 4;
+}
+
+
 
 /* Initialize USART */
 void USART0_Init(unsigned int baudrate)
@@ -247,6 +279,49 @@ ISR(USART_UDRE_vect)
 	{
 		UCSRB &= ~(1<<UDRIE);         /* Disable UDRE interrupt */
 	}
+}
+
+
+
+ISR(INT0_vect)
+{
+	
+	INTC_counter++;
+
+	if (INTC_on == 0) 
+	{
+		return;
+	}
+
+	if (INTC_counter >= INTC_target) 
+	{
+		INTC_on = 0;
+		PWM1_set(0);
+	}
+
+}
+
+
+
+void INTC_start(unsigned char target)
+{
+	INTC_on 		= 1;
+	INTC_target 	= target;
+	INTC_counter 	= 0;
+	MCUCR 			|= (_BV(ISC01) | _BV(ISC00)); // rising edge of int0 generates int
+	GIMSK 			|= _BV(INT0); 
+} 
+
+void INTC_cancel() 
+{
+	INTC_on 		= 0;
+}
+
+void INTC_init() 
+{
+	INTC_on 		= 0;
+	INTC_target 	= 0;
+	INTC_counter 	= 0;
 }
 
 /* Read and write functions */
