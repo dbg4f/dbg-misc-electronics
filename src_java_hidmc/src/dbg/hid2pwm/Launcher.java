@@ -43,7 +43,7 @@ public class Launcher {
 
     System.out.println(repText);
 
-    GenericSerialIo io = new GenericSerialIo("COM6", "57600,n,8,1");
+    GenericSerialIo io = new GenericSerialIo("COM7", "57600,n,8,1");
 
     //new Emulator(new GenericSerialIo("COM7", "57600,n,8,1"), panel).launch();
 

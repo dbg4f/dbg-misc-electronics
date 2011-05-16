@@ -69,6 +69,16 @@ public class McSerialWire implements StateChangeSink, McCommands {
     return (byte)((v1 << 4) + (v2 & 0xF));
   }
     
+  private byte query0(byte cmdCode) throws IOException, InterruptedException {
+    rx.clear();
+    io.write(new byte[]{cmdCode});
+    Byte v1 = rx.poll();
+    if (v1 == null) {
+      throw new IOException("timeout in query");
+    }
+    return v1;
+  }
+
   private void send(byte cmdCode, byte value) throws IOException, InterruptedException {
     log.info("Send=" + cmdCode + " val=" + BitUtils.toStr(value));
     rx.clear();
@@ -77,6 +87,26 @@ public class McSerialWire implements StateChangeSink, McCommands {
     io.write(new byte[]{(BitUtils.toByte((value & 0xF0)>>4))});
     Thread.sleep(10);
     io.write(new byte[]{BitUtils.toByte(value & 0xF)});
+    if (rx.poll() == null) {
+      throw new IOException("timeout in write");
+    }
+  }
+
+  private void send1(byte cmdCode, byte value) throws IOException, InterruptedException {
+    log.info("Send=" + cmdCode + " val=" + BitUtils.toStr(value));
+    rx.clear();
+    io.write(new byte[]{cmdCode});
+    Thread.sleep(10);
+    io.write(new byte[]{BitUtils.toByte(value & 0xF)});
+    if (rx.poll() == null) {
+      throw new IOException("timeout in write");
+    }
+  }
+
+  private void send0(byte cmdCode) throws IOException, InterruptedException {
+    log.info("Send=" + cmdCode);
+    rx.clear();
+    io.write(new byte[]{cmdCode});
     if (rx.poll() == null) {
       throw new IOException("timeout in write");
     }
@@ -105,5 +135,21 @@ public class McSerialWire implements StateChangeSink, McCommands {
 
   public byte getDir() throws IOException, InterruptedException {
     return query((byte)9);
+  }
+
+  public byte getIntC() throws IOException, InterruptedException {
+    return query((byte)10);
+  }
+
+  public void schedulePwm1(byte count) throws IOException, InterruptedException {
+    send((byte)11, count);
+  }
+
+  public void cancelSchedule() throws IOException, InterruptedException {
+    send0((byte)12);
+  }
+
+  public byte getScheduleStatus() throws IOException, InterruptedException {
+    return query0((byte)13);
   }
 }

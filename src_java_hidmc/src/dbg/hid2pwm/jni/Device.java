@@ -28,7 +28,7 @@ public class Device {
     int handle = findDevice((short)0x0583, (short)0xA00B);
 
     if (handle == 0) {
-      throw new Exception("Device not found");
+      throw new RuntimeException("Device not found");
     }
 
     prepareTransfer();
