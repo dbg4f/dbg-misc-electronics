@@ -23,4 +23,14 @@ public interface McCommands {
 
   byte getDir() throws IOException, InterruptedException;
 
+  byte getIntC() throws IOException, InterruptedException;
+
+  void schedulePwm1(byte count) throws IOException, InterruptedException;
+
+  void cancelSchedule() throws IOException, InterruptedException;
+
+  byte getScheduleStatus() throws IOException, InterruptedException;
+
+  
+
 }
