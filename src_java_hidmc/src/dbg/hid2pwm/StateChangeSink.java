@@ -13,6 +13,4 @@ public interface StateChangeSink {
 
   void trigger(InputState inputState);
 
-  void display(String msg);
-
 }

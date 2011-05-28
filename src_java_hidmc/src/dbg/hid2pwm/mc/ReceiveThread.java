@@ -1,6 +1,6 @@
 package dbg.hid2pwm.mc;
 
-import dbg.hid2pwm.jna.GenericSerialIo;
+import dbg.hid2pwm.jna.SerialIo;
 
 import java.util.concurrent.*;
 
@@ -10,12 +10,11 @@ public class ReceiveThread implements Runnable {
 
   private static final Logger log = Logger.getLogger(ReceiveThread.class);
 
-  private GenericSerialIo io;
+  private SerialIo io;
 
   private BlockingQueue<Byte> rxBuffer = new LinkedBlockingQueue<Byte>();
 
-
-  public ReceiveThread(GenericSerialIo io) {
+  public void setIo(SerialIo io) {
     this.io = io;
   }
 
@@ -23,16 +22,17 @@ public class ReceiveThread implements Runnable {
     rxBuffer.clear();
   }
 
-  public byte next() throws InterruptedException {
+  public byte blockingNext() throws InterruptedException {
     return rxBuffer.take();
   }
 
-  public Byte poll() throws InterruptedException {
+  public Byte getNetWithTimeout() throws InterruptedException {
     return rxBuffer.poll(1, TimeUnit.SECONDS);
   }
 
-  public void launch() {
+  public void init() {
     new Thread(this).start();
+    log.info("Rx thread started");
   }
 
   public void run() {

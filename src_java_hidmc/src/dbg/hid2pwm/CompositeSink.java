@@ -1,11 +1,12 @@
 package dbg.hid2pwm;
 
-
+import java.util.List;
 
 public class CompositeSink implements StateChangeSink{
-  private StateChangeSink[] sinks;
 
-  public CompositeSink(StateChangeSink... sinks) {
+  private List<StateChangeSink> sinks;
+
+  public void setSinks(List<StateChangeSink> sinks) {
     this.sinks = sinks;
   }
 
@@ -15,9 +16,4 @@ public class CompositeSink implements StateChangeSink{
     }
   }
 
-  public void display(String msg) {
-    for (StateChangeSink sink : sinks) {
-      sink.display(msg);
-    }
-  }
 }

@@ -2,7 +2,7 @@ package dbg.hid2pwm.mc;
 
 import dbg.hid2pwm.StateChangeSink;
 import dbg.hid2pwm.InputState;
-import dbg.hid2pwm.jna.GenericSerialIo;
+import dbg.hid2pwm.jna.SerialIo;
 
 import java.io.IOException;
 
@@ -12,16 +12,18 @@ public class McSerialWire implements StateChangeSink, McCommands {
 
   private static final Logger log = Logger.getLogger(McSerialWire.class);
 
-  private GenericSerialIo io;
+  private SerialIo io;
 
   private ReceiveThread rx;
 
-  public McSerialWire(GenericSerialIo io) {
+  public void setIo(SerialIo io) {
     this.io = io;
-    rx = new ReceiveThread(io);
-    rx.launch();
   }
- 
+
+  public void setRx(ReceiveThread rx) {
+    this.rx = rx;
+  }
+
   public void trigger(InputState inputState) {
 
     int fwd = inputState.getRangeX() > 0 ? 1 : 0;
@@ -54,15 +56,11 @@ public class McSerialWire implements StateChangeSink, McCommands {
 
   }
 
-  public void display(String msg) {
-    
-  }
-
   private byte query(byte cmdCode) throws IOException, InterruptedException {
     rx.clear();
     io.write(new byte[]{cmdCode});
-    Byte v1 = rx.poll();
-    Byte v2 = rx.poll();
+    Byte v1 = rx.getNetWithTimeout();
+    Byte v2 = rx.getNetWithTimeout();
     if (v1 == null || v2 == null) {
       throw new IOException("timeout in query");
     }
@@ -72,7 +70,7 @@ public class McSerialWire implements StateChangeSink, McCommands {
   private byte query0(byte cmdCode) throws IOException, InterruptedException {
     rx.clear();
     io.write(new byte[]{cmdCode});
-    Byte v1 = rx.poll();
+    Byte v1 = rx.getNetWithTimeout();
     if (v1 == null) {
       throw new IOException("timeout in query");
     }
@@ -87,7 +85,7 @@ public class McSerialWire implements StateChangeSink, McCommands {
     io.write(new byte[]{(BitUtils.toByte((value & 0xF0)>>4))});
     Thread.sleep(10);
     io.write(new byte[]{BitUtils.toByte(value & 0xF)});
-    if (rx.poll() == null) {
+    if (rx.getNetWithTimeout() == null) {
       throw new IOException("timeout in write");
     }
   }
@@ -98,7 +96,7 @@ public class McSerialWire implements StateChangeSink, McCommands {
     io.write(new byte[]{cmdCode});
     Thread.sleep(10);
     io.write(new byte[]{BitUtils.toByte(value & 0xF)});
-    if (rx.poll() == null) {
+    if (rx.getNetWithTimeout() == null) {
       throw new IOException("timeout in write");
     }
   }
@@ -107,7 +105,7 @@ public class McSerialWire implements StateChangeSink, McCommands {
     log.info("Send=" + cmdCode);
     rx.clear();
     io.write(new byte[]{cmdCode});
-    if (rx.poll() == null) {
+    if (rx.getNetWithTimeout() == null) {
       throw new IOException("timeout in write");
     }
   }
