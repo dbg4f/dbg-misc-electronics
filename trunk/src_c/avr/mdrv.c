@@ -40,12 +40,14 @@ void 			DIR_set(unsigned char value);
 unsigned char	PWM0_get(); 
 unsigned char	PWM1_get(); 
 unsigned char	DIR_get(); 
+unsigned char	AIN_get(); 
 
 void 			DIR_setup();
 void 			PWM_setup();
 void 			INTC_init();
 void 			INTC_cancel(); 
 void 			INTC_start(unsigned char target);
+void 			AIN_init();
 unsigned char 	merge(unsigned char vH, unsigned char vL);
 
 
@@ -76,6 +78,8 @@ int main()
 	DIR_setup();
 
 	INTC_init();
+
+	AIN_init();
 
 	sei();           /* Enable interrupts => enable UART interrupts */
 
@@ -190,6 +194,13 @@ int main()
 		else if (command_code == 13) 
 		{						
 			USART0_Transmit(INTC_on); 
+		}
+		// get AIN value
+		else if (command_code == 14) 
+		{						
+			pwm_value = AIN_get();
+			USART0_Transmit(pwm_value >> 4); 
+			USART0_Transmit(pwm_value); 
 		}
 		// unknown command
 		else 
@@ -308,8 +319,6 @@ void INTC_start(unsigned char target)
 	INTC_on 		= 1;
 	INTC_target 	= target;
 	INTC_counter 	= 0;
-	MCUCR 			|= (_BV(ISC01) | _BV(ISC00)); // rising edge of int0 generates int
-	GIMSK 			|= _BV(INT0); 
 } 
 
 void INTC_cancel() 
@@ -322,6 +331,16 @@ void INTC_init()
 	INTC_on 		= 0;
 	INTC_target 	= 0;
 	INTC_counter 	= 0;
+	//MCUCR 			|= (_BV(ISC01) | _BV(ISC00)); // rising edge of int0 generates int
+	MCUCR 			|= (_BV(ISC00)); // any level change at int0 generates int
+	GIMSK 			|= _BV(INT0); 
+
+}
+
+void AIN_init()
+{
+	// ACD bit has 0 default value, no changes needed
+	// initalization is needed when INT is in use
 }
 
 /* Read and write functions */
@@ -385,6 +404,11 @@ unsigned char PWM0_get()
 unsigned char PWM1_get() 
 {
 	return OCR0B;
+} 
+
+unsigned char AIN_get() 
+{
+	return ACSR;
 } 
 
 
