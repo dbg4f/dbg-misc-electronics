@@ -5,7 +5,11 @@ import dbg.hid2pwm.InputState;
 
 import java.awt.event.*;
 
-public class MouseInputSink implements MouseMotionListener, MouseListener {
+import org.apache.log4j.Logger;
+
+public class MouseInputListener implements MouseMotionListener, MouseListener {
+
+  private static final Logger log = Logger.getLogger(MouseInputListener.class);
 
   private StateChangeSink stateChangeSink;
 
@@ -15,16 +19,17 @@ public class MouseInputSink implements MouseMotionListener, MouseListener {
   private int startX;
   private int startY;
 
+
+  public void setStateChangeSink(StateChangeSink stateChangeSink) {
+    this.stateChangeSink = stateChangeSink;
+  }
+
   public int getX() {
     return x;
   }
 
   public int getY() {
     return y;
-  }
-
-  public MouseInputSink(StateChangeSink stateChangeSink) {
-    this.stateChangeSink = stateChangeSink;
   }
 
   public void mouseDragged(MouseEvent e) {
@@ -52,20 +57,20 @@ public class MouseInputSink implements MouseMotionListener, MouseListener {
   }
 
   public void mouseReleased(MouseEvent e) {
-    System.out.println("mouseReleased e = " + e);
+    log.debug("mouseReleased e = " + e);
   }
 
   public void mouseEntered(MouseEvent e) {
-    System.out.println("mouseEntered e = " + e);
+    log.debug("mouseEntered e = " + e);
   }
 
   public void mouseExited(MouseEvent e) {
-    System.out.println("mouseExited e = " + e);
+    log.debug("mouseExited e = " + e);
   }
 
   @Override
   public String toString() {
-    return "MouseInputSink{" +
+    return "MouseInputListener{" +
             "x=" + x +
             ", y=" + y +
             ", startX=" + startX +

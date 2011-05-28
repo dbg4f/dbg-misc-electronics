@@ -10,36 +10,29 @@ public class StickPanel extends InputEventSink implements StateChangeSink {
 
   private JFrame jframe;
 
-  private MouseInputSink mouseSink;
+  private MouseInputListener mouseInputListener;
 
   private InputState inputState;
 
   private String msg;
 
-  public StickPanel() {
+  public void setMouseInput(MouseInputListener mouseInputListener) {
+    this.mouseInputListener = mouseInputListener;
+  }
 
+  public void init() {
     jframe = new JFrame();
     Container c = jframe.getContentPane();
     c.add(this);
-    
+
     jframe.setBackground(Color.white);
     jframe.setSize(600, 600);
     jframe.setLocation(400, 300);
     jframe.setVisible(true);
     jframe.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-
-    //enableEvents(AWTEvent.MOUSE_MOTION_EVENT_MASK);
-    
-    //addMouseListener(new MouseInputSink());
-
-    mouseSink = new MouseInputSink(this);
-
-    addMouseMotionListener(mouseSink);
-    addMouseListener(mouseSink);
-
-
-
+    addMouseMotionListener(mouseInputListener);
+    addMouseListener(mouseInputListener);
   }
 
 
@@ -71,8 +64,8 @@ public class StickPanel extends InputEventSink implements StateChangeSink {
       g.drawString(inputState.getRangeX() + " " + inputState.getRangeY() + " " + msg, 100, 100);
 
 
-      int x2 = cx + inputState.getRangeX();//mouseSink.getX();
-      int y2 = cy + inputState.getRangeY();//mouseSink.getY();
+      int x2 = cx + inputState.getRangeX();//mouseInputListener.getX();
+      int y2 = cy + inputState.getRangeY();//mouseInputListener.getY();
 
       g.drawLine(cx, cy, cx, y2);
       g.drawLine(cx, cy, x2, cy);

@@ -1,6 +1,6 @@
 package dbg.hid2pwm.mc;
 
-import dbg.hid2pwm.jna.GenericSerialIo;
+import dbg.hid2pwm.jna.SerialIo;
 import dbg.hid2pwm.StateChangeSink;
 import org.apache.log4j.Logger;
 
@@ -16,17 +16,19 @@ public class Emulator implements Runnable {
 
   private Map<String, String> reg = new LinkedHashMap<String, String>();
 
-  private GenericSerialIo io;
+  private SerialIo io;
 
-  public Emulator(GenericSerialIo io, StateChangeSink sink) {
+  public void setIo(SerialIo io) {
     this.io = io;
+  }
+
+  public void setSink(StateChangeSink sink) {
     this.sink = sink;
   }
 
   public void launch() {
 
     new Thread(this).start();
-
 
   }
 
@@ -63,7 +65,7 @@ public class Emulator implements Runnable {
 
             reg.put(String.valueOf(cmdCode), BitUtils.toStr(val));
 
-            sink.display(reg.toString());
+            //sink.display(reg.toString());
 
             break;
         }

@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+xsi:schemaLocation="http://www.springframework.org/schema/beans
+http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+
+
+    <bean id="stickUsbDevice" class="dbg.hid2pwm.jni.Device" init-method="init">
+        <property name="vendorId" value="${stickUsbVendorId}"/>
+        <property name="deviceId" value="${stickUsbDeviceId}"/>
+    </bean>
+
+    <bean id="serialIo" class="dbg.hid2pwm.jna.Win32SerialIo">
+        <property name="portName" value="${serialIoPortName}"/>
+        <property name="dcbStr"   value="${serialIoPortDcb}"/>
+    </bean>
+
+    <bean id="rxThread" class="dbg.hid2pwm.mc.ReceiveThread" init-method="init">
+        <property name="io" ref="serialIo"/>
+    </bean>
+
+    <bean id="mcSerialWire" class="dbg.hid2pwm.mc.McSerialWire">
+        <property name="rx" ref="rxThread"/>
+        <property name="io" ref="serialIo"/>
+    </bean>
+
+    <bean id="stickPolling" class="dbg.hid2pwm.jni.StickPolling" init-method="init">
+        <property name="usbDevice" ref="stickUsbDevice"/>
+        <property name="pollingInterval" value="10"/>
+        <property name="sink" ref="commonSink"/>
+    </bean>
+
+
+    <bean id="uiPanel" class="dbg.hid2pwm.ui.StickPanel" init-method="init">
+        <property name="mouseInput" ref="mouseInput"/>
+    </bean>
+
+    <bean id="mouseInput" class="dbg.hid2pwm.ui.MouseInputListener">
+        <property name="stateChangeSink" ref="commonSink"/>
+    </bean>
+
+    <bean id="consoleInputSource" class="dbg.hid2pwm.ui.ConsoleInputSource" init-method="init">
+        <property name="sink" ref="commonSink"/>
+    </bean>
+
+    <bean id="commonSink" class="dbg.hid2pwm.CompositeSink">
+        <property name="sinks">
+            <list>
+                <!--
+                <ref bean="mcSerialWire"/>
+                -->
+                <ref bean="uiPanel"/>                
+            </list>
+        </property>
+    </bean>
+    
+
+    <bean id="host" class="dbg.hid2pwm.Host">
+        <property name="threads">
+            <list>
+
+            </list>
+        </property>
+        <property name="usbDevice"  ref="stickUsbDevice"/>
+        <property name="sink"       ref="commonSink"/>
+        <property name="polling"    ref="stickPolling"/>
+        <property name="console"    ref="consoleInputSource"/>
+    </bean>
+</beans>

@@ -13,15 +13,26 @@ import java.nio.ByteOrder;
 
 import dbg.hid2pwm.mc.BitUtils;
 
-public class GenericSerialIo {
+public class Win32SerialIo implements SerialIo {
 
-  private static final Logger log = Logger.getLogger(GenericSerialIo.class);
+  private static final Logger log = Logger.getLogger(Win32SerialIo.class);
 
   private Kernel32 klib = Kernel32.INSTANCE;
   private ExtKernel32 klibExt = ExtKernel32.INSTANCE;
   private WinNT.HANDLE hPort;
 
-  public GenericSerialIo(String portName, String dcbStr) throws IOException {
+  private String portName;
+  private String dcbStr;
+
+  public void setPortName(String portName) {
+    this.portName = portName;
+  }
+
+  public void setDcbStr(String dcbStr) {
+    this.dcbStr = dcbStr;
+  }
+
+  public void init() throws IOException {
     hPort = openPort(portName, dcbStr);  
   }
 

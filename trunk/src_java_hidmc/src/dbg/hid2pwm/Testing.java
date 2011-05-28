@@ -1,6 +1,6 @@
 package dbg.hid2pwm;
 
-import dbg.hid2pwm.jna.GenericSerialIo;
+import dbg.hid2pwm.jna.Win32SerialIo;
 import dbg.hid2pwm.mc.McSerialWire;
 
 import java.io.IOException;
@@ -20,12 +20,13 @@ public class Testing {
 
 
   public static void main(String[] args) throws IOException, InterruptedException {
-    testIntLine();
+    //testIntLine();
   }
 
+  /*
   public static void testIntLine() throws IOException, InterruptedException {
 
-    GenericSerialIo io = new GenericSerialIo("COM7", "57600,n,8,1");
+    Win32SerialIo io = new Win32SerialIo("COM7", "57600,n,8,1");
 
     McSerialWire wire = new McSerialWire(io);
     
@@ -49,7 +50,7 @@ public class Testing {
 
 
   }
-  
+      */
 
 
 
