@@ -41,68 +41,88 @@ public class GraphicTool extends JPanel implements ActionListener, Printable {
   private void drawPinArray(Graphics g, int startx, int starty) {
         try {
 
+          String fileSet = System.getProperty("file");
+
+          String[] fileNames = fileSet.split(";");
+
+          int index = 0;
+
+          for (String file : fileNames) {
+
             Config c = new Config();
-            c.read(System.getProperty("file"));
-            
+
+            c.read(file);
+
             g.setFont(new Font("Courier New", Font.PLAIN, c.fontSize));
 
-            
-            if (c.width == 2) {
-                
-                int w = c.step + c.woffset * 2;
-                int h = c.step * (c.height-1) + c.hoffset * 2;
-                
-                g.drawRect(startx, starty, w, h);
-                
-                int x1 = startx + c.woffset;
-                int x2 = x1 + c.step;
-                
-                g.drawLine(x1, starty, x1, starty + h);
-                g.drawLine(x2, starty, x2, starty + h);
-                
-                int hdiff = ((c.height - 1) * c.vstep - h) / 2;
-                
-                int annY = starty - hdiff;
-                int annX1 = startx - c.distance*2;
-                int annX2 = startx + w + c.distance*2;
-                
-                
-                for(int i=0; i<c.height; i++) {
+            int scaleX = index % 2;
 
-                  g.setColor(i%2 == 0 ? Color.GRAY : Color.BLACK);
+            int scaleY = index % 3;
 
-                  int yy = starty + c.hoffset + i * c.step                          ;
-                  g.drawLine(startx, yy, startx + w, yy);
-                  
-                  int annYC = annY + i * c.vstep;
-                  
-                  int xx1 = startx - c.distance;
-                  int xx2 = startx + w + c.distance;
-                  
-                  
-                  g.drawLine(xx1, yy, startx, yy);
-                  g.drawLine(xx2, yy, startx + w, yy);
+            drawFromConfig(g, scaleX* 200 + startx, scaleY * 200 + starty, c);
 
-                  g.drawLine(annX1, annYC, xx1, yy);
-                  g.drawLine(annX2, annYC, xx2, yy);
-                  
-                  
-                  g.drawLine(annX1 - c.distanceText, annYC, annX1, annYC);
-                  g.drawLine(annX2 + c.distanceText, annYC, annX2, annYC);
-                  
-                  
-                  g.drawString(c.getText(i, 0), annX1 - c.distanceText - c.textLen, annYC + c.fontSize / 3);
-                  g.drawString(c.getText(i, 1), annX2 + c.distanceText, annYC + c.fontSize / 3);
-                  
-                }
-                
-            }
-            
-            
+            index++;
+
+          }
+
+
         } catch (IOException ex) {
             ex.printStackTrace();
         }
       
+  }
+
+  private void drawFromConfig(Graphics g, int startx, int starty, Config c) {
+    if (c.width == 2) {
+
+        int w = c.step + c.woffset * 2;
+        int h = c.step * (c.height-1) + c.hoffset * 2;
+
+        g.drawRect(startx, starty, w, h);
+
+        int x1 = startx + c.woffset;
+        int x2 = x1 + c.step;
+
+        g.drawLine(x1, starty, x1, starty + h);
+        g.drawLine(x2, starty, x2, starty + h);
+
+        int hdiff = ((c.height - 1) * c.vstep - h) / 2;
+
+        int annY = starty - hdiff;
+        int annX1 = startx - c.distance*2;
+        int annX2 = startx + w + c.distance*2;
+
+
+        for(int i=0; i<c.height; i++) {
+
+          g.setColor(i%2 == 0 ? Color.GRAY : Color.BLACK);
+
+          int yy = starty + c.hoffset + i * c.step                          ;
+          g.drawLine(startx, yy, startx + w, yy);
+
+          int annYC = annY + i * c.vstep;
+
+          int xx1 = startx - c.distance;
+          int xx2 = startx + w + c.distance;
+
+
+          g.drawLine(xx1, yy, startx, yy);
+          g.drawLine(xx2, yy, startx + w, yy);
+
+          g.drawLine(annX1, annYC, xx1, yy);
+          g.drawLine(annX2, annYC, xx2, yy);
+
+
+          g.drawLine(annX1 - c.distanceText, annYC, annX1, annYC);
+          g.drawLine(annX2 + c.distanceText, annYC, annX2, annYC);
+
+
+          g.drawString(c.getText(i, 0), annX1 - c.distanceText - c.textLen, annYC + c.fontSize / 3);
+          g.drawString(c.getText(c.height - i - 1, 1), annX2 + c.distanceText, annYC + c.fontSize / 3);
+
+        }
+
+    }
   }
 
   public void print() {
