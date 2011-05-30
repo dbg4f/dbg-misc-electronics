@@ -27,7 +27,7 @@ public class Config {
     int step            = MM(2.54);
     int distance        = MM(3);
     int distanceText    = MM(2);
-    int textLen         = MM(15);
+    int textLen         = MM(10);
     int vstep           = (int)(1.0 * fontSize); 
      
     String[] text;
