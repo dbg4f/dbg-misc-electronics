@@ -313,6 +313,12 @@ void exec_ext_command(unsigned char cmd, unsigned char param)
 		PWM0_set(param);
 		send_resp2(0x14, param);
 	}	
+	else 
+	{
+		// unknown command
+		send_resp2(0xEE, param);				
+	}
+
 
 }
 
@@ -325,6 +331,158 @@ unsigned char merge(unsigned char vH, unsigned char vL)
 unsigned char getH(unsigned char v)
 {
 	return v >> 4;
+}
+
+
+void read_reg(unsigned char reg)
+{
+	unsigned char res = 0x00;
+
+	char found = 1;
+	
+	switch (reg)
+	{
+case     0x3B:	res=GIMSK ; break;
+case     0x3A:	res=EIFR  ; break;
+case     0x39:	res=TIMSK ; break;
+case     0x38:	res=TIFR  ; break;
+case     0x37:	res=SPMCSR; break;
+case     0x36:	res=OCR0A ; break;
+case     0x35:	res=MCUCR ; break;
+case     0x34:	res=MCUSR ; break;
+case     0x33:	res=TCCR0B; break;
+case     0x32:	res=TCNT0 ; break;
+case     0x31:	res=OSCCAL; break;
+case     0x30:	res=TCCR0A; break;
+case     0x2F:	res=TCCR1A; break;
+case     0x2E:	res=TCCR1B; break;
+case     0x2D:	res=TCNT1H; break;
+case     0x2C:	res=TCNT1L; break;
+case     0x2B:	res=OCR1AH; break;
+case     0x2A:	res=OCR1AL; break;
+case     0x29:	res=OCR1BH; break;
+case     0x28:	res=OCR1BL; break;
+case     0x26:	res=CLKPR ; break;
+case     0x25:	res=ICR1H ; break;
+case     0x24:	res=ICR1L ; break;
+case     0x23:	res=GTCCR ; break;
+case     0x22:	res=TCCR1C; break;
+case     0x21:	res=WDTCSR; break;
+case     0x20:	res=PCMSK ; break;
+case     0x1E:	res=EEAR  ; break;
+case     0x1D:	res=EEDR  ; break;
+case     0x1C:	res=EECR  ; break;
+case     0x1B:	res=PORTA ; break;
+case     0x1A:	res=DDRA  ; break;
+case     0x19:	res=PINA  ; break;
+case     0x18:	res=PORTB ; break;
+case     0x17:	res=DDRB  ; break;
+case     0x16:	res=PINB  ; break;
+case     0x15:	res=GPIOR2; break;
+case     0x14:	res=GPIOR1; break;
+case     0x13:	res=GPIOR0; break;
+case     0x12:	res=PORTD ; break;
+case     0x11:	res=DDRD  ; break;
+case     0x10:	res=PIND  ; break;
+case     0x0F:	res=USIDR ; break;
+case     0x0E:	res=USISR ; break;
+case     0x0D:	res=USICR ; break;
+case     0x0C:	res=UDR   ; break;
+case     0x0B:	res=UCSRA ; break;
+case     0x0A:	res=UCSRB ; break;
+case     0x09:	res=UBRRL ; break;
+case     0x08:	res=ACSR  ; break;
+case     0x03:	res=UCSRC ; break;
+case     0x02:	res=UBRRH ; break;
+case     0x01:	res=DIDR  ; break;
+		default : found = 0;
+	}	
+
+	if (found)
+	{
+		send_resp2(0xDD, res);				
+	}
+	else
+	{
+		send_resp2(0xAC, res);				
+	}
+	
+	
+}
+
+
+void write_reg(unsigned char reg, unsigned char value)
+{
+
+	char found = 1;
+	
+	switch (reg)
+	{
+case     0x3B:	GIMSK =value; value=GIMSK ;break;
+case     0x3A:	EIFR  =value; value=EIFR  ;break;
+case     0x39:	TIMSK =value; value=TIMSK ;break;
+case     0x38:	TIFR  =value; value=TIFR  ;break;
+case     0x37:	SPMCSR=value; value=SPMCSR;break;
+case     0x36:	OCR0A =value; value=OCR0A ;break;
+case     0x35:	MCUCR =value; value=MCUCR ;break;
+case     0x34:	MCUSR =value; value=MCUSR ;break;
+case     0x33:	TCCR0B=value; value=TCCR0B;break;
+case     0x32:	TCNT0 =value; value=TCNT0 ;break;
+case     0x31:	OSCCAL=value; value=OSCCAL;break;
+case     0x30:	TCCR0A=value; value=TCCR0A;break;
+case     0x2F:	TCCR1A=value; value=TCCR1A;break;
+case     0x2E:	TCCR1B=value; value=TCCR1B;break;
+case     0x2D:	TCNT1H=value; value=TCNT1H;break;
+case     0x2C:	TCNT1L=value; value=TCNT1L;break;
+case     0x2B:	OCR1AH=value; value=OCR1AH;break;
+case     0x2A:	OCR1AL=value; value=OCR1AL;break;
+case     0x29:	OCR1BH=value; value=OCR1BH;break;
+case     0x28:	OCR1BL=value; value=OCR1BL;break;
+case     0x26:	CLKPR =value; value=CLKPR ;break;
+case     0x25:	ICR1H =value; value=ICR1H ;break;
+case     0x24:	ICR1L =value; value=ICR1L ;break;
+case     0x23:	GTCCR =value; value=GTCCR ;break;
+case     0x22:	TCCR1C=value; value=TCCR1C;break;
+case     0x21:	WDTCSR=value; value=WDTCSR;break;
+case     0x20:	PCMSK =value; value=PCMSK ;break;
+case     0x1E:	EEAR  =value; value=EEAR  ;break;
+case     0x1D:	EEDR  =value; value=EEDR  ;break;
+case     0x1C:	EECR  =value; value=EECR  ;break;
+case     0x1B:	PORTA =value; value=PORTA ;break;
+case     0x1A:	DDRA  =value; value=DDRA  ;break;
+case     0x19:	PINA  =value; value=PINA  ;break;
+case     0x18:	PORTB =value; value=PORTB ;break;
+case     0x17:	DDRB  =value; value=DDRB  ;break;
+case     0x16:	PINB  =value; value=PINB  ;break;
+case     0x15:	GPIOR2=value; value=GPIOR2;break;
+case     0x14:	GPIOR1=value; value=GPIOR1;break;
+case     0x13:	GPIOR0=value; value=GPIOR0;break;
+case     0x12:	PORTD =value; value=PORTD ;break;
+case     0x11:	DDRD  =value; value=DDRD  ;break;
+case     0x10:	PIND  =value; value=PIND  ;break;
+case     0x0F:	USIDR =value; value=USIDR ;break;
+case     0x0E:	USISR =value; value=USISR ;break;
+case     0x0D:	USICR =value; value=USICR ;break;
+case     0x0C:	UDR   =value; value=UDR   ;break;
+case     0x0B:	UCSRA =value; value=UCSRA ;break;
+case     0x0A:	UCSRB =value; value=UCSRB ;break;
+case     0x09:	UBRRL =value; value=UBRRL ;break;
+case     0x08:	ACSR  =value; value=ACSR  ;break;
+case     0x03:	UCSRC =value; value=UCSRC ;break;
+case     0x02:	UBRRH =value; value=UBRRH ;break;
+case     0x01:	DIDR  =value; value=DIDR  ;break;
+		default : found = 0;
+	}	
+
+	if (found)
+	{
+		send_resp2(0xDA, value);				
+	}
+	else
+	{
+		send_resp2(0xDC, value);				
+	}
+		
 }
 
 

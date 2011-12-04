@@ -1,0 +1,1 @@
+avrdude.exe -c ftbb -p t2313 -P ft0 -U flash:r:test1.hex:i -B 9600
