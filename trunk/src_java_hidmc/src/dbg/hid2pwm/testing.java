@@ -14,7 +14,7 @@ import org.apache.log4j.Logger;
  * Time: 21:42:52
  * To change this template use File | Settings | File Templates.
  */
-public class Testing {
+class Testing {
 
   private static final Logger log = Logger.getLogger(Testing.class);
 

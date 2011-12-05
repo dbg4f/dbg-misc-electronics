@@ -68,7 +68,8 @@ public class TestSerial {
                 int percent = range(buf[12], 0, 255, 0, 100, true);
 
 
-                System.out.println("P " + pwm + " " + percent);
+                //System.out.println("P " + pwm + " " + percent);
+                System.out.println(String.format("%s - JS: pwm %02X (%d)", new SimpleDateFormat("mm:ss:SSS").format(new Date()), pwm, pwm));
 
                 out.setPwm(pwm);
 
@@ -161,7 +162,7 @@ public class TestSerial {
                 while (!Thread.currentThread().isInterrupted()) {
                     int res = socketStream.read();
 
-                    System.out.println(String.format("%s - res = %02X", new SimpleDateFormat("mm:ss:SSS").format(new Date()), res));
+                    System.out.println(String.format("%s - in %02X (%d)", new SimpleDateFormat("mm:ss:SSS").format(new Date()), res, res));
 
                     if (res == -1) {
                         System.out.println("End of stream");
@@ -208,14 +209,15 @@ public class TestSerial {
                     try {
 
 
-                        int value = Integer.valueOf(str);
+                        //int value = Integer.valueOf(str);
+                        int value = Integer.parseInt(str, 16);
 
-
+                        System.out.println(String.format("value = %02X", value));
 
                         setPwm(value);
+                        //writeRaw(value);
 
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         e.printStackTrace();
                     }
 
@@ -231,14 +233,55 @@ public class TestSerial {
 
 
         public void setPwm(int value) throws IOException, InterruptedException {
+
+            byte[] outBytes = new byte[] {0x55, 0x02, 0x04, (byte)value, 0x00};
+
+            outBytes[4] = crc_calc(outBytes[0], outBytes[1], outBytes[2], outBytes[3]);
+
+            outputStream.write(outBytes);
+
+           /*
             outputStream.write(0x04);
-            Thread.sleep(10);
-            outputStream.write((value & 0xF0)>>4);
-            Thread.sleep(10);
+            Thread.sleep(1);
+            outputStream.write((value & 0xF0) >> 4);
+            Thread.sleep(1);
             outputStream.write(value & 0xF);
-            Thread.sleep(10);
+            Thread.sleep(1);*/
         }
 
+        public void writeRaw(int value) throws IOException, InterruptedException {
+            outputStream.write(value);
+        }
+
+
     }
+
+    static byte crc_calc(byte... content) {
+        byte crc = (byte) 0xFF;
+
+        for (byte b : content) {
+            crc = crc_update(crc, b);
+        }
+
+        return crc;
+    }
+
+    static byte crc_update(byte crc, byte data) {
+
+        int i;
+
+        crc ^= data;
+
+        for (i = 0; i < 8; i++) {
+            if ((crc & 0x80) != 0x00) {
+                crc = (byte) ((crc << 1) ^ 0xE5);
+            } else {
+                crc <<= 1;
+            }
+        }
+
+        return crc;
+    }
+
 
 }
