@@ -31,7 +31,9 @@ unsigned char 	crc_update(unsigned char crc, unsigned char data);
 
 unsigned char 	send_with_crc(unsigned char crc, unsigned char data);
 void 			send_resp2(unsigned char byte1, unsigned char byte2); 
-void 			exec_ext_command(unsigned char cmd, unsigned char param);
+void exec_ext_command(unsigned char cmd, unsigned char param, unsigned char param2);
+void read_reg(unsigned char reg);
+void write_reg(unsigned char reg, unsigned char value);
 
 
 static unsigned char 	INTC_on;
@@ -80,12 +82,11 @@ int main()
 
 	unsigned char crc;
 	unsigned char value;
-	unsigned char counter;
-	unsigned char i;
 
 	unsigned char length = 0;
 	unsigned char command = 0;
 	unsigned char parameter = 0;
+	unsigned char parameter2 = 0;
 	unsigned char ext_crc;		
 	
 	
@@ -102,7 +103,7 @@ int main()
 
 	AIN_init();
 
-	//sei();           /* Enable interrupts => enable UART interrupts */
+	sei();           /* Enable interrupts => enable UART interrupts */
 
 	send_resp2(0x55, 0x33);	
 
@@ -115,6 +116,7 @@ int main()
 
 		command = 0;
 		parameter = 0;
+		parameter2 = 0;
 		
 		// marker
 		value 	= UART0_wait_read();
@@ -137,12 +139,20 @@ int main()
 				
 			}
 			
-			if (length == 2)
+			if (length >= 2)
 			{
 				// parameter
 				value 	= UART0_wait_read();
 				crc 	= crc_update(crc, value);
 				parameter = value;
+			}
+
+			if (length >= 3)
+			{
+				// parameter2
+				value 	= UART0_wait_read();
+				crc 	= crc_update(crc, value);
+				parameter2 = value;
 			}
 	
 			// crc from input
@@ -153,7 +163,7 @@ int main()
 			{
 				
 				// forward validated input
-				exec_ext_command(command, parameter);
+				exec_ext_command(command, parameter, parameter2);
 
 			}
 			else 
@@ -167,7 +177,7 @@ int main()
 		else 
 		{
 			// not in sync
-			send_resp2(0x55, 0xBB);
+			send_resp2(0x55, value);
 		}
 
 
@@ -301,7 +311,7 @@ int main()
 }
 
 
-void exec_ext_command(unsigned char cmd, unsigned char param)
+void exec_ext_command(unsigned char cmd, unsigned char param, unsigned char param2)
 {
 	if (cmd == 0x01) 
 	{
@@ -312,7 +322,42 @@ void exec_ext_command(unsigned char cmd, unsigned char param)
 	{
 		PWM0_set(param);
 		send_resp2(0x14, param);
-	}	
+	}
+	else if (cmd == 0x05)
+	{
+		PWM1_set(param);
+		send_resp2(0x15, param);
+	}			
+	// get interrupts counter
+	else if (cmd == 0x10) 
+	{
+		send_resp2(0x15, INTC_counter);
+	}
+	// schedule PWM1 off
+	else if (cmd == 0x11) 
+	{			
+		INTC_start(param);
+		send_resp2(0x11, INTC_counter);
+	}
+	// cancel schedule PWM1
+	else if (cmd == 0x12) 
+	{			
+		INTC_cancel();
+		send_resp2(0x12, INTC_counter);
+	}
+	// get schedule status
+	else if (cmd == 0x13) 
+	{								
+		send_resp2(0x11, INTC_on);
+	}
+	else if (cmd == 0x14) 
+	{								
+		read_reg(param);
+	}
+	else if (cmd == 0x15) 
+	{								
+		write_reg(param, param2);
+	}
 	else 
 	{
 		// unknown command
