@@ -209,13 +209,31 @@ public class TestSerial {
                     try {
 
 
+                        String[] tokens = str.trim().split("\\s");
+
+                        for (String token : tokens) {
+
+                            if (token.startsWith("w")) {
+                                Thread.sleep(Integer.valueOf(token.substring(1)));
+                            }
+                            else if (token.length() == 4) {
+
+                                int cmd = Integer.parseInt(token.substring(0, 2), 16);
+                                int value = Integer.parseInt(token.substring(2), 16);
+
+                                System.out.println(String.format("cmd %02X value = %02X", cmd, value));
+
+                                sendCommand((byte)cmd, (byte)value);
+                                //setPwm(value);
+                                //writeRaw(value);
+                            }
+                            else {
+                                System.out.println("token not recognized: " + token);
+                            }
+                        }
+
+
                         //int value = Integer.valueOf(str);
-                        int value = Integer.parseInt(str, 16);
-
-                        System.out.println(String.format("value = %02X", value));
-
-                        setPwm(value);
-                        //writeRaw(value);
 
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -234,11 +252,7 @@ public class TestSerial {
 
         public void setPwm(int value) throws IOException, InterruptedException {
 
-            byte[] outBytes = new byte[] {0x55, 0x02, 0x04, (byte)value, 0x00};
-
-            outBytes[4] = crc_calc(outBytes[0], outBytes[1], outBytes[2], outBytes[3]);
-
-            outputStream.write(outBytes);
+            sendCommand((byte)0x05,(byte) value);
 
            /*
             outputStream.write(0x04);
@@ -247,6 +261,15 @@ public class TestSerial {
             Thread.sleep(1);
             outputStream.write(value & 0xF);
             Thread.sleep(1);*/
+        }
+
+        public void sendCommand(byte code, byte value) throws IOException {
+
+            byte[] outBytes = new byte[] {0x55, 0x02, code, value, 0x00};
+
+            outBytes[4] = crc_calc(outBytes[0], outBytes[1], outBytes[2], outBytes[3]);
+
+            outputStream.write(outBytes);
         }
 
         public void writeRaw(int value) throws IOException, InterruptedException {
@@ -285,3 +308,17 @@ public class TestSerial {
 
 
 }
+/*
+
+0x01 echo
+0x04 [param] set pwm0
+0x05 [param] set pwm1
+0x10 get int_c
+0x11 schedule pwm1 off
+0x12 cancel schedule pwm1
+0x13 get schedule status
+0x14 [reg] read reg
+0x15 [reg, value] write reg
+0x16 [param] set pwm1 final value
+
+*/
