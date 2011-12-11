@@ -39,6 +39,7 @@ void write_reg(unsigned char reg, unsigned char value);
 static unsigned char 	INTC_on;
 static unsigned char 	INTC_target;
 static unsigned char 	INTC_counter;
+static unsigned char 	PWM1_stop = 0;
 
 void 			USART0_Init( unsigned int baudrate );
 unsigned char 	USART0_Receive();
@@ -358,6 +359,11 @@ void exec_ext_command(unsigned char cmd, unsigned char param, unsigned char para
 	{								
 		write_reg(param, param2);
 	}
+	else if (cmd == 0x16) 
+	{								
+		// set final PWM value
+		PWM1_stop = param;
+	}
 	else 
 	{
 		// unknown command
@@ -628,7 +634,7 @@ ISR(INT0_vect)
 	if (INTC_counter >= INTC_target) 
 	{
 		INTC_on = 0;
-		PWM1_set(0);
+		PWM1_set(PWM1_stop);
 	}
 
 }
