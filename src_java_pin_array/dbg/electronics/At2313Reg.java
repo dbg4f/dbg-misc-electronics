@@ -61,4 +61,8 @@ public enum At2313Reg {
     }
 
     private byte code;
+
+    public byte getCode() {
+        return code;
+    }
 }

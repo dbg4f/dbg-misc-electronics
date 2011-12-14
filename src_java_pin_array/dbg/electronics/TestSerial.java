@@ -117,11 +117,15 @@ public class TestSerial {
     }
 
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException, McCommunicationException {
 
         final TestSerial serial = new TestSerial();
 
         Socket socket = new Socket("127.0.0.1", 4444);
+
+        testMcConn(socket);
+
+        /*
 
         new Thread(new In(socket)).start();
 
@@ -141,7 +145,35 @@ public class TestSerial {
                     }
                 }
         ).start();
+        */
 
+    }
+
+    private static void testMcConn(Socket socket) throws IOException, McCommunicationException {
+        McConnection mc = new McConnection(socket.getInputStream(), socket.getOutputStream());
+
+        byte resp;
+
+        resp = mc.send(McCommand.ECHO, (byte)0x23);
+        resp = mc.send(McCommand.ECHO, (byte)0x23);
+        resp = mc.send(McCommand.ECHO, (byte)0x23);
+        resp = mc.send(McCommand.ECHO, (byte)0x23);
+        resp = mc.send(McCommand.ECHO, (byte)0x23);
+        resp = mc.send(McCommand.ECHO, (byte)0x23);
+        resp = mc.send(McCommand.ECHO, (byte)0x23);
+
+        StringBuffer buf = new StringBuffer();
+
+        for (At2313Reg reg : At2313Reg.values()) {
+            resp = mc.readReg(reg);
+            buf.append(String.format("REG %s %02X\n", reg.name(), resp));
+        }
+
+        System.out.println(buf.toString());
+
+        //System.out.println("resp = " + resp);
+
+        //socket.close();
     }
 
     public static class In implements Runnable {

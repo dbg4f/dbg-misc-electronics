@@ -13,6 +13,7 @@ public class McWatchdog implements Runnable {
     boolean entered = false;
     boolean signaled = false;
 
+    private McLogger logger = ConsoleLogger.getInstance();
 
     public void launch() {
         new Thread(this).start();
@@ -38,8 +39,7 @@ public class McWatchdog implements Runnable {
             signaled = true;
         }
         else {
-            // TODO: send problem notification
-            System.err.print("Timeout");
+            logger.error("Timeout");
         }
     }
 
