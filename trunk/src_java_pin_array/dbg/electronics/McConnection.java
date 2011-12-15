@@ -4,13 +4,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 
-/**
- * Created by IntelliJ IDEA.
- * User: dmitry
- * Date: 12/13/11
- * Time: 8:10 PM
- * To change this template use File | Settings | File Templates.
- */
 public class McConnection {
 
     private InputStream in;
