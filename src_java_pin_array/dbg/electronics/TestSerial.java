@@ -149,31 +149,55 @@ public class TestSerial {
 
     }
 
-    private static void testMcConn(Socket socket) throws IOException, McCommunicationException {
+    private static void testMcConn(Socket socket) throws IOException, McCommunicationException, InterruptedException {
         McConnection mc = new McConnection(socket.getInputStream(), socket.getOutputStream());
 
         byte resp;
 
-        resp = mc.send(McCommand.ECHO, (byte)0x23);
-        resp = mc.send(McCommand.ECHO, (byte)0x23);
-        resp = mc.send(McCommand.ECHO, (byte)0x23);
-        resp = mc.send(McCommand.ECHO, (byte)0x23);
-        resp = mc.send(McCommand.ECHO, (byte)0x23);
-        resp = mc.send(McCommand.ECHO, (byte)0x23);
-        resp = mc.send(McCommand.ECHO, (byte)0x23);
+        mc.send(McCommand.ECHO, (byte)0x23);
 
-        StringBuffer buf = new StringBuffer();
+        mc.send(McCommand.SET_FINAL_PWM1, (byte)0x7F);
+        mc.send(McCommand.SET_PWM1, (byte)0x7F);
+        mc.send(McCommand.SET_PWM1, (byte)0x10);
 
-        for (At2313Reg reg : At2313Reg.values()) {
-            resp = mc.readReg(reg);
-            buf.append(String.format("REG %s %02X\n", reg.name(), resp));
-        }
+        //turn(mc, 5, false);
 
-        System.out.println(buf.toString());
+        Thread.sleep(1000);
+
+        mc.send(McCommand.SET_PWM1, (byte)0xF0);
+
+        Thread.sleep(1000);
+
+        mc.send(McCommand.SET_PWM1, (byte)0x7F);
+
+
+        //turn(mc, 5, false);
+
+
+
 
         //System.out.println("resp = " + resp);
 
         //socket.close();
+    }
+
+    private static void turn(McConnection mc, int steps, boolean dir) throws IOException, McCommunicationException, InterruptedException {
+
+        mc.send(McCommand.SET_PWM1, (byte)0x7F);
+
+        mc.send(McCommand.SCHEDULE_PWM1, (byte)0);
+
+        mc.send(McCommand.SCHEDULE_PWM1, (byte) steps);
+
+        mc.send(McCommand.SET_PWM1, dir ? (byte)(0xFF-10) : 10);
+
+        int resp = mc.send(McCommand.GET_INT_COUNTER);
+        resp = mc.send(McCommand.GET_INT_COUNTER);
+        resp = mc.send(McCommand.GET_INT_COUNTER);
+        Thread.sleep(30);
+        resp = mc.send(McCommand.GET_INT_COUNTER);
+        resp = mc.send(McCommand.GET_INT_COUNTER);
+
     }
 
     public static class In implements Runnable {
