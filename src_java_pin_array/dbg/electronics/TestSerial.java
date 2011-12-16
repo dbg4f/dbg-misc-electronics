@@ -149,6 +149,14 @@ public class TestSerial {
 
     }
 
+    private static void setPB5(McConnection mc, boolean value) throws IOException, McCommunicationException {
+
+        byte pb = mc.readReg(At2313Reg.PORTB);
+
+        mc.writeReg(At2313Reg.PORTB, value ? (byte)(pb | (1<<5)) : (byte)(~(1<<5) & pb));
+    }
+
+
     private static void testMcConn(Socket socket) throws IOException, McCommunicationException, InterruptedException {
         McConnection mc = new McConnection(socket.getInputStream(), socket.getOutputStream());
 
@@ -158,30 +166,35 @@ public class TestSerial {
 
         mc.send(McCommand.SET_FINAL_PWM1, (byte)0x7F);
         mc.send(McCommand.SET_PWM1, (byte)0x7F);
-        mc.send(McCommand.SET_PWM1, (byte)0x10);
 
-        //turn(mc, 5, false);
+        System.out.println("Turn on");
+
+
+        Thread.sleep(2000);
+
+        setPB5(mc, true);
+
+        turn(mc, 5, false, 30);
 
         Thread.sleep(1000);
 
-        mc.send(McCommand.SET_PWM1, (byte)0xF0);
-
-        Thread.sleep(1000);
+        turn(mc, 5, false, 30);
 
         mc.send(McCommand.SET_PWM1, (byte)0x7F);
 
-
-        //turn(mc, 5, false);
-
+        setPB5(mc, false);
 
 
+        System.out.println("Exit");
+
+        System.exit(0);
 
         //System.out.println("resp = " + resp);
 
         //socket.close();
     }
 
-    private static void turn(McConnection mc, int steps, boolean dir) throws IOException, McCommunicationException, InterruptedException {
+    private static void turn(McConnection mc, int steps, boolean dir, int pwm) throws IOException, McCommunicationException, InterruptedException {
 
         mc.send(McCommand.SET_PWM1, (byte)0x7F);
 
@@ -189,7 +202,7 @@ public class TestSerial {
 
         mc.send(McCommand.SCHEDULE_PWM1, (byte) steps);
 
-        mc.send(McCommand.SET_PWM1, dir ? (byte)(0xFF-10) : 10);
+        mc.send(McCommand.SET_PWM1, dir ? (byte)(0xFF- pwm) : (byte)pwm);
 
         int resp = mc.send(McCommand.GET_INT_COUNTER);
         resp = mc.send(McCommand.GET_INT_COUNTER);
@@ -197,6 +210,15 @@ public class TestSerial {
         Thread.sleep(30);
         resp = mc.send(McCommand.GET_INT_COUNTER);
         resp = mc.send(McCommand.GET_INT_COUNTER);
+        Thread.sleep(30);
+        resp = mc.send(McCommand.GET_INT_COUNTER);
+        Thread.sleep(30);
+        resp = mc.send(McCommand.GET_INT_COUNTER);
+
+        Thread.sleep(100);
+
+        mc.send(McCommand.SET_PWM1, (byte)0x7F);
+
 
     }
 
