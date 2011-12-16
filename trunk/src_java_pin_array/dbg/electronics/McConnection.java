@@ -101,8 +101,8 @@ public class McConnection {
         return send(McCommand.READ_REG, reg.getCode());
     }
 
-    public void writeReg(At2313Reg reg, byte value) {
-
+    public void writeReg(At2313Reg reg, byte value) throws IOException, McCommunicationException {
+        send(McCommand.WRITE_REG, reg.getCode(), value);
     }
 
     private byte crc_calc(byte marker, byte len, byte... content) {
