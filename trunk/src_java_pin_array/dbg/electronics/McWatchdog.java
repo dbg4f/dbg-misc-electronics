@@ -1,5 +1,7 @@
 package dbg.electronics;
 
+import java.io.IOException;
+
 /**
  * Created by IntelliJ IDEA.
  * User: dmitry
@@ -12,6 +14,12 @@ public class McWatchdog implements Runnable {
 
     boolean entered = false;
     boolean signaled = false;
+
+    private McConnection mc;
+
+    public McWatchdog(McConnection mc) {
+        this.mc = mc;
+    }
 
     private McLogger logger = ConsoleLogger.getInstance();
 
@@ -40,6 +48,13 @@ public class McWatchdog implements Runnable {
         }
         else {
             logger.error("Timeout");
+            try {
+                mc.restart();
+            } catch (IOException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            } catch (McCommunicationException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
         }
     }
 

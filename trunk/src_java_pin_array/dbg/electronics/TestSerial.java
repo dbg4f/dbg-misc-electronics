@@ -32,7 +32,7 @@ public class TestSerial {
     private Out out;
 
 
-    private void readInputJs() throws IOException, InterruptedException {
+    private void readInputJs() throws IOException, InterruptedException, McCommunicationException {
 
        FileInputStream fileIs = new FileInputStream("/dev/input/event8");
 
@@ -63,13 +63,14 @@ public class TestSerial {
 
                 String v = (128 - buf[12]) + "\n";
 
-                int pwm = range(buf[12], 0, 255, 0, 255, false);
+                int pwm = range(buf[12], 0, 128, 0, 255, true);
 
-                int percent = range(buf[12], 0, 255, 0, 100, true);
+                int percent = range(buf[12], 0, 128, 0, 100, true);
 
 
                 //System.out.println("P " + pwm + " " + percent);
                 System.out.println(String.format("%s - JS: pwm %02X (%d)", new SimpleDateFormat("mm:ss:SSS").format(new Date()), pwm, pwm));
+
 
                 out.setPwm(pwm);
 
@@ -109,7 +110,7 @@ public class TestSerial {
         int target  = (src - srcMin) * targetLen / srcLen + targetMin;
 
         if (invert) {
-            target = targetMax - target;
+            target = targetMax - target + targetMin;
         }
 
         return target;
@@ -123,11 +124,14 @@ public class TestSerial {
 
         Socket socket = new Socket("127.0.0.1", 4444);
 
-        testMcConn(socket);
+        //testMcConn(socket);
 
-        /*
 
-        new Thread(new In(socket)).start();
+        McConnection mc = new McConnection(socket);
+
+        setPwmFreq(mc, false);
+
+        //new Thread(new In(socket)).start();
 
         serial.out = new Out(socket);
 
@@ -145,7 +149,7 @@ public class TestSerial {
                     }
                 }
         ).start();
-        */
+
 
     }
 
@@ -156,31 +160,70 @@ public class TestSerial {
         mc.writeReg(At2313Reg.PORTB, value ? (byte)(pb | (1<<5)) : (byte)(~(1<<5) & pb));
     }
 
+    private static void setPwmFreq(McConnection mc, boolean normal) throws IOException, McCommunicationException {
+
+        byte pb = mc.readReg(At2313Reg.TCCR0B);
+
+/*
+
+TCCR0B [0..2]
+
+CS 2,1,0
+
+0 0 1 clk I/O  /    (No prescaling)
+0 1 0 clk I/O  /8  (From prescaler)
+
+         */
+
+
+        mc.writeReg(At2313Reg.TCCR0B, normal ? (byte)((pb & 0xF8) | 1) : (byte)((pb & 0xF8) | 2));
+    }
+
 
     private static void testMcConn(Socket socket) throws IOException, McCommunicationException, InterruptedException {
-        McConnection mc = new McConnection(socket.getInputStream(), socket.getOutputStream());
+        McConnection mc = new McConnection(socket);
 
         byte resp;
 
         mc.send(McCommand.ECHO, (byte)0x23);
 
         mc.send(McCommand.SET_FINAL_PWM1, (byte)0x7F);
-        mc.send(McCommand.SET_PWM1, (byte)0x7F);
+        mc.send(McCommand.SET_PWM0, (byte)0x7F);
 
-        System.out.println("Turn on");
+        touchPwm(mc);
+        touchPwm(mc);
+        touchPwm(mc);
+        touchPwm(mc);
+        touchPwm(mc);
+        touchPwm(mc);
+        touchPwm(mc);
+        touchPwm(mc);
+        touchPwm(mc);
+        touchPwm(mc);
+        touchPwm(mc);
+        touchPwm(mc);
+        touchPwm(mc);
+        touchPwm(mc);
+        touchPwm(mc);
+        touchPwm(mc);
 
 
-        Thread.sleep(2000);
+        if (true) {
+            System.exit(0);
+            return;
+        }
+
+        //Thread.sleep(2000);
 
         setPB5(mc, true);
 
-        turn(mc, 5, false, 30);
+        turn(mc, 6, false, 10);
 
         Thread.sleep(1000);
 
-        turn(mc, 5, false, 30);
+        turn(mc, 6, true, 10);
 
-        mc.send(McCommand.SET_PWM1, (byte)0x7F);
+        mc.send(McCommand.SET_PWM0, (byte)0x7F);
 
         setPB5(mc, false);
 
@@ -194,30 +237,64 @@ public class TestSerial {
         //socket.close();
     }
 
+    private static void touchPwm(McConnection mc) throws IOException, McCommunicationException, InterruptedException {
+        System.out.println("Turn on");
+
+        boolean pb5En = true;
+
+
+        setPB5(mc, pb5En);
+
+
+        mc.send(McCommand.SET_PWM0, (byte)0x10);
+        mc.send(McCommand.SET_PWM1, (byte)0x10);
+
+        Thread.sleep(3000);
+
+        mc.send(McCommand.SET_PWM0, (byte)0x7F);
+        mc.send(McCommand.SET_PWM1, (byte)0x7F);
+
+        Thread.sleep(1000);
+
+        mc.send(McCommand.SET_PWM0, (byte)0xF0);
+        mc.send(McCommand.SET_PWM1, (byte)0xF0);
+
+        Thread.sleep(3000);
+
+        setPB5(mc, !pb5En);
+    }
+
     private static void turn(McConnection mc, int steps, boolean dir, int pwm) throws IOException, McCommunicationException, InterruptedException {
 
-        mc.send(McCommand.SET_PWM1, (byte)0x7F);
+        mc.send(McCommand.SET_PWM0, (byte)0x7F);
 
         mc.send(McCommand.SCHEDULE_PWM1, (byte)0);
 
         mc.send(McCommand.SCHEDULE_PWM1, (byte) steps);
 
-        mc.send(McCommand.SET_PWM1, dir ? (byte)(0xFF- pwm) : (byte)pwm);
+        mc.send(McCommand.SET_PWM0, dir ? (byte)(0xFF- pwm) : (byte)pwm);
 
         int resp = mc.send(McCommand.GET_INT_COUNTER);
-        resp = mc.send(McCommand.GET_INT_COUNTER);
+
         resp = mc.send(McCommand.GET_INT_COUNTER);
         Thread.sleep(30);
         resp = mc.send(McCommand.GET_INT_COUNTER);
+        Thread.sleep(30);
+        resp = mc.send(McCommand.GET_INT_COUNTER);
+        Thread.sleep(30);
+        resp = mc.send(McCommand.GET_INT_COUNTER);
+        Thread.sleep(30);
         resp = mc.send(McCommand.GET_INT_COUNTER);
         Thread.sleep(30);
         resp = mc.send(McCommand.GET_INT_COUNTER);
         Thread.sleep(30);
         resp = mc.send(McCommand.GET_INT_COUNTER);
 
-        Thread.sleep(100);
+        Thread.sleep(1000);
 
-        mc.send(McCommand.SET_PWM1, (byte)0x7F);
+        resp = mc.send(McCommand.GET_INT_COUNTER);
+
+        mc.send(McCommand.SET_PWM0, (byte)0x7F);
 
 
     }
@@ -260,18 +337,22 @@ public class TestSerial {
 
     public static class Out implements Runnable {
 
-        Socket socket;
+        //Socket socket;
 
         OutputStream outputStream;
 
-        public Out(Socket socket) {
-            this.socket = socket;
+        McConnection mc;
+
+        public Out(Socket socket) throws IOException, McCommunicationException {
+            //this.socket = socket;
+            mc = new McConnection(socket);
+            mc.send(McCommand.ECHO, (byte)0x11);
         }
 
         public void run() {
             try {
 
-                outputStream = socket.getOutputStream();
+                //outputStream = socket.getOutputStream();
 
 
                 System.out.println("Out started");
@@ -328,9 +409,12 @@ public class TestSerial {
         }
 
 
-        public void setPwm(int value) throws IOException, InterruptedException {
+        public void setPwm(int value) throws IOException, InterruptedException, McCommunicationException {
 
-            sendCommand((byte)0x05,(byte) value);
+            //sendCommand((byte)0x04,(byte) value);
+
+            mc.send(McCommand.SET_PWM0, (byte)value);
+
 
            /*
             outputStream.write(0x04);
