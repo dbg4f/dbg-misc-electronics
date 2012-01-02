@@ -3,15 +3,42 @@ package dbg.electronics;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
 
 public class McConnection {
 
     private InputStream in;
     private OutputStream out;
 
-    private McWatchdog watchdog = new McWatchdog();
+    private Socket socket;
+
+
+    private McWatchdog watchdog = new McWatchdog(this);
 
     private McLogger logger = ConsoleLogger.getInstance();
+
+
+    public McConnection(Socket socket) throws IOException {
+        fromSocket(socket);
+        watchdog.launch();
+    }
+
+    private void fromSocket(Socket socket) throws IOException {
+        this.in = socket.getInputStream();
+        this.out = socket.getOutputStream();
+        this.socket = socket;
+    }
+
+
+    private void reInit() throws IOException {
+        if (socket != null) {
+            socket.close();
+            Socket socketNew = new Socket(socket.getInetAddress(), socket.getPort());
+            fromSocket(socketNew);
+        }
+
+    }
+
 
     public McConnection(InputStream in, OutputStream out) {
         this.in = in;
@@ -20,6 +47,31 @@ public class McConnection {
     }
 
     public byte send(McCommand cmd, byte... params) throws IOException, McCommunicationException {
+        try {
+            return send2(cmd, params);
+        }
+        catch (Exception e) {
+
+            restart();
+            return send(cmd, params);
+        }
+
+    }
+
+    public void restart() throws IOException, McCommunicationException {
+
+        try {
+            Thread.sleep(100);
+        } catch (InterruptedException e1) {
+            e1.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+        sinkIn();
+        reInit();
+        send(McCommand.ECHO, (byte) 0x22);
+    }
+
+    public byte send2(McCommand cmd, byte... params) throws IOException, McCommunicationException {
 
         // TODO: check command params count
 
