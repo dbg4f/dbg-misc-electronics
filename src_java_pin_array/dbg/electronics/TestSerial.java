@@ -63,9 +63,9 @@ public class TestSerial {
 
                 String v = (128 - buf[12]) + "\n";
 
-                int pwm = range(buf[12], 0, 128, 0, 255, true);
+                int pwm = McUtils.range(buf[12], 0, 128, 0, 255, true);
 
-                int percent = range(buf[12], 0, 128, 0, 100, true);
+                int percent = McUtils.range(buf[12], 0, 128, 0, 100, true);
 
 
                 //System.out.println("P " + pwm + " " + percent);
@@ -92,44 +92,20 @@ public class TestSerial {
     }
 
 
-    public static int range(int src, int srcMin, int srcMax, int targetMin, int targetMax, boolean invert) {
-
-        if (src > srcMax) {
-           src = srcMax;
-        }
-
-        if (src < srcMin) {
-            src = srcMin;
-        }
-
-        int srcLen = srcMax - srcMin;
-
-        int targetLen = targetMax - targetMin;
-
-
-        int target  = (src - srcMin) * targetLen / srcLen + targetMin;
-
-        if (invert) {
-            target = targetMax - target + targetMin;
-        }
-
-        return target;
-
-    }
-
-
     public static void main(String[] args) throws IOException, InterruptedException, McCommunicationException {
 
         final TestSerial serial = new TestSerial();
 
         Socket socket = new Socket("127.0.0.1", 4444);
 
-        //testMcConn(socket);
+        testMcConn(socket);
+
+        //readComparator(socket);
 
 
-        McConnection mc = new McConnection(socket);
+        //McConnection mc = new McConnection(socket);
 
-        setPwmFreq(mc, false);
+        //setPwmFreq(mc, false);
 
         //new Thread(new In(socket)).start();
 
@@ -137,7 +113,7 @@ public class TestSerial {
 
 
         new Thread(serial.out).start();
-
+        /*
         new Thread(
                 new Runnable() {
                     public void run() {
@@ -149,7 +125,7 @@ public class TestSerial {
                     }
                 }
         ).start();
-
+                 */
 
     }
 
@@ -180,6 +156,21 @@ CS 2,1,0
     }
 
 
+    private static void readComparator(Socket socket) throws IOException, McCommunicationException, InterruptedException {
+        McConnection mc = new McConnection(socket);
+
+        while (!Thread.currentThread().isInterrupted()){
+
+            System.out.println("getComparator(mc) = " + getComparator(mc));
+
+            Thread.sleep(1000);
+
+        }
+
+
+    }
+
+
     private static void testMcConn(Socket socket) throws IOException, McCommunicationException, InterruptedException {
         McConnection mc = new McConnection(socket);
 
@@ -187,25 +178,26 @@ CS 2,1,0
 
         mc.send(McCommand.ECHO, (byte)0x23);
 
-        mc.send(McCommand.SET_FINAL_PWM1, (byte)0x7F);
-        mc.send(McCommand.SET_PWM0, (byte)0x7F);
+        mc.send(McCommand.SET_FINAL_PWM1, (byte)0x00);
+        //mc.send(McCommand.SET_PWM0, (byte)0x7F);
 
-        touchPwm(mc);
-        touchPwm(mc);
-        touchPwm(mc);
-        touchPwm(mc);
-        touchPwm(mc);
-        touchPwm(mc);
-        touchPwm(mc);
-        touchPwm(mc);
-        touchPwm(mc);
-        touchPwm(mc);
-        touchPwm(mc);
-        touchPwm(mc);
-        touchPwm(mc);
-        touchPwm(mc);
-        touchPwm(mc);
-        touchPwm(mc);
+        center(mc);
+
+        Thread.sleep(1000);
+
+
+        turnAndBack(mc, 5);
+        Thread.sleep(1000);
+        center(mc);
+        Thread.sleep(1000);
+        turnAndBack(mc, 10);
+        Thread.sleep(1000);
+        center(mc);
+        Thread.sleep(1000);
+        turnAndBack(mc, 12);
+        //turnAndBack(mc, 16);
+
+        center(mc);
 
 
         if (true) {
@@ -237,64 +229,69 @@ CS 2,1,0
         //socket.close();
     }
 
+    private static void turnAndBack(McConnection mc, int steps) throws IOException, McCommunicationException, InterruptedException {
+        turn(mc, 10, false, 11);
+        Thread.sleep(100);
+        turn(mc, steps, true, 11);
+        Thread.sleep(100);
+    }
+
+    private static void center(McConnection mc) throws IOException, McCommunicationException, InterruptedException {
+
+        boolean initPos = getComparator(mc);
+
+        while (getComparator(mc) == initPos) {
+            turn(mc, 1, initPos, 11);
+            Thread.sleep(10);
+        }
+
+    }
+
+    private static boolean getComparator(McConnection mc) throws IOException, McCommunicationException {
+       return (mc.readReg(At2313Reg.ACSR) & 0x20) != 0;
+    }
+
     private static void touchPwm(McConnection mc) throws IOException, McCommunicationException, InterruptedException {
         System.out.println("Turn on");
 
-        boolean pb5En = true;
-
-
-        setPB5(mc, pb5En);
-
 
         mc.send(McCommand.SET_PWM0, (byte)0x10);
-        mc.send(McCommand.SET_PWM1, (byte)0x10);
 
         Thread.sleep(3000);
 
         mc.send(McCommand.SET_PWM0, (byte)0x7F);
-        mc.send(McCommand.SET_PWM1, (byte)0x7F);
 
         Thread.sleep(1000);
 
         mc.send(McCommand.SET_PWM0, (byte)0xF0);
-        mc.send(McCommand.SET_PWM1, (byte)0xF0);
 
-        Thread.sleep(3000);
+        Thread.sleep(2000);
 
-        setPB5(mc, !pb5En);
+        mc.send(McCommand.SET_PWM0, (byte)0x00);
+
     }
 
     private static void turn(McConnection mc, int steps, boolean dir, int pwm) throws IOException, McCommunicationException, InterruptedException {
 
-        mc.send(McCommand.SET_PWM0, (byte)0x7F);
+        setPB5(mc, dir);
 
-        mc.send(McCommand.SCHEDULE_PWM1, (byte)0);
+        mc.send(McCommand.SET_PWM0, (byte)0x00);
+
+        mc.send(McCommand.CANCEL_SCHEDULE_PWM1);
 
         mc.send(McCommand.SCHEDULE_PWM1, (byte) steps);
 
-        mc.send(McCommand.SET_PWM0, dir ? (byte)(0xFF- pwm) : (byte)pwm);
+        mc.send(McCommand.SET_PWM0, (byte)(0xFF- pwm));
 
-        int resp = mc.send(McCommand.GET_INT_COUNTER);
 
-        resp = mc.send(McCommand.GET_INT_COUNTER);
-        Thread.sleep(30);
-        resp = mc.send(McCommand.GET_INT_COUNTER);
-        Thread.sleep(30);
-        resp = mc.send(McCommand.GET_INT_COUNTER);
-        Thread.sleep(30);
-        resp = mc.send(McCommand.GET_INT_COUNTER);
-        Thread.sleep(30);
-        resp = mc.send(McCommand.GET_INT_COUNTER);
-        Thread.sleep(30);
-        resp = mc.send(McCommand.GET_INT_COUNTER);
-        Thread.sleep(30);
-        resp = mc.send(McCommand.GET_INT_COUNTER);
+        while (!Thread.currentThread().isInterrupted()) {
+            int resp = mc.send(McCommand.GET_INT_COUNTER);
+            Thread.sleep(5);
+            if (resp >= steps) {
+                break;
+            }
+        }
 
-        Thread.sleep(1000);
-
-        resp = mc.send(McCommand.GET_INT_COUNTER);
-
-        mc.send(McCommand.SET_PWM0, (byte)0x7F);
 
 
     }
@@ -429,7 +426,7 @@ CS 2,1,0
 
             byte[] outBytes = new byte[] {0x55, 0x02, code, value, 0x00};
 
-            outBytes[4] = crc_calc(outBytes[0], outBytes[1], outBytes[2], outBytes[3]);
+            outBytes[4] = McUtils.crc_calc(outBytes[0], outBytes[1], outBytes[2], outBytes[3]);
 
             outputStream.write(outBytes);
         }
@@ -439,33 +436,6 @@ CS 2,1,0
         }
 
 
-    }
-
-    static byte crc_calc(byte... content) {
-        byte crc = (byte) 0xFF;
-
-        for (byte b : content) {
-            crc = crc_update(crc, b);
-        }
-
-        return crc;
-    }
-
-    static byte crc_update(byte crc, byte data) {
-
-        int i;
-
-        crc ^= data;
-
-        for (i = 0; i < 8; i++) {
-            if ((crc & 0x80) != 0x00) {
-                crc = (byte) ((crc << 1) ^ 0xE5);
-            } else {
-                crc <<= 1;
-            }
-        }
-
-        return crc;
     }
 
 
