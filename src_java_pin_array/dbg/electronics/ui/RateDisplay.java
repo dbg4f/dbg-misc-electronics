@@ -1,4 +1,4 @@
-package dbg.electronics;
+package dbg.electronics.ui;
 
 import javax.swing.*;
 import java.awt.*;
@@ -12,25 +12,32 @@ import java.net.Socket;
 public class RateDisplay implements Runnable {
 
     private final RatePanel panel;
+    private final int port;
 
 
-    public RateDisplay(RatePanel panel) {
+    public RateDisplay(RatePanel panel, int port) {
         this.panel = panel;
+        this.port = port;
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                createAndShowGUI();
+                createAndShowGUI(5555);
             }
         });
+    }
+
+    public static void launch(int port) {
+        createAndShowGUI(port);
     }
 
     public void run() {
 
         try {
 
-            ServerSocket serverSocket = new ServerSocket(5555);
+
+            ServerSocket serverSocket = new ServerSocket(port);
 
             while (!Thread.currentThread().isInterrupted()) {
 
@@ -43,7 +50,7 @@ public class RateDisplay implements Runnable {
                 String inputLine;
 
                 while ((inputLine = in.readLine()) != null) {
-                    System.out.println("inputLine = " + inputLine);
+                    //System.out.println("inputLine = " + inputLine);
 
                     if ("q".equalsIgnoreCase(inputLine)) {
                         clientSocket.close();
@@ -65,7 +72,7 @@ public class RateDisplay implements Runnable {
 
     }
 
-    private static void createAndShowGUI() {
+    private static void createAndShowGUI(int port) {
         System.out.println("Created GUI on EDT? " + SwingUtilities.isEventDispatchThread());
         JFrame f = new JFrame("Swing Paint Demo");
         f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -77,7 +84,7 @@ public class RateDisplay implements Runnable {
         Timer t = new Timer(1000, new TimerListener(ratePanel));
         t.start();
 
-        new Thread(new RateDisplay(ratePanel)).start();
+        new Thread(new RateDisplay(ratePanel, port)).start();
 
     }
 }
