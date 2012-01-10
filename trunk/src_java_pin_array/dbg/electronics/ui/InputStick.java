@@ -44,7 +44,7 @@ public class InputStick implements Runnable {
 
     private void readInputJs() throws IOException, InterruptedException, McCommunicationException {
 
-       FileInputStream fileIs = new FileInputStream("/dev/input/event8");
+       FileInputStream fileIs = new FileInputStream("/dev/input/event4");
 
        BufferedInputStream rd = new BufferedInputStream(fileIs);
 

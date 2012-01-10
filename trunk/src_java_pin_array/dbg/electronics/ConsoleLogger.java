@@ -1,5 +1,8 @@
 package dbg.electronics;
 
+
+import org.apache.log4j.Logger;
+
 /**
  * Created by IntelliJ IDEA.
  * User: dmitry
@@ -8,6 +11,8 @@ package dbg.electronics;
  * To change this template use File | Settings | File Templates.
  */
 public class ConsoleLogger implements McLogger {
+
+    static Logger log = org.apache.log4j.Logger.getLogger(ConsoleLogger.class);
 
     private static ConsoleLogger instance;
 
@@ -36,7 +41,7 @@ public class ConsoleLogger implements McLogger {
 
     private void print(String level, String text, Exception e) {
         long ts = System.currentTimeMillis() - initTs;
-        System.out.println(String.format("%06d.%04d %s - %s %s", ts/1000, ts%1000, level, text, e != null ? e.getMessage() : ""));
+        log.info(String.format("%06d.%04d %s - %s %s", ts/1000, ts%1000, level, text, e != null ? e.getMessage() : ""));
     }
 
     private boolean isDebug() {
