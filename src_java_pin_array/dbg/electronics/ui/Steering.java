@@ -1,12 +1,15 @@
 package dbg.electronics.ui;
 
 import dbg.electronics.*;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 
 import static java.lang.Thread.sleep;
 
 public class Steering {
+
+    private static Logger log = Logger.getLogger(Steering.class);
 
     protected int currentPos;
 
@@ -34,7 +37,14 @@ public class Steering {
 
         SteeringMovement movement = calcMovement(finalPos);
 
+        log.debug(movement.toString());
+
+        setDir(movement.dir);
+
         if (movement.overCenter) {
+
+
+            turn(movement.stepsToCenter, 10);
 
             center();
 
@@ -46,13 +56,13 @@ public class Steering {
 
         }
 
-        if (currentDir != movement.dir) {
+        //if (currentDir != movement.dir) {
 
-            setDir(movement.dir);
+        //    setDir(movement.dir);
 
-            currentDir = movement.dir;
+        //    currentDir = movement.dir;
 
-        }
+        //}
 
         currentPos = finalPos;
 
@@ -65,14 +75,18 @@ public class Steering {
 
         int remain = Math.abs(finalPos - currentPos);
 
+        //int stepsToCenter = 0;
+
         if (finalPos > 0 && currentPos < 0) {
             remain = finalPos;
             overCenter = true;
+            //stepsToCenter = -currentPos;
         }
 
         if (finalPos < 0 && currentPos > 0) {
             remain = -currentPos;
             overCenter = true;
+            //stepsToCenter = currentPos;
         }
 
         if (finalPos == 0) {
@@ -80,7 +94,7 @@ public class Steering {
             overCenter = true;
         }
 
-        return new SteeringMovement(finalPos - currentPos > 0, overCenter, remain);
+        return new SteeringMovement(finalPos - currentPos > 0, overCenter, remain, Math.abs(currentPos));
 
     }
 
@@ -92,7 +106,7 @@ public class Steering {
         while (getComparator() == initPos) {
             setDir(initPos);
             turn(1, 11);
-            sleep(10);
+            sleep(1);
         }
 
     }

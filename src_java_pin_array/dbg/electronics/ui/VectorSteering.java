@@ -2,21 +2,26 @@ package dbg.electronics.ui;
 
 
 import dbg.electronics.McCommunicationException;
+import dbg.electronics.McConnection;
 import dbg.electronics.McUtils;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
+import java.net.Socket;
 
 public class VectorSteering implements VectorMovementHandler, Runnable {
 
+    private static Logger log = Logger.getLogger(VectorSteering.class);
+
     private RemoteDisplay displayControl;
 
-    private SteeringEmulator steering;
+    private Steering steering;
 
     private int steeringPos = 0;
     private final int xMin;
     private final int yMin;
 
-    public VectorSteering(int xMin, int yMin, SteeringEmulator steering) throws IOException {
+    public VectorSteering(int xMin, int yMin, Steering steering) throws IOException {
 
         this.xMin = xMin;
         this.yMin = yMin;
@@ -33,12 +38,18 @@ public class VectorSteering implements VectorMovementHandler, Runnable {
 
     public static void main(String[] args) throws IOException, InterruptedException, McCommunicationException {
 
+        log.debug("Start");
+
         RateDisplay.launch(5555);
 
         RateDisplay.launch(5556);
 
+        Socket socket = new Socket("127.0.0.1", 4444);
+
+        McConnection mc = new McConnection(socket);
+
         //VectorSteering steering = new VectorSteering(-200, 200);
-        VectorSteering steering = new VectorSteering(0, 255, new SteeringEmulator());
+        VectorSteering steering = new VectorSteering(0, 255, new Steering(mc));
 
         InputStick stick = new InputStick(steering);
 
@@ -50,13 +61,15 @@ public class VectorSteering implements VectorMovementHandler, Runnable {
 
         int controlPos = McUtils.range(x, xMin, yMin, 0, 100, false);
 
+        log.debug("JS move: " + x + " / " + controlPos);
+
         try {
 
 
             displayControl.show(controlPos);
 
             synchronized (this) {
-                steeringPos = McUtils.range(x, xMin, yMin, -12, 12, false);
+                steeringPos = McUtils.range(x, xMin, yMin, -18, 18, false);
             }
 
             //System.out.println("steeringPos = " + steeringPos + "/" + controlPos + ", now " + steering.getCurrentPos() );
@@ -79,8 +92,12 @@ public class VectorSteering implements VectorMovementHandler, Runnable {
             try {
 
                 if (emulatorCurrentPos != steeringPos) {
-                    System.out.println("Apply offset [" + emulatorCurrentPos + ".." + steeringPos + "]");
+
+                    log.debug("Start: apply offset [" + emulatorCurrentPos + ".." + steeringPos + "]");
+
                     steering.applyOffset(steeringPos - emulatorCurrentPos);
+
+                    log.debug("End: apply offset [" + emulatorCurrentPos + ".." + steeringPos + "]");
                 }
 
                 Thread.sleep(100);
