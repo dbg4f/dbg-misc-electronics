@@ -14,6 +14,7 @@ import java.awt.event.KeyEvent;
 import java.util.*;
 
 
+import j3d.builders.LivingRoomBuilder;
 import j3d.builders.RoomBuilder;
 import j3d.builders.DetailsViewFilter;
 import j3d.primitives.Detail;
@@ -55,7 +56,7 @@ public class NavObserver extends Applet {
 
         BranchGroup objRoot = new BranchGroup();
 
-        new RoomBuilder().createEnv(objRoot);
+        new LivingRoomBuilder().createEnv(objRoot);
 
 
         TransformGroup vpTrans = su.getViewingPlatform().getViewPlatformTransform();

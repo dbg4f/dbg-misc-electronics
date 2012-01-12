@@ -15,33 +15,26 @@ import java.util.*;
 public class LivingRoomBuilder {
 
   public static final float H           = 0.016f;
-  public static final float VERT_CLR_H  = 0.001f;
-  public static final float FULL_H      = 2.52f;
-  public static final float FULL_W      = 0.45f;
-  public static final float FULL_L      = 1.50f;
+
+  public static final float L_GAP1 = 0.40f - H;
+  public static final float L_GAP2 = 0.40f - H;
+  public static final float L_GAP3 = 0.80f - H;
+  public static final float L_GAP4 = 0.40f - H;
+  public static final float L_GAP5 = 0.50f - H;
+
   public static final float WALL_DIST   = 0.003f;
-  public static final float COMP_H      = 0.45f;
-  public static final float SHELF_CLR   = 0.001f;
+
+  public static final float L_FULL = L_GAP1 + L_GAP2 + L_GAP3 + L_GAP4 + L_GAP5;
+
+  public static final float H_LOWER = 0.55f;
+  public static final float H_UPPER = 1.44f;
+
+  public static final float H_FULL = H_LOWER + H_UPPER;
+
+  public static final float W_FULL = 0.35f;
+
   public static final float FLOOR_BASE  = 0.05f;
-  public static final float COMP_DOOR_D1 = 0.02f;
-  public static final float COMP_DOOR_D2 = 0.08f;
-  public static final float COMP_DOOR_CLR_H = 0.008f;
-  public static final float SHELF_W       = FULL_W - 0.12f - H;
-  public static final float SHELF_L       = ((FULL_L - (3f * H)) / 2f) - 2f * SHELF_CLR;
-  public static final float COMP_DOOR_L   = (FULL_L - 2f * H) / 2f + 0.03f;
-  public static final float COMP_DOOR_H   = COMP_H - 2f * COMP_DOOR_CLR_H;
-  public static final float H_VERT_UP     = COMP_H + 2f * H;
-  public static final float H_VERT_LOW    = FULL_H - H_VERT_UP - VERT_CLR_H;
-  public static final float MAIN_COMP_WINDOW_H = H_VERT_LOW - FLOOR_BASE - H - COMP_H - H - H;
-  public static final float MAIN_COMP_WINDOW_L = FULL_L - 2f*H;
 
-
-  public static final float H_VERT_CHEST    = 0.75f;
-  public static final float L_CHEST         = 0.5f;
-  public static final float CHEST_BOX_SIDE_CLR = 0.013f;
-  public static final float CHEST_BOX_VERT_GAP = 0.003f;
-  public static final float L_CHEST_CAP     = L_CHEST + 2f*H;
-  public static final float CHEST_BOX_H     = (H_VERT_CHEST - FLOOR_BASE - H + CHEST_BOX_VERT_GAP)/4f;
 
 
   public static final Color3f COLOR_WALL = new Color3f(0.9f, 0.9f, 0.4f);
@@ -90,106 +83,27 @@ public class LivingRoomBuilder {
   }
 
   private Detail verticalBase(float wallDistance, float h, float floorDist, String name, DetailType detailType) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(wallDistance, 0f, floorDist), new Vector3f(H, FULL_W, h));
+    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(wallDistance, 0f, floorDist), new Vector3f(H, W_FULL, h));
     return new Detail(orthogonalBox, detailType, name, OrthogonalPlate.YZ);
   }
 
-  private Detail verticalChestBase(float wallDistance, float h, float floorDist, String name) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(wallDistance, 0f, floorDist), new Vector3f(H, FULL_W - H, h));
-    return new Detail(orthogonalBox, DetailType.CHEST_VERTICAL_BASE, name, OrthogonalPlate.YZ);
-  }
-
-  private Detail centralVerticalRib(float h, String name) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(FULL_L / 2f - H / 2f, H, h), new Vector3f(H, SHELF_W, COMP_H));
-    return new Detail(orthogonalBox, DetailType.VERTICAL_RIB, name, OrthogonalPlate.YZ);
-  }
-
   private Detail horizontalBase(float floorDistance, String name) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(H, 0f, floorDistance), new Vector3f(FULL_L - (2.0f * H), FULL_W, H));
+    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(H, 0f, floorDistance), new Vector3f(L_FULL - (2.0f * H), W_FULL, H));
     return new Detail(orthogonalBox, DetailType.HORIZONTAL_BASE, name, OrthogonalPlate.XY);
   }
 
-  private Detail chestCap(String name) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(FULL_L, 0f, H_VERT_CHEST), new Vector3f(L_CHEST_CAP, FULL_W, H));
-    return new Detail(orthogonalBox, DetailType.CHEST_CAP, name, OrthogonalPlate.XY);
-  }
-
-  private Detail chestHorizontalBase(String name) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(FULL_L + H, H, FLOOR_BASE), new Vector3f(L_CHEST, FULL_W - 2f*H, H));
-    return new Detail(orthogonalBox, DetailType.CHEST_BASE, name, OrthogonalPlate.XY);
-  }
-
-  private Detail backWall(float floorDistance, String name) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(H, 0f, floorDistance), new Vector3f(FULL_L - (2.0f * H), H, COMP_H));
-    return new Detail(orthogonalBox, DetailType.BACK_WALL, name, OrthogonalPlate.XZ);
-  }
-
-  private Detail chestBackWall(String name) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(FULL_L + H, 0f, 0f), new Vector3f(L_CHEST, H, H_VERT_CHEST));
-    return new Detail(orthogonalBox, DetailType.CHEST_BACK_WALL, name, OrthogonalPlate.XZ);
-  }
-
-  private Detail lowerRib(float wallDistance, String name) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(H, wallDistance, 0f), new Vector3f(FULL_L - (2.0f * H), H, FLOOR_BASE));
-    return new Detail(orthogonalBox, DetailType.LOWER_RIB, name, OrthogonalPlate.XZ);
-  }
-
-  private Detail chestFront(float wallDistance, String name) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(FULL_L + H, wallDistance, 0f), new Vector3f(L_CHEST, H, FLOOR_BASE));
-    return new Detail(orthogonalBox, DetailType.CHEST_FRONT, name, OrthogonalPlate.XZ);
-  }
-
-  private Detail shelf(float floorDistance, float wallDistance, String name) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(wallDistance, H, floorDistance), new Vector3f(SHELF_L, SHELF_W, H));
-    return new Detail(orthogonalBox, DetailType.SHELF, name, OrthogonalPlate.XY);
-  }
-
-  private Detail compDoor(float floorDistance, float wallDistance, float depth, String name) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(wallDistance, FULL_W - H - depth, floorDistance), new Vector3f(COMP_DOOR_L, H, COMP_DOOR_H));
-    return new Detail(orthogonalBox, DetailType.COMPARTMENT_DOOR, name, OrthogonalPlate.XZ);
-  }
-/*
-  private Detail compMainDoor(float floorDistance, float wallDistance, float depth, String name) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(wallDistance, FULL_W - H - depth, floorDistance), new Vector3f(COMP_DOOR_L, H, COMP_MAIN_DOOR_H));
-    return new Detail(orthogonalBox, DetailType.COMPARTMENT_MAIN_DOOR, name, OrthogonalPlate.XZ);
-  }
-  */
-  private List<Detail> chestBox(float wallDist, float backWallDist, float floorDist, final String name) {
-    Point3f start = new Point3f(wallDist, backWallDist, floorDist);
-    final OrthogonalBox front = new OrthogonalBox(start, new Vector3f(L_CHEST_CAP-0.003f, H, CHEST_BOX_H));
-    final float chestBoxH = CHEST_BOX_H - 2f* CHEST_BOX_SIDE_CLR;
-    final float chestBoxDepth = FULL_W - H - CHEST_BOX_SIDE_CLR - H;
-    final Vector3f sideSizes = new Vector3f(H, -chestBoxDepth, chestBoxH);
-    final Vector3f footSizes = new Vector3f(L_CHEST - 2f* CHEST_BOX_SIDE_CLR - 2f*H, -chestBoxDepth, H);
-    final Vector3f backSizes = new Vector3f(L_CHEST-2f*H-2f* CHEST_BOX_SIDE_CLR, H, chestBoxH - H);
-
-    final OrthogonalBox side1 = new OrthogonalBox(new Point3f(start.x + H + CHEST_BOX_SIDE_CLR,                start.y, start.z + CHEST_BOX_SIDE_CLR), sideSizes);
-    final OrthogonalBox side2 = new OrthogonalBox(new Point3f(start.x + H + L_CHEST - CHEST_BOX_SIDE_CLR - H,  start.y, start.z + CHEST_BOX_SIDE_CLR), sideSizes);
-    final OrthogonalBox foot  = new OrthogonalBox(new Point3f(start.x + H + CHEST_BOX_SIDE_CLR + H,            start.y, start.z + CHEST_BOX_SIDE_CLR), footSizes);
-    final OrthogonalBox back  = new OrthogonalBox(new Point3f(start.x + H + CHEST_BOX_SIDE_CLR + H,            start.y - chestBoxDepth, start.z + CHEST_BOX_SIDE_CLR + H), backSizes);
-
-    return new ArrayList<Detail>() {
-      {
-        add(new Detail(front, DetailType.CHEST_BOX_FRONT, name + "-front",  OrthogonalPlate.XZ));
-        add(new Detail(side1, DetailType.CHEST_BOX_SIDE, name + "-side1",   OrthogonalPlate.YZ));
-        add(new Detail(side2, DetailType.CHEST_BOX_SIDE, name + "-side2",   OrthogonalPlate.YZ));
-        add(new Detail(foot,  DetailType.CHEST_BOX_FOOT, name + "-foot",    OrthogonalPlate.XY));
-        add(new Detail(back,  DetailType.CHEST_BOX_BACK, name + "-back",    OrthogonalPlate.XZ));
-      }
-    };
-
-  }
 
 
   private List<Detail> roomBounds(float size, Color3f wallColor, Color3f floorColor) {
-    Point3f start = new Point3f(-WALL_DIST, -WALL_DIST, -WALL_DIST);
-    final OrthogonalBox floor = new OrthogonalBox(start, new Vector3f(size, size, -H));
+    Point3f start1 = new Point3f(-WALL_DIST, -WALL_DIST, -WALL_DIST);
+    Point3f start2 = new Point3f(-WALL_DIST + 2 * size, -WALL_DIST, -WALL_DIST);
+    final OrthogonalBox floor = new OrthogonalBox(start1, new Vector3f(size * 2, size, -H));
     floor.applyDefaultColor(floorColor);
     floor.rebuild();
-    final OrthogonalBox wallX = new OrthogonalBox(start, new Vector3f(size, -H, size));
+    final OrthogonalBox wallX = new OrthogonalBox(start1, new Vector3f(size * 2, -H, size));
     wallX.applyDefaultColor(new Color3f(wallColor.getX() + 0.08f, wallColor.getY() + 0.08f, wallColor.getZ() + 0.08f));
     wallX.rebuild();
-    final OrthogonalBox wallY = new OrthogonalBox(start, new Vector3f(-H, size, size));
+    final OrthogonalBox wallY = new OrthogonalBox(start2, new Vector3f(-H, size, size));
     wallY.applyDefaultColor(wallColor);
     wallY.rebuild();
     return new ArrayList<Detail>() {
@@ -208,63 +122,16 @@ public class LivingRoomBuilder {
 
     detials.addAll(roomBounds(2.5f, COLOR_WALL, COLOR_FLOOR));
 
-    detials.add(verticalBase(0f,            H_VERT_LOW, 0f,                      "low1", DetailType.VERTICAL_BASE_LOWER));
-    detials.add(verticalBase(FULL_L - H,    H_VERT_LOW, 0f,                      "low2", DetailType.VERTICAL_BASE_LOWER));
-    detials.add(verticalBase(0f,            H_VERT_UP, H_VERT_LOW + VERT_CLR_H,  "up1",  DetailType.VERTICAL_BASE_UPPER));
-    detials.add(verticalBase(FULL_L - H,    H_VERT_UP, H_VERT_LOW + VERT_CLR_H,  "up2",  DetailType.VERTICAL_BASE_UPPER));
+    detials.add(verticalBase(0f,                                            H_FULL + FLOOR_BASE,    0f,                      "vertB6", DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBase(L_GAP5,                                        H_FULL,                 FLOOR_BASE,              "vertB5", DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBase(L_GAP5 + L_GAP4,                               H_FULL,                 FLOOR_BASE,              "vertB4", DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBase(L_GAP5 + L_GAP4 + L_GAP3,                      H_FULL,                 FLOOR_BASE,              "vertB3", DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBase(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2,             H_FULL,                 FLOOR_BASE,              "vertB2", DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBase(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2 + L_GAP1,    H_FULL + FLOOR_BASE,    0f,                      "vertB1", DetailType.VERTICAL_BASE_LOWER));
+
 
     detials.add(horizontalBase(FLOOR_BASE,              "1"));
-    detials.add(horizontalBase(FLOOR_BASE + H + COMP_H, "2"));
-    detials.add(horizontalBase(H_VERT_LOW - H,          "3"));
-    detials.add(horizontalBase(H_VERT_LOW + VERT_CLR_H, "4"));
-    detials.add(horizontalBase(FULL_H - H,              "5"));
-
-    detials.add(centralVerticalRib(FULL_H - H - COMP_H, "V1"));
-    detials.add(centralVerticalRib(FLOOR_BASE + H,      "V2"));
-
-    float lowShelfBaseFloorDist = FLOOR_BASE + H + COMP_H / 2f;
-    float upperShelfBaseFloorDist = FULL_H - (H + COMP_H / 2f);
-
-    float shelfBaseY1 = H + SHELF_CLR;
-    float shelfBaseY2 = FULL_L - (H + SHELF_CLR * 2f + SHELF_L);
-
-    detials.add(shelf(lowShelfBaseFloorDist, shelfBaseY1, "S1"));
-    detials.add(shelf(lowShelfBaseFloorDist, shelfBaseY2, "S2"));
-
-    detials.add(shelf(upperShelfBaseFloorDist, shelfBaseY1, "S3"));
-    detials.add(shelf(upperShelfBaseFloorDist, shelfBaseY2, "S4"));
-
-    detials.add(compDoor(FLOOR_BASE + H + COMP_DOOR_CLR_H, H, COMP_DOOR_D1, "D1"));
-    detials.add(compDoor(FLOOR_BASE + H + COMP_DOOR_CLR_H, FULL_L - H - COMP_DOOR_L, COMP_DOOR_D2, "D2"));
-
-    detials.add(compDoor(FULL_H - H - COMP_DOOR_CLR_H - COMP_DOOR_H, H, COMP_DOOR_D1, "D3"));
-    detials.add(compDoor(FULL_H - H - COMP_DOOR_CLR_H - COMP_DOOR_H, FULL_L - H - COMP_DOOR_L, COMP_DOOR_D2, "D4"));
-
-    //detials.add(compMainDoor(FLOOR_BASE + H + COMP_H + COMP_DOOR_CLR_H, H,                         COMP_DOOR_D1, "DM1"));
-    //detials.add(compMainDoor(FLOOR_BASE + H + COMP_H + COMP_DOOR_CLR_H, FULL_L - H - COMP_DOOR_L,  COMP_DOOR_D2, "DM2"));
-
-    detials.add(backWall(FLOOR_BASE + H,              "B1"));
-    detials.add(backWall(FLOOR_BASE + H + COMP_H + H, "B2"));
-    detials.add(backWall(H_VERT_LOW - COMP_H - H,     "B3"));
-    detials.add(backWall(FULL_H - H - COMP_H,         "B4"));
-
-    detials.add(lowerRib(FULL_W/3f,             "LR1"));
-    detials.add(lowerRib(FULL_W  - FLOOR_BASE,  "LR2"));
-
-
-    detials.add(verticalChestBase(FULL_L,                 H_VERT_CHEST, 0f, "B-low1"));
-    detials.add(verticalChestBase(FULL_L + L_CHEST + H,   H_VERT_CHEST, 0f, "B-low2"));
-    detials.add(chestFront(FULL_W  - FLOOR_BASE, "B-front"));
-
-    detials.add(chestCap("B-CAP"));
-    detials.add(chestHorizontalBase("B-Low"));
-    detials.add(chestBackWall("B-BackWall"));
-
-    
-    detials.addAll(chestBox(FULL_L, FULL_W-H, FLOOR_BASE, "box1"));
-    detials.addAll(chestBox(FULL_L, FULL_W-H, FLOOR_BASE + CHEST_BOX_VERT_GAP + CHEST_BOX_H, "box2"));
-    detials.addAll(chestBox(FULL_L, FULL_W-H, FLOOR_BASE + 2f*(CHEST_BOX_VERT_GAP + CHEST_BOX_H), "box3"));
-    detials.addAll(chestBox(FULL_L, FULL_W-H, FLOOR_BASE + 3f*(CHEST_BOX_VERT_GAP + CHEST_BOX_H), "box4"));
+    detials.add(horizontalBase(FLOOR_BASE + H + H_FULL, "2"));
 
     return detials;
   }
