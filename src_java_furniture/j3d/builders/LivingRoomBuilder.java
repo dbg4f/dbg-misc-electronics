@@ -1,6 +1,5 @@
 package j3d.builders;
 
-import com.sun.org.apache.bcel.internal.generic.NEW;
 import j3d.primitives.OrthogonalBox;
 import j3d.primitives.OrthogonalPlate;
 import j3d.primitives.DetailType;
@@ -32,7 +31,8 @@ public class LivingRoomBuilder {
 
   public static final float H_FULL = H_LOWER + H_UPPER;
 
-  public static final float W_FULL = 0.35f;
+  public static final float W_SMALL = 0.30f;
+  public static final float W_LARGE = 0.45f;
 
   public static final float FLOOR_BASE  = 0.05f;
 
@@ -65,10 +65,7 @@ public class LivingRoomBuilder {
   };
 
 
-    private final Point3f pos = new Point3f(1f, 1f, 1f);
-
-
-    private void setColors(DetailType detailType, OrthogonalBox box) {
+  private void setColors(DetailType detailType, OrthogonalBox box) {
     //if (PLATE_COLORS.containsKey(detailType)) {
       /*
       box.setPlateColor(OrthogonalPlate.XY, PLATE_COLORS.get(detailType)[0]);
@@ -86,13 +83,19 @@ public class LivingRoomBuilder {
     //}
   }
 
-  private Detail verticalBase(float wallDistance, float h, float floorDist, String name, DetailType detailType) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(wallDistance, 0f, floorDist), new Vector3f(H, W_FULL, h));
+  private Detail verticalBaseUpper(float wallDistance, float h, float floorDist, String name, DetailType detailType) {
+    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(wallDistance, 0f, floorDist), new Vector3f(H, W_SMALL, h));
     return new Detail(orthogonalBox, detailType, name, OrthogonalPlate.YZ);
   }
 
-  private Detail horizontalBase(float floorDistance, String name) {
-    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(H, 0f, floorDistance), new Vector3f(L_FULL - (2.0f * H), W_FULL, H));
+  private Detail verticalBaseLower(float wallDistance, float h, float floorDist, float width, String name, DetailType detailType) {
+    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(wallDistance, 0f, floorDist), new Vector3f(H, width, h));
+    return new Detail(orthogonalBox, detailType, name, OrthogonalPlate.YZ);
+  }
+
+
+  private Detail horizontalBase(float floorDistance, String name, float width) {
+    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(H, 0f, floorDistance), new Vector3f(L_FULL - (2.0f * H), width, H));
     return new Detail(orthogonalBox, DetailType.HORIZONTAL_BASE, name, OrthogonalPlate.XY);
   }
 
@@ -122,64 +125,58 @@ public class LivingRoomBuilder {
   
 
   public List<Detail> createDetails() {
+
     List<Detail> detials = new ArrayList<Detail>();
 
     detials.addAll(roomBounds(2.5f, COLOR_WALL, COLOR_FLOOR));
 
-    detials.add(verticalBase(0f,                                            H_FULL + FLOOR_BASE,    0f,                      "vertB6", DetailType.VERTICAL_BASE_LOWER));
-    detials.add(verticalBase(L_GAP5,                                        H_FULL,                 FLOOR_BASE,              "vertB5", DetailType.VERTICAL_BASE_LOWER));
-    detials.add(verticalBase(L_GAP5 + L_GAP4,                               H_FULL,                 FLOOR_BASE,              "vertB4", DetailType.VERTICAL_BASE_LOWER));
-    detials.add(verticalBase(L_GAP5 + L_GAP4 + L_GAP3,                      H_FULL,                 FLOOR_BASE,              "vertB3", DetailType.VERTICAL_BASE_LOWER));
-    detials.add(verticalBase(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2,             H_FULL,                 FLOOR_BASE,              "vertB2", DetailType.VERTICAL_BASE_LOWER));
-    detials.add(verticalBase(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2 + L_GAP1,    H_FULL + FLOOR_BASE,    0f,                      "vertB1", DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseUpper(0f,                                               H_UPPER + 2.0f * H,  FLOOR_BASE + H_LOWER - H,    "vertUB6-side",  DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseUpper(L_GAP5,                                           H_UPPER,             FLOOR_BASE + H_LOWER,        "vertUB5",       DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseUpper(L_GAP5 + L_GAP4,                                  H_UPPER,             FLOOR_BASE + H_LOWER,        "vertUB4",       DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseUpper(L_GAP5 + L_GAP4 + L_GAP3,                         H_UPPER,             FLOOR_BASE + H_LOWER,        "vertUB3",       DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseUpper(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2,                H_UPPER,             FLOOR_BASE + H_LOWER,        "vertUB2",       DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseUpper(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2 + L_GAP1 - H,   H_UPPER + 2.0f * H,  FLOOR_BASE + H_LOWER - H,    "vertUB1-side",  DetailType.VERTICAL_BASE_LOWER));
+
+    detials.add(verticalBaseLower(0f,                                               H_LOWER + 2.0f * H,  0f,                    W_SMALL,  "vertLB6-side",  DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5,                                           H_LOWER,             FLOOR_BASE + H,        W_LARGE,  "vertLB5",       DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5 + L_GAP4,                                  H_LOWER,             FLOOR_BASE + H,        W_LARGE,  "vertLB4",       DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5 + L_GAP4 + L_GAP3,                         H_LOWER,             FLOOR_BASE + H,        W_LARGE,  "vertLB3",       DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2,                H_LOWER,             FLOOR_BASE + H,        W_LARGE,  "vertLB2",       DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2 + L_GAP1 - H,   H_LOWER + 2.0f * H,  0f,                    W_SMALL,  "vertLB1-side",  DetailType.VERTICAL_BASE_LOWER));
 
 
-    detials.add(horizontalBase(FLOOR_BASE,              "1"));
-    detials.add(horizontalBase(FLOOR_BASE + H + H_FULL, "2"));
+    detials.add(horizontalBase(FLOOR_BASE + H_LOWER,    "horizontalBS1", W_SMALL));
+    detials.add(horizontalBase(FLOOR_BASE + H_FULL,     "horizontalBS2", W_SMALL));
+    detials.add(horizontalBase(FLOOR_BASE,              "horizontalBL1", W_LARGE));
+    detials.add(horizontalBase(FLOOR_BASE + H_LOWER - H,     "horizontalBL2", W_LARGE));
 
     return detials;
   }
 
-
-
-  class TL extends TimerTask {
-
-      @Override
-      public void run() {
-          double v = pos.getX() + 0.1 * pos.getX();
-          pos.setX((float)v);
-
-          System.out.println("v = " + v);
-          
-          //createEnv(g);
-
-      }
-  }
-
-    BranchGroup g;
-    
   public void createEnv(BranchGroup objRoot) {
+    List<Detail> details = createDetails();
 
-    OrthogonalBox orthogonalBox = new OrthogonalBox(pos, new Vector3f(1f, 1f, 1f));
+    Set<DetailType> excl = new HashSet<DetailType>(EnumSet.complementOf(DetailType.CHEST_DETAILS));
 
-    if (g == null) {
-        objRoot.addChild(orthogonalBox);
+    //excl.add(DetailType.BACK_WALL);
+    //excl.add(DetailType.COMPARTMENT_DOOR);
+
+
+    //filterOut(details, excl.toArray(new DetailType[excl.size()]));
+
+    //filterOut(details, DetailType.ROOM_WALL);
+
+
+    details = new DetailsViewFilter().filter(details);
+
+    for (Detail detail : details) {
+      objRoot.addChild(detail.getBox());
     }
-      
-    g = objRoot;  
-      
-    
 
+    setColors(details);
 
-    setColors(null, orthogonalBox);
+    makeWired(details, /*DetailType.COMPARTMENT_DOOR, DetailType.ROOM_WALL,*/ DetailType.values());
 
-    orthogonalBox.rebuildWired();
-    //makeWired(details, /*DetailType.COMPARTMENT_DOOR, DetailType.ROOM_WALL,*/ DetailType.values());
-
-   Timer t = new Timer();
-      
-   t.schedule(new TL(), 1000, 1000);
-      
   }
 
   private void setColors(List<Detail> details) {
