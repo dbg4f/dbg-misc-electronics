@@ -60,6 +60,9 @@ public class NavObserver extends Applet {
 
 
         TransformGroup vpTrans = su.getViewingPlatform().getViewPlatformTransform();
+        //vpTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
+
+
         vpTrans.setTransform(new ViewPointStorage().getViewTransform());
         KeyNavigatorBehavior keyNavBeh = new KeyNavigatorBehavior(vpTrans);
 
