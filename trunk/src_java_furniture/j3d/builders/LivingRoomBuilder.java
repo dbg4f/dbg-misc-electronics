@@ -1,5 +1,6 @@
 package j3d.builders;
 
+import com.sun.org.apache.bcel.internal.generic.NEW;
 import j3d.primitives.OrthogonalBox;
 import j3d.primitives.OrthogonalPlate;
 import j3d.primitives.DetailType;
@@ -64,7 +65,10 @@ public class LivingRoomBuilder {
   };
 
 
-  private void setColors(DetailType detailType, OrthogonalBox box) {
+    private final Point3f pos = new Point3f(1f, 1f, 1f);
+
+
+    private void setColors(DetailType detailType, OrthogonalBox box) {
     //if (PLATE_COLORS.containsKey(detailType)) {
       /*
       box.setPlateColor(OrthogonalPlate.XY, PLATE_COLORS.get(detailType)[0]);
@@ -136,30 +140,46 @@ public class LivingRoomBuilder {
     return detials;
   }
 
+
+
+  class TL extends TimerTask {
+
+      @Override
+      public void run() {
+          double v = pos.getX() + 0.1 * pos.getX();
+          pos.setX((float)v);
+
+          System.out.println("v = " + v);
+          
+          //createEnv(g);
+
+      }
+  }
+
+    BranchGroup g;
+    
   public void createEnv(BranchGroup objRoot) {
-    List<Detail> details = createDetails();
 
-    Set<DetailType> excl = new HashSet<DetailType>(EnumSet.complementOf(DetailType.CHEST_DETAILS));
+    OrthogonalBox orthogonalBox = new OrthogonalBox(pos, new Vector3f(1f, 1f, 1f));
 
-    //excl.add(DetailType.BACK_WALL);
-    //excl.add(DetailType.COMPARTMENT_DOOR);
-
-
-    //filterOut(details, excl.toArray(new DetailType[excl.size()]));
-
-    //filterOut(details, DetailType.ROOM_WALL);
-
-
-    details = new DetailsViewFilter().filter(details);
-
-    for (Detail detail : details) {
-      objRoot.addChild(detail.getBox());
+    if (g == null) {
+        objRoot.addChild(orthogonalBox);
     }
+      
+    g = objRoot;  
+      
+    
 
-    setColors(details);
 
-    makeWired(details, /*DetailType.COMPARTMENT_DOOR, DetailType.ROOM_WALL,*/ DetailType.values());
+    setColors(null, orthogonalBox);
 
+    orthogonalBox.rebuildWired();
+    //makeWired(details, /*DetailType.COMPARTMENT_DOOR, DetailType.ROOM_WALL,*/ DetailType.values());
+
+   Timer t = new Timer();
+      
+   t.schedule(new TL(), 1000, 1000);
+      
   }
 
   private void setColors(List<Detail> details) {
