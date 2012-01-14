@@ -33,6 +33,12 @@ public class OrthogonalBox extends PositionedPrimitive {
     this.setAppearance(createSimpleAppearance());
   }
 
+  public OrthogonalBox cloneBox() {
+    OrthogonalBox box = new OrthogonalBox(position, dim);
+    box.duplicateNode(this, true);
+    return box;
+  }
+
   public Vector3f getDim() {
     return dim;
   }
@@ -170,4 +176,14 @@ public class OrthogonalBox extends PositionedPrimitive {
 
   }
 
+    public String toListEntry() {
+        return dim.toString();
+    }
+
+    @Override
+    public String toString() {
+        return "OrthogonalBox{" +
+                "dim=" + dim +
+                '}';
+    }
 }

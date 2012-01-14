@@ -11,19 +11,25 @@ import java.applet.Applet;
 import java.awt.*;
 import java.awt.event.KeyListener;
 import java.awt.event.KeyEvent;
-import java.util.*;
+import java.util.List;
 
 
+import j3d.builders.FilterFarme;
 import j3d.builders.LivingRoomBuilder;
 import j3d.builders.RoomBuilder;
 import j3d.builders.DetailsViewFilter;
 import j3d.primitives.Detail;
 import j3d.primitives.OrthogonalBox;
-import j3d.primitives.OrthogonalPlate;
+import j3d.samples.RedrawListener;
 
-public class NavObserver extends Applet {
+public class NavObserver extends Applet implements RedrawListener {
 
-  class SceneKeyListener implements KeyListener {
+    private List<Detail> details;
+    private BranchGroup scene;
+    private SimpleUniverse simpleU;
+    private BranchGroup branchGroup;
+
+    class SceneKeyListener implements KeyListener {
 
       final SimpleUniverse su;
       final Canvas3D canvas3d;
@@ -51,57 +57,68 @@ public class NavObserver extends Applet {
       }
     }
 
-    public BranchGroup createSceneGraph(final SimpleUniverse su) {
+    public BranchGroup createSceneGraph(final SimpleUniverse su, BranchGroup branchGroup, List<Detail> details, Transform3D viewTransform) {
 	// Create the root of the branch graph
 
-        BranchGroup objRoot = new BranchGroup();
 
-        new LivingRoomBuilder().createEnv(objRoot);
 
 
         TransformGroup vpTrans = su.getViewingPlatform().getViewPlatformTransform();
-        //vpTrans.setCapability(TransformGroup.ALLOW_TRANSFORM_WRITE);
 
-
-        vpTrans.setTransform(new ViewPointStorage().getViewTransform());
+        vpTrans.setTransform(viewTransform);
         KeyNavigatorBehavior keyNavBeh = new KeyNavigatorBehavior(vpTrans);
 
-        /*
-
-        int delay = 2000; //milliseconds
-        ActionListener taskPerformer = new ActionListener() {
-          public void actionPerformed(ActionEvent evt) {
-            Transform3D t3d = new Transform3D();
-            su.getViewingPlatform().getViewPlatformTransform().getTransform(t3d);
-            //System.out.println("T3D = " + t3d);
-            Matrix4f m = new Matrix4f();
-            t3d.get(m);
-            System.out.println("m = " + m);
-          }
-        };
-        new Timer(delay, taskPerformer).start();
-        */
 
         BoundingSphere bounds = new BoundingSphere(new Point3d(), 1000.0);
         keyNavBeh.setSchedulingBounds(bounds);
-        objRoot.addChild(keyNavBeh);
+        branchGroup.addChild(keyNavBeh);
 
         Background background = new Background(1.0f, 1.0f, 1.0f);
         background.setApplicationBounds(bounds);
-        objRoot.addChild(background);
+        branchGroup.addChild(background);
 
 
         AmbientLight light = new AmbientLight(new Color3f(0f, 1f, 0f));
         light.setInfluencingBounds(new BoundingSphere());
-        objRoot.addChild(light);
+        branchGroup.addChild(light);
 
 
-        objRoot.compile();
 
-        return objRoot;
+
+        return branchGroup;
     }
 
-  public NavObserver() {
+    private List<Detail> createDetails() {
+
+        LivingRoomBuilder builder = new LivingRoomBuilder();
+
+        List<Detail> details = builder.createDetails();
+
+
+
+        builder.setAppearance(details);
+        return details;
+    }
+
+    private void attachDetailsToGraph(BranchGroup branchGroup, List<Detail> details) {
+        for (Detail detail : details) {
+        if (detail.isVisible()) {
+            OrthogonalBox box = detail.getBox();
+            branchGroup.addChild(box.cloneBox());
+        }
+      }
+    }
+
+
+
+    public NavObserver() {
+
+        details = createDetails();
+
+        FilterFarme.launch(details, this);
+
+        //details = detailsUI;
+
         setLayout(new BorderLayout());
         GraphicsConfiguration config = SimpleUniverse.getPreferredConfiguration();
 
@@ -109,16 +126,69 @@ public class NavObserver extends Applet {
 
         add("Center", canvas3D);
 
-        SimpleUniverse simpleU = new SimpleUniverse(canvas3D);
+        simpleU = new SimpleUniverse(canvas3D);
 
         canvas3D.addKeyListener(new SceneKeyListener(simpleU, canvas3D));
 
         addKeyListener(new SceneKeyListener(simpleU, canvas3D));
 
-        BranchGroup scene = createSceneGraph(simpleU);
+
+        branchGroup = new BranchGroup();
+
+        attachDetailsToGraph(branchGroup, details);
+
+        scene = createSceneGraph(simpleU, branchGroup, details, new ViewPointStorage().getViewTransform());
+
+        scene.setCapability(BranchGroup.ALLOW_DETACH);
+        scene.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+
+        scene.compile();
 
         simpleU.addBranchGraph(scene);
-      
+
+
+        redraw();
+
+        redraw();
+
+
+    }
+
+    public void onRedraw() {
+        redraw();
+    }
+
+    private void redraw() {
+
+        Transform3D t3d = new Transform3D();
+
+        simpleU.getViewingPlatform().getViewPlatformTransform().getTransform(t3d);
+
+        scene.detach();
+
+        scene.removeChild(branchGroup);
+
+        final BranchGroup branchGroup2 = new BranchGroup();
+
+        attachDetailsToGraph(branchGroup2, details);
+
+       // Transform3D viewTransform = new ViewPointStorage().getViewTransform();
+
+
+
+        BranchGroup scene1 = createSceneGraph(simpleU, branchGroup2, details, t3d);
+
+        scene1.setCapability(BranchGroup.ALLOW_DETACH);
+        scene1.setCapability(BranchGroup.ALLOW_CHILDREN_WRITE);
+
+
+        scene1.compile();
+
+        simpleU.addBranchGraph(scene1);
+
+        scene = scene1;
+
+        //
 
     }
 
