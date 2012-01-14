@@ -13,11 +13,17 @@ public class Detail {
   final DetailType detailType;
   final String name;
 
+  boolean visible = true;
+
   public Detail(OrthogonalBox box, DetailType detailType, String name, OrthogonalPlate orientation) {
     this.box = box;
     this.detailType = detailType;
     this.name = name;
     this.orientation = orientation;
+  }
+
+  public Detail cloneDetail () {
+    return new Detail(box.cloneBox(), detailType, name, orientation);
   }
 
   public OrthogonalBox getBox() {
@@ -56,12 +62,17 @@ public class Detail {
     return name;
   }
 
-  @Override
+    public boolean isVisible() {
+        return visible;
+    }
+
+    public void setVisible(boolean visible) {
+        this.visible = visible;
+    }
+
+    @Override
   public String toString() {
-    return "Detail{" +
-           "box=" + box +
-           ", detailType=" + detailType +
-           ", name='" + name + '\'' +
-           '}';
+    return name + " " + getOrderedSizesString() + " " + detailType + " " + getOrderedSizes()[0] * getOrderedSizes()[1] / 1000000f;
+
   }
 }

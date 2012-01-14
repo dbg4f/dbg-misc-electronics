@@ -156,30 +156,22 @@ public class LivingRoomBuilder {
   public void createEnv(BranchGroup objRoot) {
     List<Detail> details = createDetails();
 
-    Set<DetailType> excl = new HashSet<DetailType>(EnumSet.complementOf(DetailType.CHEST_DETAILS));
-
-    //excl.add(DetailType.BACK_WALL);
-    //excl.add(DetailType.COMPARTMENT_DOOR);
-
-
-    //filterOut(details, excl.toArray(new DetailType[excl.size()]));
-
-    //filterOut(details, DetailType.ROOM_WALL);
-
-
-    details = new DetailsViewFilter().filter(details);
 
     for (Detail detail : details) {
       objRoot.addChild(detail.getBox());
     }
 
-    setColors(details);
-
-    makeWired(details, /*DetailType.COMPARTMENT_DOOR, DetailType.ROOM_WALL,*/ DetailType.values());
+      setAppearance(details);
 
   }
 
-  private void setColors(List<Detail> details) {
+    public void setAppearance(List<Detail> details) {
+        setColors(details);
+
+        makeWired(details, /*DetailType.COMPARTMENT_DOOR, DetailType.ROOM_WALL,*/ DetailType.values());
+    }
+
+    private void setColors(List<Detail> details) {
     for (Detail d : details) {
       setColors(d.getDetailType(), d.getBox());
     }
