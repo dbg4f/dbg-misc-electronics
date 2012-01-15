@@ -99,6 +99,11 @@ public class LivingRoomBuilder {
     return new Detail(orthogonalBox, DetailType.HORIZONTAL_BASE, name, OrthogonalPlate.XY);
   }
 
+  private Detail horizontalPlate(float floorDistance, float width, float length, float sideDist, String name) {
+    final OrthogonalBox orthogonalBox = new OrthogonalBox(new Point3f(sideDist, 0f, floorDistance), new Vector3f(length, width, H));
+    return new Detail(orthogonalBox, DetailType.HORIZONTAL_BASE, name, OrthogonalPlate.XY);
+  }
+
 
 
   private List<Detail> roomBounds(float size, Color3f wallColor, Color3f floorColor) {
@@ -129,26 +134,34 @@ public class LivingRoomBuilder {
     List<Detail> detials = new ArrayList<Detail>();
 
     detials.addAll(roomBounds(2.5f, COLOR_WALL, COLOR_FLOOR));
-
+    /*
     detials.add(verticalBaseUpper(0f,                                               H_UPPER + 2.0f * H,  FLOOR_BASE + H_LOWER - H,    "vertUB6-side",  DetailType.VERTICAL_BASE_LOWER));
     detials.add(verticalBaseUpper(L_GAP5,                                           H_UPPER,             FLOOR_BASE + H_LOWER,        "vertUB5",       DetailType.VERTICAL_BASE_LOWER));
     detials.add(verticalBaseUpper(L_GAP5 + L_GAP4,                                  H_UPPER,             FLOOR_BASE + H_LOWER,        "vertUB4",       DetailType.VERTICAL_BASE_LOWER));
     detials.add(verticalBaseUpper(L_GAP5 + L_GAP4 + L_GAP3,                         H_UPPER,             FLOOR_BASE + H_LOWER,        "vertUB3",       DetailType.VERTICAL_BASE_LOWER));
     detials.add(verticalBaseUpper(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2,                H_UPPER,             FLOOR_BASE + H_LOWER,        "vertUB2",       DetailType.VERTICAL_BASE_LOWER));
     detials.add(verticalBaseUpper(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2 + L_GAP1 - H,   H_UPPER + 2.0f * H,  FLOOR_BASE + H_LOWER - H,    "vertUB1-side",  DetailType.VERTICAL_BASE_LOWER));
+      */
 
-    detials.add(verticalBaseLower(0f,                                               H_LOWER + 2.0f * H,  0f,                    W_SMALL,  "vertLB6-side",  DetailType.VERTICAL_BASE_LOWER));
-    detials.add(verticalBaseLower(L_GAP5,                                           H_LOWER,             FLOOR_BASE + H,        W_LARGE,  "vertLB5",       DetailType.VERTICAL_BASE_LOWER));
-    detials.add(verticalBaseLower(L_GAP5 + L_GAP4,                                  H_LOWER,             FLOOR_BASE + H,        W_LARGE,  "vertLB4",       DetailType.VERTICAL_BASE_LOWER));
-    detials.add(verticalBaseLower(L_GAP5 + L_GAP4 + L_GAP3,                         H_LOWER,             FLOOR_BASE + H,        W_LARGE,  "vertLB3",       DetailType.VERTICAL_BASE_LOWER));
-    detials.add(verticalBaseLower(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2,                H_LOWER,             FLOOR_BASE + H,        W_LARGE,  "vertLB2",       DetailType.VERTICAL_BASE_LOWER));
-    detials.add(verticalBaseLower(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2 + L_GAP1 - H,   H_LOWER + 2.0f * H,  0f,                    W_SMALL,  "vertLB1-side",  DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5,                                           H_LOWER + 2.0f * H + FLOOR_BASE,    0f,                    W_LARGE,  "vertLB2",       DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5 + L_GAP4,                                  H_LOWER,                            FLOOR_BASE + H,        W_LARGE,  "vertLB3",       DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5 + L_GAP4 + L_GAP3,                         H_LOWER,                            FLOOR_BASE + H,        W_LARGE,  "vertLB4",       DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2,                H_LOWER + 2.0f * H + FLOOR_BASE,    0f,                    W_LARGE,  "vertLB5",       DetailType.VERTICAL_BASE_LOWER));
 
+    detials.add(verticalBaseLower(0f,                                               H_LOWER + 2.0f * H + FLOOR_BASE,    0f,                    W_SMALL,  "vertLB1",       DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5 - H,                                       H_LOWER + 2.0f * H + FLOOR_BASE,    0f,                    W_SMALL,  "vertLB2A",      DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2 + L_GAP1,       H_LOWER + 2.0f * H + FLOOR_BASE,    0f,                    W_SMALL,  "vertLB6",       DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2 + H,            H_LOWER + 2.0f * H + FLOOR_BASE,    0f,                    W_SMALL,  "vertLB5A",      DetailType.VERTICAL_BASE_LOWER));
 
-    detials.add(horizontalBase(FLOOR_BASE + H_LOWER,    "horizontalBS1", W_SMALL));
-    detials.add(horizontalBase(FLOOR_BASE + H_FULL,     "horizontalBS2", W_SMALL));
-    detials.add(horizontalBase(FLOOR_BASE,              "horizontalBL1", W_LARGE));
-    detials.add(horizontalBase(FLOOR_BASE + H_LOWER - H,     "horizontalBL2", W_LARGE));
+    // TODO: all lower ribs
+    // TODO: back-side plates
+    detials.add(horizontalPlate(FLOOR_BASE,                 W_LARGE, L_GAP2 + L_GAP3 + L_GAP4 - H,          L_GAP5 + H,                                     "lowerBase1A"));
+    detials.add(horizontalPlate(FLOOR_BASE,                 W_SMALL, L_GAP1 - 2.0f * H,                     L_GAP2 + L_GAP3 + L_GAP4 + L_GAP5 + 2.0f * H,   "lowerBase2A"));
+    detials.add(horizontalPlate(FLOOR_BASE,                 W_SMALL, L_GAP5 - 2.0f * H,                     H,                                              "lowerBase3A"));
+
+    detials.add(horizontalPlate(FLOOR_BASE + H + H_LOWER,   W_LARGE, L_GAP2 + L_GAP3 + L_GAP4 - H,          L_GAP5 + H,                                     "lowerBase1B"));
+    detials.add(horizontalPlate(FLOOR_BASE + H + H_LOWER,   W_SMALL, L_GAP1 - 2.0f * H,                     L_GAP2 + L_GAP3 + L_GAP4 + L_GAP5 + 2.0f * H,   "lowerBase2B"));
+    detials.add(horizontalPlate(FLOOR_BASE + H + H_LOWER,   W_SMALL, L_GAP5 - 2.0f * H,                     H,                                              "lowerBase3B"));
 
     return detials;
   }
