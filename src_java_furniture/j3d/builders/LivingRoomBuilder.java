@@ -27,7 +27,8 @@ public class LivingRoomBuilder {
   public static final float L_FULL = L_GAP1 + L_GAP2 + L_GAP3 + L_GAP4 + L_GAP5;
 
   public static final float H_LOWER = 0.55f;
-  public static final float H_UPPER = 1.44f;
+  public static final float H_UPPER_GAP = 0.16f;
+  public static final float H_UPPER = 1.44f - H_UPPER_GAP;
 
   public static final float H_FULL = H_LOWER + H_UPPER;
 
@@ -155,6 +156,7 @@ public class LivingRoomBuilder {
 
     // TODO: all lower ribs
     // TODO: back-side plates
+
     detials.add(horizontalPlate(FLOOR_BASE,                 W_LARGE, L_GAP2 + L_GAP3 + L_GAP4 - H,          L_GAP5 + H,                                     "lowerBase1A"));
     detials.add(horizontalPlate(FLOOR_BASE,                 W_SMALL, L_GAP1 - 2.0f * H,                     L_GAP2 + L_GAP3 + L_GAP4 + L_GAP5 + 2.0f * H,   "lowerBase2A"));
     detials.add(horizontalPlate(FLOOR_BASE,                 W_SMALL, L_GAP5 - 2.0f * H,                     H,                                              "lowerBase3A"));
@@ -162,6 +164,24 @@ public class LivingRoomBuilder {
     detials.add(horizontalPlate(FLOOR_BASE + H + H_LOWER,   W_LARGE, L_GAP2 + L_GAP3 + L_GAP4 - H,          L_GAP5 + H,                                     "lowerBase1B"));
     detials.add(horizontalPlate(FLOOR_BASE + H + H_LOWER,   W_SMALL, L_GAP1 - 2.0f * H,                     L_GAP2 + L_GAP3 + L_GAP4 + L_GAP5 + 2.0f * H,   "lowerBase2B"));
     detials.add(horizontalPlate(FLOOR_BASE + H + H_LOWER,   W_SMALL, L_GAP5 - 2.0f * H,                     H,                                              "lowerBase3B"));
+
+
+
+
+    detials.add(horizontalPlate(FLOOR_BASE + H + H_LOWER + H,             W_LARGE, L_GAP2 + L_GAP3 + L_GAP4 - H,          L_GAP5 + H,                                     "upperBase1A"));
+    detials.add(horizontalPlate(FLOOR_BASE + H + H_LOWER + H,             W_SMALL, L_GAP1 - 2.0f * H,                     L_GAP2 + L_GAP3 + L_GAP4 + L_GAP5 + 2.0f * H,   "upperBase2A"));
+    detials.add(horizontalPlate(FLOOR_BASE + H + H_LOWER + H,             W_SMALL, L_GAP5 - 2.0f * H,                     H,                                              "upperBase3A"));
+
+    detials.add(horizontalPlate(FLOOR_BASE + H + H_LOWER + H + H_UPPER + H_UPPER_GAP,   W_SMALL, L_GAP1 - 2.0f * H,                     L_GAP2 + L_GAP3 + L_GAP4 + L_GAP5 + 2.0f * H,   "upperBase2B"));
+    detials.add(horizontalPlate(FLOOR_BASE + H + H_LOWER + H + H_UPPER,                 W_LARGE, L_GAP2 + L_GAP3 + L_GAP4 - H,          L_GAP5 + H,                                     "upperBase3B"));
+    detials.add(horizontalPlate(FLOOR_BASE + H + H_LOWER + H + H_UPPER,                 W_SMALL, L_GAP5 - 2.0f * H,                     H,                                              "upperBase4B"));
+
+    detials.add(verticalBaseLower(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2 + L_GAP1, H_UPPER + H + H_UPPER_GAP,    FLOOR_BASE + 2.0f * H + H_LOWER, W_SMALL,  "vertUB6",  DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2 + H,      H_UPPER + H + H_UPPER_GAP,    FLOOR_BASE + 2.0f * H + H_LOWER, W_SMALL,  "vertUB7",  DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5 + L_GAP4 + L_GAP3 + L_GAP2,          H_UPPER + H,                  FLOOR_BASE + 2.0f * H + H_LOWER, W_LARGE,  "vertUB8",  DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5,                                     H_UPPER + H,                  FLOOR_BASE + 2.0f * H + H_LOWER, W_LARGE,  "vertUB9",  DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5 - H,                                 H_UPPER + H,                  FLOOR_BASE + 2.0f * H + H_LOWER, W_SMALL,  "vertUB10", DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(0f,                                         H_UPPER + H,                  FLOOR_BASE + 2.0f * H + H_LOWER, W_SMALL,  "vertUB11", DetailType.VERTICAL_BASE_LOWER));
 
     return detials;
   }
