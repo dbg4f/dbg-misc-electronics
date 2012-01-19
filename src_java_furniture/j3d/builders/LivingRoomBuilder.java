@@ -183,6 +183,10 @@ public class LivingRoomBuilder {
     detials.add(verticalBaseLower(L_GAP5 - H,                                 H_UPPER + H,                  FLOOR_BASE + 2.0f * H + H_LOWER, W_SMALL,  "vertUB10", DetailType.VERTICAL_BASE_LOWER));
     detials.add(verticalBaseLower(0f,                                         H_UPPER + H,                  FLOOR_BASE + 2.0f * H + H_LOWER, W_SMALL,  "vertUB11", DetailType.VERTICAL_BASE_LOWER));
 
+    detials.add(verticalBaseLower(L_GAP5 + L_GAP4,                            H_UPPER - H,                  FLOOR_BASE + 3.0f * H + H_LOWER, W_LARGE,  "vertU3",  DetailType.VERTICAL_BASE_LOWER));
+    detials.add(verticalBaseLower(L_GAP5 + L_GAP4 + L_GAP3,                   H_UPPER - H,                  FLOOR_BASE + 3.0f * H + H_LOWER, W_LARGE,  "vertU4",  DetailType.VERTICAL_BASE_LOWER));
+
+
     return detials;
   }
 
