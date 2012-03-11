@@ -24,7 +24,7 @@ public class PdfLauncher {
 
   public static void main(String[] args) throws IOException, DocumentException {
 
-    new PdfLauncher().createPdf("pins.pdf");
+    new PdfLauncher().createPdf(System.getProperty("outfile", "pins.pdf"));
   }
 
   public void createPdf(String filename) throws IOException, DocumentException {

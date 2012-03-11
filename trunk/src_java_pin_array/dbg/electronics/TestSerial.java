@@ -98,7 +98,7 @@ public class TestSerial {
 
         Socket socket = new Socket("127.0.0.1", 4444);
 
-        testMcConn(socket);
+        mcTestCycle2(socket);
 
         //readComparator(socket);
 
@@ -136,6 +136,14 @@ public class TestSerial {
         mc.writeReg(At2313Reg.PORTB, value ? (byte)(pb | (1<<5)) : (byte)(~(1<<5) & pb));
     }
 
+    private static void setRegBit(McConnection mc, At2313Reg reg, int bit, boolean value) throws IOException, McCommunicationException {
+
+        byte pb = mc.readReg(reg);
+
+        mc.writeReg(reg, value ? (byte)(pb | (1<<bit)) : (byte)(~(1<<bit) & pb));
+    }
+
+
     private static void setPwmFreq(McConnection mc, boolean normal) throws IOException, McCommunicationException {
 
         byte pb = mc.readReg(At2313Reg.TCCR0B);
@@ -171,7 +179,83 @@ CS 2,1,0
     }
 
 
-    private static void testMcConn(Socket socket) throws IOException, McCommunicationException, InterruptedException {
+
+    private static void mcTestCycle1(Socket socket) throws IOException, McCommunicationException, InterruptedException {
+
+
+        McConnection mc = new McConnection(socket);
+
+        mc.send(McCommand.ECHO, (byte)0x23);
+
+        mc.send(McCommand.SET_FINAL_PWM1, (byte)0x00);
+
+
+        setRegBit(mc, At2313Reg.DDRD, 6, true);
+
+        for (;;) {
+
+            mc.send(McCommand.SET_PWM0, (byte)0x7F);
+            Thread.sleep(1000);
+            mc.send(McCommand.SET_PWM0, (byte)0x00);
+            Thread.sleep(1000);
+            mc.send(McCommand.SET_PWM0, (byte)0xFF);
+            Thread.sleep(1000);
+            setRegBit(mc, At2313Reg.PORTD, 6, true);
+            Thread.sleep(1000);
+            setRegBit(mc, At2313Reg.PORTD, 6, false);
+            Thread.sleep(1000);
+
+        }
+
+    }
+
+    private static void mcTestCycle2(Socket socket) throws IOException, McCommunicationException, InterruptedException {
+
+
+        McConnection mc = new McConnection(socket);
+
+        mc.send(McCommand.ECHO, (byte)0x23);
+
+        setRegBit(mc, At2313Reg.DDRB, 6, true);
+        setRegBit(mc, At2313Reg.DDRB, 7, true);
+
+        for (;;) {
+
+
+            mc.send(McCommand.SET_PWM1, (byte)0x7F);
+            Thread.sleep(1000);
+            mc.send(McCommand.SET_PWM1, (byte)0x00);
+            Thread.sleep(1000);
+            mc.send(McCommand.SET_PWM1, (byte)0xFF);
+            Thread.sleep(1000);
+            /*
+
+
+            for (int i=100; i<200; i+=1) {
+                mc.send(McCommand.SET_PWM1, (byte)i);
+                System.out.println("i=" + i);
+                Thread.sleep(400);
+            }
+
+            System.out.println("Fin");
+
+            Thread.sleep(2000);
+             */
+
+            setRegBit(mc, At2313Reg.PORTB, 6, true);
+            Thread.sleep(1000);
+            setRegBit(mc, At2313Reg.PORTB, 6, false);
+            Thread.sleep(1000);
+            setRegBit(mc, At2313Reg.PORTB, 7, true);
+            Thread.sleep(3000);
+            setRegBit(mc, At2313Reg.PORTB, 7, false);
+            Thread.sleep(1000);
+
+        }
+
+    }
+
+    private static void testMcConn2(Socket socket) throws IOException, McCommunicationException, InterruptedException {
         McConnection mc = new McConnection(socket);
 
         byte resp;
