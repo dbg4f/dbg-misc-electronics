@@ -95,7 +95,7 @@ public class GraphicTool extends JPanel implements ActionListener, Printable {
 
         for(int i=0; i<c.height; i++) {
 
-          g.setColor(i%2 == 0 ? Color.GRAY : Color.BLACK);
+          //g.setColor(i%2 == 0 ? Color.GRAY : Color.BLACK);
 
           int yy = starty + c.hoffset + i * c.step                          ;
           g.drawLine(startx, yy, startx + w, yy);
