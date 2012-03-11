@@ -222,19 +222,22 @@ CS 2,1,0
         for (;;) {
 
 
+            //mc.send(McCommand.SET_PWM1, (byte)0xFF);
+            //mc.send(McCommand.SET_PWM0, (byte)0xFF);
+            Thread.sleep(1000);
             mc.send(McCommand.SET_PWM1, (byte)0x7F);
+            mc.send(McCommand.SET_PWM0, (byte)0x7F);
             Thread.sleep(1000);
-            mc.send(McCommand.SET_PWM1, (byte)0x00);
+            //mc.send(McCommand.SET_PWM1, (byte)0x00);
+            //mc.send(McCommand.SET_PWM0, (byte)0x00);
             Thread.sleep(1000);
-            mc.send(McCommand.SET_PWM1, (byte)0xFF);
-            Thread.sleep(1000);
+
+
             /*
-
-
             for (int i=100; i<200; i+=1) {
                 mc.send(McCommand.SET_PWM1, (byte)i);
                 System.out.println("i=" + i);
-                Thread.sleep(400);
+                Thread.sleep(100);
             }
 
             System.out.println("Fin");
@@ -242,13 +245,15 @@ CS 2,1,0
             Thread.sleep(2000);
              */
 
-            setRegBit(mc, At2313Reg.PORTB, 6, true);
+
+
+            //setRegBit(mc, At2313Reg.PORTB, 6, true);
             Thread.sleep(1000);
             setRegBit(mc, At2313Reg.PORTB, 6, false);
             Thread.sleep(1000);
-            setRegBit(mc, At2313Reg.PORTB, 7, true);
-            Thread.sleep(3000);
-            setRegBit(mc, At2313Reg.PORTB, 7, false);
+            //setRegBit(mc, At2313Reg.PORTB, 7, true);
+            Thread.sleep(1000);
+            //setRegBit(mc, At2313Reg.PORTB, 7, false);
             Thread.sleep(1000);
 
         }
