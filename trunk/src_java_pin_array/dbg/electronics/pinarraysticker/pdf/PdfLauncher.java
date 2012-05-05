@@ -11,6 +11,7 @@ import java.io.FileOutputStream;
 import java.awt.*;
 
 import dbg.electronics.pinarraysticker.GraphicTool;
+import dbg.electronics.pinarraysticker.GrayCode;
 
 /**
  * Created by IntelliJ IDEA.
@@ -37,12 +38,25 @@ public class PdfLauncher {
       // step 4
       PdfContentByte canvas = writer.getDirectContent();
       Graphics2D g2 = canvas.createGraphics(650, 650);
-      GraphicTool gt = new GraphicTool();
-      gt.paintComponent(g2);
+
+      //drawPinArrays(g2);
+
+      drawGrayCode(g2);
+
       g2.dispose();
       // step 5
       document.close();
   }
+
+    private void drawPinArrays(Graphics2D g2) {
+        GraphicTool gt = new GraphicTool();
+        gt.paintComponent(g2);
+    }
+
+    private void drawGrayCode(Graphics2D g2) {
+        GrayCode gt = new GrayCode();
+        gt.paintComponent(g2);
+    }
 
 
 }
