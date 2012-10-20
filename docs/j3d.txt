@@ -1,0 +1,7 @@
+  creating: lib/
+   creating: lib/ext/
+  inflating: lib/ext/vecmath.jar
+  inflating: lib/ext/j3dcore.jar
+  inflating: lib/ext/j3dutils.jar
+   creating: lib/amd64/
+  inflating: lib/amd64/libj3dcore-ogl.so
