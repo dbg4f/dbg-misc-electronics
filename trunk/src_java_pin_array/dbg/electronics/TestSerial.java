@@ -112,7 +112,11 @@ public class TestSerial {
 
         Socket socket = new Socket("127.0.0.1", 4444);
 
-        //mcTestCycle1(socket);
+        mcTestCycle1(socket);
+
+        if (true) {
+            return;
+        }
 
         //readComparator(socket);
 
@@ -150,7 +154,7 @@ public class TestSerial {
         mc.writeReg(At2313Reg.PORTB, value ? (byte)(pb | (1<<5)) : (byte)(~(1<<5) & pb));
     }
 
-    private static void setRegBit(McConnection mc, At2313Reg reg, int bit, boolean value) throws IOException, McCommunicationException {
+    public static void setRegBit(McConnection mc, At2313Reg reg, int bit, boolean value) throws IOException, McCommunicationException {
 
         byte pb = mc.readReg(reg);
 
@@ -200,27 +204,68 @@ CS 2,1,0
         McConnection mc = new McConnection(socket);
 
         mc.send(McCommand.ECHO, (byte)0x23);
+        mc.send(McCommand.ECHO, (byte)0x23);
+        mc.send(McCommand.ECHO, (byte)0x23);
 
-        mc.send(McCommand.SET_FINAL_PWM1, (byte)0x00);
 
 
-        boolean dir = true;
+        setRegBit(mc, At2313Reg.DDRB, 4, true);
+        setRegBit(mc, At2313Reg.DDRD, 4, true);
 
-        setRegBit(mc, At2313Reg.DDRD, 6, true);
 
-        for (;;) {
+        setRegBit(mc, At2313Reg.PORTB, 4, true);
 
-            mc.send(McCommand.SET_PWM0, (byte)0x30);
-            Thread.sleep(1000);
-            mc.send(McCommand.SET_PWM0, (byte)0xFF);
-            Thread.sleep(1000);
+        Thread.sleep(1000);
+
+        setRegBit(mc, At2313Reg.PORTD, 4, true);
+
+
+        if (true) {
+
+         //   return;
+        }
+
+
+        mc.send(McCommand.SET_PWM0, (byte)0x80);
+        Thread.sleep(1000);
+        mc.send(McCommand.SET_PWM0, (byte)0x00);
+        Thread.sleep(1000);
+        mc.send(McCommand.SET_PWM0, (byte)0xFE);
+        //mc.send(McCommand.SET_PWM0, (byte)0xFF);
+        Thread.sleep(1000);
+        mc.send(McCommand.SET_PWM0, (byte)0x00);
+
+
+        mc.send(McCommand.SET_PWM1, (byte)0xD0);
+        Thread.sleep(5000);
+        mc.send(McCommand.SET_PWM1, (byte)0x00);
+        Thread.sleep(1000);
+        mc.send(McCommand.SET_PWM1, (byte)0xF0);
+        Thread.sleep(1000);
+        mc.send(McCommand.SET_PWM1, (byte)0x00);
+
+        mc.send(McCommand.ECHO, (byte)0x23);
+
+        //mc.send(McCommand.SET_FINAL_PWM1, (byte)0x00);
+
+
+        //boolean dir = true;
+
+        //setRegBit(mc, At2313Reg.DDRD, 6, true);
+
+        //for (;;) {
+
+        //    mc.send(McCommand.SET_PWM0, (byte)0x30);
+        //    Thread.sleep(1000);
+        //    mc.send(McCommand.SET_PWM0, (byte)0xFF);
+        //    Thread.sleep(1000);
             //mc.send(McCommand.SET_PWM0, (byte)0xFF);
             //Thread.sleep(1000);
-            setRegBit(mc, At2313Reg.PORTD, 6, dir);
+        //    setRegBit(mc, At2313Reg.PORTD, 6, dir);
 
-            dir = !dir;
+        //    dir = !dir;
 
-        }
+        //}
 
     }
 
