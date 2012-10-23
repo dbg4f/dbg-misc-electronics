@@ -213,16 +213,22 @@ CS 2,1,0
         setRegBit(mc, At2313Reg.DDRD, 4, true);
 
 
-        setRegBit(mc, At2313Reg.PORTB, 4, true);
+        setRegBit(mc, At2313Reg.PORTD, 4, true);
 
         Thread.sleep(1000);
 
-        setRegBit(mc, At2313Reg.PORTD, 4, true);
+        setRegBit(mc, At2313Reg.PORTD, 4, false);
+
+        Thread.sleep(1000);
+
+        setRegBit(mc, At2313Reg.PORTD, 4, false);
+
+        Thread.sleep(1000);
 
 
         if (true) {
 
-         //   return;
+            return;
         }
 
 
