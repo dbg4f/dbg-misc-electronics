@@ -24,6 +24,7 @@ class MouseMotionEventDemo extends JPanel implements MouseMotionListener, MouseW
     JLabel wheelValueLabel;
     int wheelValue = 0;
     McConnection mc;
+    boolean dir = false;
     static final String NEWLINE = System.getProperty("line.separator");
 
     public static void main(String[] args) {
@@ -107,6 +108,27 @@ class MouseMotionEventDemo extends JPanel implements MouseMotionListener, MouseW
 
         mc = new McConnection(new Socket("localhost", 4444));
 
+        try {
+            TestSerial.setRegBit(mc, At2313Reg.DDRB, 4, true);
+            TestSerial.setRegBit(mc, At2313Reg.DDRD, 4, true);
+
+
+            mc.readReg(At2313Reg.TCCR0B);
+
+            //TestSerial.setRegBit(mc, At2313Reg.TCCR0B, 1, true);
+            //TestSerial.setRegBit(mc, At2313Reg.TCCR0B, 0, false);
+
+            mc.readReg(At2313Reg.TCCR0B);
+
+            mc.writeReg(At2313Reg.TCCR0B, (byte)0x02);
+
+
+
+        } catch (McCommunicationException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
+
+
     }
 
     void eventOutput(String eventDescription, MouseEvent e) {
@@ -182,8 +204,19 @@ class MouseMotionEventDemo extends JPanel implements MouseMotionListener, MouseW
     private void toggleTurn(boolean right, boolean toggle)  {
         command("turn " + right + " " + toggle);
 
+
+
         try {
-            TestSerial.setRegBit(mc, right ? At2313Reg.PORTD : At2313Reg.PORTB, 4, toggle);
+
+            if (dir != right) {
+                TestSerial.setRegBit(mc, At2313Reg.PORTB, 4, right);
+                dir = right;
+            }
+
+
+
+
+
 
             mc.send(McCommand.SET_PWM0, toggle ? (byte)0xE0 : (byte)0x00);
 
