@@ -1,7 +1,7 @@
 package j3d.samples;
 
 //These are the fairly standard imports that we will be using
-//for many of the examples in the book. The “core” Java 3D code
+//for many of the examples in the book. The ?core? Java 3D code
 //resides in the javax.media.j3d package.
 import java.applet.Applet;
 import java.awt.*;
@@ -46,7 +46,7 @@ public class SwingTest extends JPanel implements ActionListener
  /*
   * SwingTest rotates the objects in the scene using a
   * RotationInterpolator behavior that will automatically modify
-  * the rotation components of a 4 × 4 transformation matrix.
+  * the rotation components of a 4 ? 4 transformation matrix.
   * Objects that are attached to the transformation matrix object
   * (TransformGroup) will therefore be automatically rotated.
   */
@@ -138,7 +138,7 @@ public class SwingTest extends JPanel implements ActionListener
    * We create a BranchGroup that is the top of the view branch.
    * Underneath it we create a series of TransformGroup, and then
    * finally we attach the ViewPlatform to the lowest TransformGroup.
-   * The TransformGroups (which contain a 4 × 4 transformation matrix)
+   * The TransformGroups (which contain a 4 ? 4 transformation matrix)
    * allow the ViewPlatform to be rotate, scaled, and translated within
    * the scene.
    */
@@ -277,7 +277,7 @@ protected Bounds createApplicationBounds()
  /*
   * Here we have hard-coded the initial size of the Canvas3D.
   * However, because we have used a BorderLayout layout algorithm,
-  * this will be automatically resized to fit—-as the parent JFrame
+  * this will be automatically resized to fit?-as the parent JFrame
   * is resized.
   */
   c3d.setSize( 500, 500 );
@@ -294,7 +294,7 @@ protected Bounds createApplicationBounds()
 
  /*
   * Get a TransformGroup array for the View side of the scenegraph.
-  * We create a single TransformGroup (which wraps a 4 × 4 transformation
+  * We create a single TransformGroup (which wraps a 4 ? 4 transformation
   * matrix) and modify the transformation matrix to apply a scale to
   * the view of the scene, as well as move the ViewPlatform back
   * by 20 meters so that we can see the origin (0,0,0). The objects
@@ -456,7 +456,7 @@ protected Bounds createApplicationBounds()
  }
 
  //Create the scene side of the scenegraph. This method does
- //all the work of creating the scene branch—containing graphical
+ //all the work of creating the scene branch?containing graphical
  //objects, lights, and rotation behaviors to rotate the objects.
  protected BranchGroup createSceneBranchGroup()
  {
@@ -478,7 +478,7 @@ protected Bounds createApplicationBounds()
   BoundingSphere bounds = new BoundingSphere(
                            new Point3d(0.0,0.0,0.0), 100.0);
 
-  //Create a 4 × 4 transformation matrix
+  //Create a 4 ? 4 transformation matrix
   Transform3D yAxis = new Transform3D();
 
   /*
@@ -547,7 +547,7 @@ protected Bounds createApplicationBounds()
 
  /*
   * Wire the scenegraph together. It is useful to do this
-  * in the reverse order that the branches were created—
+  * in the reverse order that the branches were created?
   * rather like closing parentheses, that way you will not forget
   * to add a child branch to its parent. If you forget to add a branch
   * that you have created and populated then it will just not
@@ -567,7 +567,7 @@ protected Bounds createApplicationBounds()
   * on all Nodes in the scenegraph to allow you to associate
   * your own data with particular scenegraph elements. The Cube
   * must wrapped in a BranchGroup as only BranchGroups can be
-  * added and removed from the scenegraph at runtime—
+  * added and removed from the scenegraph at runtime?
   * not Shape3Ds themselves which describe the geometry.
   */
  protected BranchGroup createCube()
@@ -616,7 +616,7 @@ protected Bounds createApplicationBounds()
  }
 
  //Remove a BranchGroup from the scene based on the User Data.
- //This allows us to dynamically remove the “Cube” or “Sphere”
+ //This allows us to dynamically remove the ?Cube? or ?Sphere?
  //BranchGroups at runtime.
  protected void removeShape( String name )
  {
@@ -637,7 +637,7 @@ protected Bounds createApplicationBounds()
     //Get the User Data for the ScenegraphObject
     Object userData = sgObject.getUserData();
 
-    //Compare the current ScenegraphObject’s User Data with
+    //Compare the current ScenegraphObject?s User Data with
     //what we are looking for, if they match then we can remove
     //the BranchGroup.
     if ( userData instanceof String &&
@@ -784,7 +784,7 @@ private JMenuItem createMenuItem( String menuText,
  {
   /*
    * Tell Swing that we need Popup Menus to be heavyweight. The Java 3D
-   * window is a heavyweight window – that is, the window is a native
+   * window is a heavyweight window ? that is, the window is a native
    * window, and therefore any windows that must overlap it must also be
    * native. Our menu items will be dropped down in front of the
    * Java 3D Canvas3D so they must be created as heavyweight windows.
