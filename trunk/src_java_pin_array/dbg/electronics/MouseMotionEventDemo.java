@@ -106,7 +106,7 @@ class MouseMotionEventDemo extends JPanel implements MouseMotionListener, MouseW
         setPreferredSize(new Dimension(450, 450));
         setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
 
-        mc = new McConnection(new Socket("localhost", 4444));
+        mc = new McConnection(new Socket("192.168.1.1", 4444));
 
         try {
             TestSerial.setRegBit(mc, At2313Reg.DDRB, 4, true);
@@ -209,7 +209,7 @@ class MouseMotionEventDemo extends JPanel implements MouseMotionListener, MouseW
         try {
 
             if (dir != right) {
-                TestSerial.setRegBit(mc, At2313Reg.PORTB, 4, right);
+                TestSerial.setRegBit(mc, At2313Reg.PORTD, 4, right);
                 dir = right;
             }
 
@@ -218,7 +218,7 @@ class MouseMotionEventDemo extends JPanel implements MouseMotionListener, MouseW
 
 
 
-            mc.send(McCommand.SET_PWM0, toggle ? (byte)0xE0 : (byte)0x00);
+            mc.send(McCommand.SET_PWM1, toggle ? (byte)0xE0 : (byte)0x00);
 
 
 
@@ -255,7 +255,7 @@ class MouseMotionEventDemo extends JPanel implements MouseMotionListener, MouseW
 
     private void applyPwmValue() {
         try {
-            mc.send(McCommand.SET_PWM1, (byte)wheelValue);
+            mc.send(McCommand.SET_PWM0, (byte)wheelValue);
         } catch (IOException e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
         } catch (McCommunicationException e) {

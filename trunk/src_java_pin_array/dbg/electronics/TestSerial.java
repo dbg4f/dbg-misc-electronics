@@ -110,7 +110,7 @@ public class TestSerial {
 
         final TestSerial serial = new TestSerial();
 
-        Socket socket = new Socket("127.0.0.1", 4444);
+        Socket socket = new Socket("192.168.1.1", 4444);
 
         mcTestCycle1(socket);
 
@@ -228,7 +228,7 @@ CS 2,1,0
 
         if (true) {
 
-            return;
+            //return;
         }
 
 
@@ -243,7 +243,7 @@ CS 2,1,0
 
 
         mc.send(McCommand.SET_PWM1, (byte)0xD0);
-        Thread.sleep(5000);
+        Thread.sleep(3000);
         mc.send(McCommand.SET_PWM1, (byte)0x00);
         Thread.sleep(1000);
         mc.send(McCommand.SET_PWM1, (byte)0xF0);
