@@ -59,8 +59,8 @@ MCU = atmega16
 #/* Select Boot Size in Words (select one, comment out the others) */
 ## NO! BOOTSIZE=128
 ## NO! BOOTSIZE=256
-   BOOTSIZE=512
-## BOOTSIZE=1024
+##   BOOTSIZE=512
+ BOOTSIZE=1024
 ## BOOTSIZE=2048
 
 # /* Select if bootloader should include the inverrupt-vectors 

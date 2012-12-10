@@ -37,9 +37,9 @@
 
 /* Частота контроллера (кварца) */
 #ifndef F_CPU
-// #define F_CPU 7372800
+ #define F_CPU 7372800
 //#define F_CPU (7372800/2)
-#define F_CPU 8000000
+//#define F_CPU 8000000
 #endif
 
 /* UART Скорость UART оптимально 19200 */
