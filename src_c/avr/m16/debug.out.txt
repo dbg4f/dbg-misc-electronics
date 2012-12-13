@@ -1,0 +1,188 @@
+
+avrdude: Version 5.10, compiled on Jun 23 2011 at 23:15:41
+         Copyright (c) 2000-2005 Brian Dean, http://www.bdmicro.com/
+         Copyright (c) 2007-2009 Joerg Wunsch
+
+         System wide configuration file is "/etc/avrdude.conf"
+         User configuration file is "/home/dmitri/.avrduderc"
+         User configuration file does not exist or is not a regular file, skipping
+
+         Using Port                    : /dev/ttyUSB0
+         Using Programmer              : avr109
+         avr910_devcode (avrdude.conf) : 0x74
+         Setting bit clk period        : 19200.0
+         AVR Part                      : ATMEGA16
+         Chip Erase delay              : 9000 us
+         PAGEL                         : PD7
+         BS2                           : PA0
+         RESET disposition             : dedicated
+         RETRY pulse                   : SCK
+         serial program mode           : yes
+         parallel program mode         : yes
+         Timeout                       : 200
+         StabDelay                     : 100
+         CmdexeDelay                   : 25
+         SyncLoops                     : 32
+         ByteDelay                     : 0
+         PollIndex                     : 3
+         PollValue                     : 0x53
+         Memory Detail                 :
+
+                                  Block Poll               Page                       Polled
+           Memory Type Mode Delay Size  Indx Paged  Size   Size #Pages MinW  MaxW   ReadBack
+           ----------- ---- ----- ----- ---- ------ ------ ---- ------ ----- ----- ---------
+           eeprom         4    10   128    0 no        512    4      0  9000  9000 0xff 0xff
+                                  Block Poll               Page                       Polled
+           Memory Type Mode Delay Size  Indx Paged  Size   Size #Pages MinW  MaxW   ReadBack
+           ----------- ---- ----- ----- ---- ------ ------ ---- ------ ----- ----- ---------
+           flash         33     6   128    0 yes     16384  128    128  4500  4500 0xff 0xff
+                                  Block Poll               Page                       Polled
+           Memory Type Mode Delay Size  Indx Paged  Size   Size #Pages MinW  MaxW   ReadBack
+           ----------- ---- ----- ----- ---- ------ ------ ---- ------ ----- ----- ---------
+           lock           0     0     0    0 no          1    0      0  9000  9000 0x00 0x00
+                                  Block Poll               Page                       Polled
+           Memory Type Mode Delay Size  Indx Paged  Size   Size #Pages MinW  MaxW   ReadBack
+           ----------- ---- ----- ----- ---- ------ ------ ---- ------ ----- ----- ---------
+           lfuse          0     0     0    0 no          1    0      0  9000  9000 0x00 0x00
+                                  Block Poll               Page                       Polled
+           Memory Type Mode Delay Size  Indx Paged  Size   Size #Pages MinW  MaxW   ReadBack
+           ----------- ---- ----- ----- ---- ------ ------ ---- ------ ----- ----- ---------
+           hfuse          0     0     0    0 no          1    0      0  9000  9000 0x00 0x00
+                                  Block Poll               Page                       Polled
+           Memory Type Mode Delay Size  Indx Paged  Size   Size #Pages MinW  MaxW   ReadBack
+           ----------- ---- ----- ----- ---- ------ ------ ---- ------ ----- ----- ---------
+           signature      0     0     0    0 no          3    0      0     0     0 0x00 0x00
+                                  Block Poll               Page                       Polled
+           Memory Type Mode Delay Size  Indx Paged  Size   Size #Pages MinW  MaxW   ReadBack
+           ----------- ---- ----- ----- ---- ------ ------ ---- ------ ----- ----- ---------
+           calibration    0     0     0    0 no          4    0      0     0     0 0x00 0x00
+
+         Programmer Type : avr910
+         Description     : Atmel AppNote AVR109 Boot Loader
+
+Connecting to programmer: .avrdude: Send: . [1b] 
+avrdude: Send: S [53] 
+avrdude: Recv: A [41] 
+
+avrdude: Recv: V [56] R [52] B [42] O [4f] O [4f] T [54] 
+avrdude: Send: V [56] 
+avrdude: Recv: 0 [30] 8 [38] 
+avrdude: Send: v [76] 
+avrdude: Recv: ? [3f] 
+avrdude: Send: p [70] 
+avrdude: Recv: S [53] 
+Found programmer: Id = "AVRBOOT"; type = S
+    Software Version = 0.8; No Hardware Version given.
+avrdude: Send: a [61] 
+avrdude: Recv: Y [59] 
+Programmer supports auto addr increment.
+avrdude: Send: b [62] 
+avrdude: Recv: Y [59] 
+avrdude: Recv: . [00] 
+avrdude: Recv: . [80] 
+Programmer supports buffered memory access with buffersize=128 bytes.
+avrdude: Send: t [74] 
+
+Programmer supports the following devices:
+avrdude: Recv: t [74] 
+    Device code: 0x74
+avrdude: Recv: . [00] 
+
+avrdude: Send: T [54] t [74] 
+avrdude: Recv: . [0d] 
+avrdude: devcode selected: 0x74
+avrdude: Send: P [50] 
+avrdude: Recv: . [0d] 
+avrdude: AVR device initialized and ready to accept instructions
+
+Reading | avrdude: Send: s [73] 
+avrdude: Recv: . [03] . [94] . [1e] 
+################################################## | 100% 0.00s
+
+avrdude: Device signature = 0x1e9403
+avrdude: Send: F [46] 
+avrdude: Recv: ? [3f] 
+avrdude: safemode read 1, lfuse value: 3f
+avrdude: Send: F [46] 
+avrdude: Recv: ? [3f] 
+avrdude: safemode read 2, lfuse value: 3f
+avrdude: Send: F [46] 
+avrdude: Recv: ? [3f] 
+avrdude: safemode read 3, lfuse value: 3f
+avrdude: safemode: Fuse reading not support by programmer.
+              Safemode disabled.
+avrdude: NOTE: FLASH memory has been specified, an erase cycle will be performed
+         To disable this feature, specify the -D option.
+avrdude: Send: A [41] . [01] . [fc] 
+avrdude: Recv: . [0d] 
+avrdude: Send: g [67] . [00] . [01] E [45] 
+avrdude: Recv: . [ff] 
+avrdude: Send: A [41] . [01] . [fd] 
+avrdude: Recv: . [0d] 
+avrdude: Send: g [67] . [00] . [01] E [45] 
+avrdude: Recv: . [ff] 
+avrdude: Send: A [41] . [01] . [fe] 
+avrdude: Recv: . [0d] 
+avrdude: Send: g [67] . [00] . [01] E [45] 
+avrdude: Recv: . [ff] 
+avrdude: Send: A [41] . [01] . [ff] 
+avrdude: Recv: . [0d] 
+avrdude: Send: g [67] . [00] . [01] E [45] 
+avrdude: Recv: . [ff] 
+avrdude: erasing chip
+avrdude: Send: e [65] 
+avrdude: Recv: . [0d] 
+avrdude: reading input file "mdrv.hex"
+avrdude: input file mdrv.hex auto detected as Intel Hex
+avrdude: writing flash (702 bytes):
+
+Writing | avrdude: Send: A [41] . [00] . [00] 
+avrdude: Recv: . [0d] 
+avrdude: Send: B [42] . [00] . [80] F [46] . [0c] . [94] * [2a] . [00] . [0c] . [94] > [3e] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [0c] . [94] < [3c] . [00] . [11] $ [24] . [1f] . [be] . [cf] . [e5] . [d4] . [e0] . [de] . [bf] . [cd] . [bf] . [10] . [e0] . [a0] . [e6] . [b0] . [e0] . [01] . [c0] . [1d] . [92] . [a4] 6 [36] . [b1] . [07] . [e1] . [f7] . [0e] . [94] . [ff] . [00] . [0c] . [94] ] [5d] . [01] . [0c] . [94] . [00] . [00] . [1f] . [92] . [0f] . [92] 
+avrdude: Recv: . [0d] 
+#########avrdude: Send: B [42] . [00] . [80] F [46] . [0f] . [b6] . [0f] . [92] . [11] $ [24] . [8f] . [93] . [9f] . [93] . [80] . [91] ` [60] . [00] . [8f] _ [5f] . [80] . [93] ` [60] . [00] . [90] . [91] a [61] . [00] . [99] # [23] 1 [31] . [f0] . [90] . [91] c [63] . [00] . [89] . [17] . [10] . [f0] . [10] . [92] a [61] . [00] . [9f] . [91] . [8f] . [91] . [0f] . [90] . [0f] . [be] . [0f] . [90] . [1f] . [90] . [18] . [95] . [91] . [e0] . [90] . [93] a [61] . [00] . [80] . [93] c [63] . [00] . [10] . [92] ` [60] . [00] . [08] . [95] . [10] . [92] a [61] . [00] . [08] . [95] . [10] . [92] a [61] . [00] . [10] . [92] c [63] . [00] . [10] . [92] ` [60] . [00] . [85] . [b7] . [81] ` [60] . [85] . [bf] . [08] . [95] . [08] . [95] . [87] . [b3] . [84] f [66] . [87] . [bb] . [8d] . [9a] . [08] . [95] . [08] . [95] . [89] . [b9] . [88] . [e1] . [8a] . [b9] . [86] . [e0] . [80] . [bd] . [08] . [95] _ [5f] . [9b] . [fe] . [cf] . [8c] . [b1] 
+avrdude: Recv: . [0d] 
+#########avrdude: Send: B [42] . [00] . [80] F [46] . [08] . [95] ] [5d] . [9b] . [fe] . [cf] . [8c] . [b9] . [08] . [95] h [68] ' [27] ( [28] . [e0] g [67] . [ff] . [09] . [c0] . [86] / [2f] . [90] . [e0] . [88] . [0f] . [99] . [1f] 5 [35] . [ee] . [83] ' [27] . [90] . [95] h [68] / [2f] . [01] . [c0] f [66] . [0f] ! [21] P [50] . [91] . [f7] . [86] / [2f] . [08] . [95] . [1f] . [93] . [cf] . [93] . [df] . [93] . [1f] . [92] . [cd] . [b7] . [de] . [b7] . [18] / [2f] . [86] / [2f] i [69] . [83] . [0e] . [94] . [81] . [00] i [69] . [81] . [81] / [2f] . [0f] . [90] . [df] . [91] . [cf] . [91] . [1f] . [91] . [0c] . [94] . [85] . [00] . [cf] . [93] . [df] . [93] . [d8] / [2f] . [c6] / [2f] e [65] . [e5] . [8f] . [ef] . [0e] . [94] . [97] . [00] b [62] . [e0] . [0e] . [94] . [97] . [00] m [6d] / [2f] . [0e] . [94] . [97] . [00] l [6c] / [2f] . [0e] . [94] . [97] . [00] h [68] / [2f] . [df] . [91] . [cf] . [91] . [0c] . [94] . [97] . [00] 
+avrdude: Recv: . [0d] 
+#########avrdude: Send: B [42] . [00] . [80] F [46] . [8c] . [ed] . [0c] . [94] . [aa] . [00] ` [60] . [e0] . [8c] . [ea] . [0c] . [94] . [aa] . [00] . [98] / [2f] . [86] / [2f] . [91] 0 [30] . [09] . [f4] 1 [31] . [c0] . [94] 0 [30] . [11] . [f4] . [84] . [e1] - [2d] . [c0] . [95] 0 [30] . [09] . [f4] . [04] . [c0] . [90] 1 [31] ! [21] . [f4] ` [60] . [91] ` [60] . [00] . [85] . [e1] $ [24] . [c0] . [91] 1 [31] ) [29] . [f4] . [0e] . [94] [ [5b] . [00] ` [60] . [91] ` [60] . [00] . [0c] . [c0] . [92] 1 [31] 1 [31] . [f4] . [10] . [92] a [61] . [00] ` [60] . [91] ` [60] . [00] . [82] . [e1] . [15] . [c0] . [93] 1 [31] ! [21] . [f4] ` [60] . [91] a [61] . [00] . [81] . [e1] . [0f] . [c0] . [94] 1 [31] . [11] . [f4] . [0c] . [94] . [c3] . [00] . [95] 1 [31] . [19] . [f4] d [64] / [2f] . [8c] . [ed] . [06] . [c0] . [96] 1 [31] . [19] . [f4] ` [60] . [93] b [62] . [00] . [08] . [95] . [8e] . [ee] . [0c] . [94] . [aa] . [00] . [cf] . [93] 
+avrdude: Recv: . [0d] 
+#########avrdude: Send: B [42] . [00] . [80] F [46] . [df] . [93] . [1f] . [92] . [cd] . [b7] . [de] . [b7] . [87] . [e1] . [0e] . [94] w [77] . [00] . [0e] . [94] q [71] . [00] . [0e] . [94] f [66] . [00] x [78] . [94] c [63] . [e3] . [85] . [e5] . [0e] . [94] . [aa] . [00] e [65] . [e5] . [8a] . [ea] . [0e] . [94] . [aa] . [00] . [0e] . [94] } [7d] . [00] . [18] / [2f] h [68] / [2f] . [8f] . [ef] . [0e] . [94] . [85] . [00] . [08] / [2f] . [15] 5 [35] . [c9] . [f5] . [0e] . [94] } [7d] . [00] . [18] / [2f] h [68] / [2f] . [80] / [2f] . [0e] . [94] . [85] . [00] . [e8] . [2e] . [11] # [23] . [91] . [f1] . [0e] . [94] } [7d] . [00] . [d8] . [2e] h [68] / [2f] . [8e] - [2d] . [0e] . [94] . [85] . [00] . [e8] . [2e] . [12] 0 [30] H [48] . [f1] . [0e] . [94] } [7d] . [00] . [08] / [2f] h [68] / [2f] . [8e] - [2d] . [0e] . [94] . [85] . [00] . [e8] . [2e] . [12] 0 [30] Y [59] . [f0] . [0e] . [94] } [7d] . [00] . [f8] . [2e] h [68] / [2f] 
+avrdude: Recv: . [0d] 
+#########avrdude: Send: B [42] . [00] > [3e] F [46] . [8e] - [2d] . [0e] . [94] . [85] . [00] . [e8] . [2e] . [10] / [2f] O [4f] - [2d] . [02] . [c0] . [10] / [2f] @ [40] . [e0] I [49] . [83] . [0e] . [94] } [7d] . [00] I [49] . [81] . [8e] . [11] . [05] . [c0] a [61] / [2f] . [8d] - [2d] . [0e] . [94] . [c7] . [00] . [c0] . [cf] n [6e] - [2d] . [83] . [e0] . [bb] . [cf] a [61] / [2f] . [85] . [e5] . [b8] . [cf] . [d1] , [2c] . [10] . [e0] . [eb] . [cf] . [f8] . [94] . [ff] . [cf] 
+avrdude: Recv: . [0d] 
+##### | 100% 0.41s
+
+avrdude: 702 bytes of flash written
+avrdude: verifying flash memory against mdrv.hex:
+avrdude: load data flash data from input file mdrv.hex:
+avrdude: input file mdrv.hex auto detected as Intel Hex
+avrdude: input file mdrv.hex contains 702 bytes
+avrdude: reading on-chip flash data:
+
+Reading | avrdude: Send: A [41] . [00] . [00] 
+avrdude: Recv: . [0d] 
+avrdude: Send: g [67] . [00] . [80] F [46] 
+avrdude: Recv: . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] 
+#########avrdude: Send: g [67] . [00] . [80] F [46] 
+avrdude: Recv: . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] 
+#########avrdude: Send: g [67] . [00] . [80] F [46] 
+avrdude: Recv: . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] 
+#########avrdude: Send: g [67] . [00] . [80] F [46] 
+avrdude: Recv: . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] 
+#########avrdude: Send: g [67] . [00] . [80] F [46] 
+avrdude: Recv: . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] 
+#########avrdude: Send: g [67] . [00] > [3e] F [46] 
+avrdude: Recv: . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] . [ff] 
+##### | 100% 0.40s
+
+avrdude: verifying ...
+avrdude: verification error, first mismatch at byte 0x0000
+         0x0c != 0xff
+avrdude: verification error; content mismatch
+avrdude: Send: L [4c] 
+avrdude: Recv: . [0d] 
+avrdude: Send: E [45] 
+avrdude: Recv: . [0d] 
+
+avrdude done.  Thank you.
+

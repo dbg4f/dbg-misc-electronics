@@ -57,8 +57,8 @@
    Для AVRProg выбирать BOOT 
    Это корректное значение для bootloader.
    avrdude может определить только part-code для ISP */
-#define DEVTYPE     DEVTYPE_BOOT
-// #define DEVTYPE     DEVTYPE_ISP
+//#define DEVTYPE     DEVTYPE_BOOT
+#define DEVTYPE     DEVTYPE_ISP
 
 /*
  * Выбор порта для кнопки входа в загрузчик
