@@ -31,8 +31,14 @@
 #define CMD_L1_ECHO 		0x01
 #define CMD_L1_READ_REG 	0x14
 #define CMD_L1_WRITE_REG 	0x15
+#define CMD_L1_READ_ADC0 	0x16
 
 #define RESP_UNKNOWN_CMD	0xEE
+
+
+static uint8_t adc0_valueL;
+static uint8_t adc0_valueH;
+static uint8_t adc0_updated;
 
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -82,6 +88,17 @@ static void send_resp2(uint8_t byte1, uint8_t byte2)
 	crc = send_with_crc(crc, byte1);
 	crc = send_with_crc(crc, byte2);
 	crc = send_with_crc(crc, crc);
+}// -----------------------------------------------------------------------------------------------------------------
+
+static void send_resp3(uint8_t byte1, uint8_t byte2, uint8_t byte3)
+{
+	uint8_t crc = 0xFF;
+	crc = send_with_crc(crc, 0x55);
+	crc = send_with_crc(crc, 0x02);
+	crc = send_with_crc(crc, byte1);
+	crc = send_with_crc(crc, byte2);
+	crc = send_with_crc(crc, byte3);
+	crc = send_with_crc(crc, crc);
 }
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -94,8 +111,20 @@ static void serial_init(void)
 
 	UART_CTRL = UART_CTRL_DATA;
 	UART_CTRL2 = UART_CTRL2_DATA;
-	
+
 }
+
+// -----------------------------------------------------------------------------------------------------------------
+
+static void read_adc0(void)
+{
+
+    send_resp3(adc0_valueH, adc0_valueL, adc0_updated);
+
+    adc0_updated = 0;
+
+}
+
 
 #define CASE_RD(REG_NAME, REG_SEL) case REG_SEL: res=REG_NAME ; break;
 
@@ -108,7 +137,7 @@ void read_reg(uint8_t reg)
 
 	switch (reg)
 	{
-	
+
 	CASE_RD(TWBR    ,0x00)
 	CASE_RD(TWSR    ,0x01)
 	CASE_RD(TWAR    ,0x02)
@@ -172,7 +201,7 @@ void read_reg(uint8_t reg)
 	CASE_RD(GIFR    ,0x3A)
 	CASE_RD(GICR    ,0x3B)
 	CASE_RD(OCR0    ,0x3C)
-			
+
 	default : found = 0;
 	}
 
@@ -198,7 +227,7 @@ void write_reg(uint8_t reg, uint8_t value)
 
 	switch (reg)
 	{
-		
+
 	CASE_WR(TWBR    ,0x00)
 	CASE_WR(TWSR    ,0x01)
 	CASE_WR(TWAR    ,0x02)
@@ -262,7 +291,7 @@ void write_reg(uint8_t reg, uint8_t value)
 	CASE_WR(GIFR    ,0x3A)
 	CASE_WR(GICR    ,0x3B)
 	CASE_WR(OCR0    ,0x3C)
-				
+
 	default : found = 0;
 	}
 
@@ -283,19 +312,24 @@ void write_reg(uint8_t reg, uint8_t value)
 void exec_ext_command(uint8_t cmd, uint8_t param, uint8_t param2)
 {
 
-	switch (cmd) 
+	switch (cmd)
 	{
-		case CMD_L1_ECHO: 
+		case CMD_L1_ECHO:
 			send_resp2(param, param);
 			break;
-			
+
 		case CMD_L1_READ_REG:
 			read_reg(param);
 			break;
-		
+
 		case CMD_L1_WRITE_REG:
 			write_reg(param, param2);
-			
+			break;
+
+		case CMD_L1_READ_ADC0:
+			read_adc0();
+			break;
+
 		default:
 			send_resp2(RESP_UNKNOWN_CMD, param);
 	}
@@ -312,7 +346,7 @@ void exec_ext_command(uint8_t cmd, uint8_t param, uint8_t param2)
 	else if (cmd == CMD_L1_WRITE_REG)
 	{
 		write_reg(param, param2);
-	}	
+	}
 	else
 	{
 		// unknown command
@@ -322,13 +356,62 @@ void exec_ext_command(uint8_t cmd, uint8_t param, uint8_t param2)
 
 }
 
+// -----------------------------------------------------------------------------------------------------------------
+ISR(INT0_vect)
+{
+
+
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+
+ISR(INT1_vect)
+{
+
+
+}
+// -----------------------------------------------------------------------------------------------------------------
+
+ISR(INT2_vect)
+{
+
+
+}
+// -----------------------------------------------------------------------------------------------------------------
+
+ISR(ADC_vect)
+{
+    adc0_valueL = ADCL;
+    adc0_valueH = ADCH;
+
+    if (adc0_updated < 255) {
+        adc0_updated++;
+    }
+
+
+}
+
+
+static void adc_init(void)
+{
+
+    // enable ADC, int, start, sequential, div/8
+    ADCSRA = (1<<ADEN)|(1<<ADIE)|(1<<ADSC)|(1<<ADATE)|(3<<ADPS0);
+
+    //REFS -- 0b[01]000101 use AVCC ref
+	//ADLAR --0b01[0]00101 right alignment
+	//MUX -- 0b010[00000]  Channel 0.
+    ADMUX = 0b01000101;
+
+}
+
 
 
 // -----------------------------------------------------------------------------------------------------------------
 
 int main(void)
 {
-		
+
 	uint8_t crc;
 	uint8_t value;
 
@@ -336,14 +419,16 @@ int main(void)
 	uint8_t command = 0;
 	uint8_t parameter = 0;
 	uint8_t parameter2 = 0;
-	uint8_t ext_crc;	
-	
+	uint8_t ext_crc;
+
 	serial_init();
-		
+
+    adc_init();
+
 	send_resp2(0x55, 0x33);
 
 	send_resp2(0xAA, 0x55);
-	
+
 	for (;;)
 	{
 		crc 	= 0xFF;
@@ -415,8 +500,8 @@ int main(void)
 		}
 
 	}
-	
-	
-	
+
+
+
 }
 
