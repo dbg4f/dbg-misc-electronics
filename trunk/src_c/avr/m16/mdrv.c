@@ -35,6 +35,7 @@
 #define CMD_L1_ENABLE_ADC 	0x17
 
 #define RESP_UNKNOWN_CMD	0xEE
+#define RESP_OK	            0xAA
 
 
 static uint8_t adc0_valueL;
@@ -95,7 +96,7 @@ static void send_resp3(uint8_t byte1, uint8_t byte2, uint8_t byte3)
 {
 	uint8_t crc = 0xFF;
 	crc = send_with_crc(crc, 0x55);
-	crc = send_with_crc(crc, 0x02);
+	crc = send_with_crc(crc, 0x03);
 	crc = send_with_crc(crc, byte1);
 	crc = send_with_crc(crc, byte2);
 	crc = send_with_crc(crc, byte3);
@@ -218,6 +219,7 @@ void read_reg(uint8_t reg)
 	CASE_RD(GIFR    ,0x3A)
 	CASE_RD(GICR    ,0x3B)
 	CASE_RD(OCR0    ,0x3C)
+	CASE_RD(SREG    ,0x3F)
 
 	default : found = 0;
 	}
@@ -308,6 +310,7 @@ void write_reg(uint8_t reg, uint8_t value)
 	CASE_WR(GIFR    ,0x3A)
 	CASE_WR(GICR    ,0x3B)
 	CASE_WR(OCR0    ,0x3C)
+	CASE_WR(SREG    ,0x3F)
 
 	default : found = 0;
 	}
@@ -349,6 +352,7 @@ void exec_ext_command(uint8_t cmd, uint8_t param, uint8_t param2)
 
 		case CMD_L1_ENABLE_ADC:
 			adc_init();
+			send_resp2(RESP_OK, 0x00);
 			break;
 
 		default:
