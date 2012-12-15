@@ -8,8 +8,6 @@ package dbg.electronics;
  * To change this template use File | Settings | File Templates.
  */
 public enum McCommandType {
-    MIRROR_CMD,
     DEFINED_RESPONSE,
-    MIRROR_PARAM,
     NO_RESPONSE
 }
