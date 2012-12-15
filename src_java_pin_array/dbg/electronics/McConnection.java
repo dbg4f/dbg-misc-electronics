@@ -157,6 +157,14 @@ public class McConnection {
         send(McCommand.WRITE_REG, reg.getCode(), value);
     }
 
+    public byte readReg(AtMega16Reg reg) throws IOException, McCommunicationException {
+        return send(McCommand.CMD_L1_READ_REG, reg.getCode());
+    }
+
+    public void writeReg(AtMega16Reg reg, byte value) throws IOException, McCommunicationException {
+        send(McCommand.CMD_L1_WRITE_REG, reg.getCode(), value);
+    }
+
     private byte crc_calc(byte marker, byte len, byte... content) {
         byte crc = (byte) 0xFF;
 

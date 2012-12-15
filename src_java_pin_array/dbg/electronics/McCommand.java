@@ -11,25 +11,26 @@ import static dbg.electronics.McCommandType.*;
  */
 public enum McCommand {
 
-    ECHO(0x01, MIRROR_PARAM),
-    SET_PWM0(0x04, 0x14),
-    SET_PWM1(0x05, 0x15),
-    GET_INT_COUNTER(0x10, 0x15),
+    ECHO(0x01),
+    SET_PWM0(0x04),
+    SET_PWM1(0x05),
+    GET_INT_COUNTER(0x10),
     SCHEDULE_PWM1(0x11),
     CANCEL_SCHEDULE_PWM1(0x12),
     SET_FINAL_PWM1(0x16, NO_RESPONSE),
-    READ_REG(0x14, 0xDD),
-    WRITE_REG(0x15, 0xDA);
+    READ_REG(0x14),
+    WRITE_REG(0x15),
+
+    CMD_L1_ECHO 		(0x01),
+    CMD_L1_READ_REG 	(0x14),
+    CMD_L1_WRITE_REG 	(0x15),
+    CMD_L1_READ_ADC0 	(0x16),
+    CMD_L1_ENABLE_ADC 	(0x17);
+
 
     private McCommand(int code) {
         this.code = (byte)code;
-        this.commandType = McCommandType.MIRROR_CMD;
-    }
-
-    private McCommand(int code, int confirmOkCode) {
-        this.code = (byte)code;
         this.commandType = McCommandType.DEFINED_RESPONSE;
-        this.confirmOkCode = (byte)confirmOkCode;
     }
 
     private McCommand(int code, McCommandType commandType) {
@@ -38,15 +39,10 @@ public enum McCommand {
     }
 
     private byte code;
-    private byte confirmOkCode = -1;
     private McCommandType commandType;
 
     public byte getCode() {
         return code;
-    }
-
-    public byte getConfirmOkCode() {
-        return confirmOkCode;
     }
 
     public McCommandType getCommandType() {
