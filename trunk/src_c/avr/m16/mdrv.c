@@ -32,6 +32,7 @@
 #define CMD_L1_READ_REG 	0x14
 #define CMD_L1_WRITE_REG 	0x15
 #define CMD_L1_READ_ADC0 	0x16
+#define CMD_L1_ENABLE_ADC 	0x17
 
 #define RESP_UNKNOWN_CMD	0xEE
 
@@ -113,6 +114,22 @@ static void serial_init(void)
 	UART_CTRL2 = UART_CTRL2_DATA;
 
 }
+
+// -----------------------------------------------------------------------------------------------------------------
+
+static void adc_init(void)
+{
+
+    // enable ADC, int, start, sequential, div/8
+    ADCSRA = (1<<ADEN)|(1<<ADIE)|(1<<ADSC)|(1<<ADATE)|(3<<ADPS0);
+
+    //REFS -- 0b[01]000101 use AVCC ref
+	//ADLAR --0b01[0]00101 right alignment
+	//MUX -- 0b010[00000]  Channel 0.
+    ADMUX = 0b01000101;
+
+}
+
 
 // -----------------------------------------------------------------------------------------------------------------
 
@@ -330,6 +347,10 @@ void exec_ext_command(uint8_t cmd, uint8_t param, uint8_t param2)
 			read_adc0();
 			break;
 
+		case CMD_L1_ENABLE_ADC:
+			adc_init();
+			break;
+
 		default:
 			send_resp2(RESP_UNKNOWN_CMD, param);
 	}
@@ -392,18 +413,6 @@ ISR(ADC_vect)
 }
 
 
-static void adc_init(void)
-{
-
-    // enable ADC, int, start, sequential, div/8
-    ADCSRA = (1<<ADEN)|(1<<ADIE)|(1<<ADSC)|(1<<ADATE)|(3<<ADPS0);
-
-    //REFS -- 0b[01]000101 use AVCC ref
-	//ADLAR --0b01[0]00101 right alignment
-	//MUX -- 0b010[00000]  Channel 0.
-    ADMUX = 0b01000101;
-
-}
 
 
 
@@ -422,8 +431,6 @@ int main(void)
 	uint8_t ext_crc;
 
 	serial_init();
-
-    adc_init();
 
 	send_resp2(0x55, 0x33);
 
