@@ -24,18 +24,23 @@ public class TestM16 {
         mc.send(McCommand.CMD_L1_ENABLE_ADC);
 
 
-        mc.readReg(AtMega16Reg.ADCSRA);
-        mc.readReg(AtMega16Reg.ADCH);
-        mc.readReg(AtMega16Reg.ADCL);
+        //mc.readReg(AtMega16Reg.ADCSRA);
+        //mc.readReg(AtMega16Reg.ADCH);
+        //mc.readReg(AtMega16Reg.ADCL);
         mc.readReg(AtMega16Reg.ADMUX);
 
         setRegBit(mc, AtMega16Reg.SREG, 7, true);
 
-        for (int i=0; i<50; i++) {
+        setRegBit(mc, AtMega16Reg.DDRD, 7, true);
+        setRegBit(mc, AtMega16Reg.PORTD, 7, true);
+
+
+
+        for (int i=0; 1<2; i++) {
             mc.send(McCommand.CMD_L1_READ_ADC0);
-            mc.readReg(AtMega16Reg.ADCH);
-            mc.readReg(AtMega16Reg.ADCL);
-            mc.readReg(AtMega16Reg.ADCSRA);
+            //mc.readReg(AtMega16Reg.ADCH);
+            //mc.readReg(AtMega16Reg.ADCL);
+            //mc.readReg(AtMega16Reg.ADCSRA);
         }
 
     }
