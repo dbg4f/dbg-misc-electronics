@@ -1,5 +1,6 @@
-package dbg.electronics.robodrv;
+package dbg.electronics.robodrv.hid;
 
+import dbg.electronics.robodrv.*;
 import dbg.electronics.robodrv.logging.LoggerFactory;
 import dbg.electronics.robodrv.logging.SimpleLogger;
 
@@ -15,6 +16,10 @@ public class HidEventListener implements Threaded {
     private final InputListener inputListener;
     private final FailuresListener failuresListener;
 
+    private FileInputStream inputStream;
+    private Thread listeningThread;
+
+
     public HidEventListener(String eventFileName, InputListener inputListener, FailuresListener failuresListener) {
         this.eventFileName = eventFileName;
         this.inputListener = inputListener;
@@ -24,28 +29,58 @@ public class HidEventListener implements Threaded {
     @Override
     public void launch() {
 
-        new Thread(new Runnable() {
+        listeningThread = new Thread(new Runnable() {
             @Override
             public void run() {
 
                 try {
                     readEvents();
                 } catch (IOException e) {
+
+                   closeResourcesQuietly();
+
                     failuresListener.onFailure(new Failure("HID input listening failed", e));
                 }
 
             }
-        }).start();
+        });
 
+        listeningThread.start();
+
+    }
+
+    @Override
+    public void terminate() {
+
+        if (listeningThread != null) {
+
+            listeningThread.interrupt();
+
+        }
+
+    }
+
+    private void closeResourcesQuietly(){
+        if (inputStream != null) {
+            try {
+                inputStream.close();
+            } catch (IOException e) {
+                // result is not meaningful
+            }
+        }
     }
 
     private void readEvents() throws IOException {
 
-        FileInputStream fileIs = new FileInputStream(eventFileName);
+        inputStream = new FileInputStream(eventFileName);
 
-        BufferedInputStream rd = new BufferedInputStream(fileIs);
+        BufferedInputStream rd = new BufferedInputStream(inputStream);
+
+        log.info("HID listener started");
 
         while (!Thread.currentThread().isInterrupted()) {
+
+
 
             int buf[] = new int[16];
 
@@ -69,7 +104,9 @@ public class HidEventListener implements Threaded {
 
         }
 
+        closeResourcesQuietly();
 
+        log.info("HID listener stopped");
 
 
 

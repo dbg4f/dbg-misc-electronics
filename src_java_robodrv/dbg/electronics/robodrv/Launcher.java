@@ -11,7 +11,7 @@ public class Launcher {
 
     public static void main(String[] args) {
 
-        new Orchestrator().start();
+        Orchestrator.getInstance().start();
 
     }
 

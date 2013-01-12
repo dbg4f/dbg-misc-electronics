@@ -10,7 +10,11 @@ package dbg.electronics.robodrv.logging;
 public class LoggerFactory {
 
     public static SimpleLogger getLogger() {
-        return new SimpleConsoleLogger();
+        return new SimpleConsoleLogger("");
+    }
+
+    public static SimpleLogger getLogger(String name) {
+        return new SimpleConsoleLogger(name);
     }
 
 }
