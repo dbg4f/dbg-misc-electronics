@@ -1,63 +1,72 @@
-package dbg.electronics.dashboard;
+package dbg.electronics.robodrv;
 
-import javax.swing.*;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
+import java.awt.image.BufferStrategy;
 
-/**
- * @author Dmitri Bogdel
- */
-public class Dashboard extends Panel implements ChangeListener {
+public class MultiBufferFullScreen implements InputListener {
 
-    private DashboardPainter painter;
 
-    private void init() {
+    private DashboardPainter dashboardPainter;
 
-        painter = new DashboardPainter();
+    private Frame mainFrame;
 
-        setLayout(new BorderLayout());
+    public MultiBufferFullScreen() {
 
-        JPanel p = new JPanel();
-        //p.add(new JLabel("Temperature:"));
-        add(p);
-        p.add("Center", painter);
+        GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
 
-        UIManager.put("swing.boldMetal", Boolean.FALSE);
+        GraphicsDevice device = env.getDefaultScreenDevice();
 
-        createFrame();
+        init(device);
 
     }
 
-    private void createFrame() {
-        JFrame f = new JFrame("Dashboard");
-        f.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        f.add("Center", this);
-        f.pack();
-        f.setVisible(true);
-    }
+    public void init(GraphicsDevice device) {
+        try {
 
-    public void stateChanged(ChangeEvent e) {
+            dashboardPainter = new DashboardPainter();
 
-        if (e.getSource() != null && e.getSource() instanceof Integer) {
+            new ValueSource().launch(this);
 
-            painter.valuePercent = (Integer) e.getSource();
+            GraphicsConfiguration gc = device.getDefaultConfiguration();
+            mainFrame = new Frame(gc);
+            mainFrame.setUndecorated(true);
+            mainFrame.setIgnoreRepaint(true);
+            device.setFullScreenWindow(mainFrame);
+            Rectangle bounds = mainFrame.getBounds();
+            mainFrame.createBufferStrategy(2);
+            BufferStrategy bufferStrategy = mainFrame.getBufferStrategy();
 
-            repaint();
+            while(!Thread.currentThread().isInterrupted()) {
+                Graphics g = bufferStrategy.getDrawGraphics();
+                if (!bufferStrategy.contentsLost()) {
 
+                    g.setColor(Color.BLACK);
+                    g.fillRect(0, 0, bounds.width, bounds.height);
+
+                    dashboardPainter.paint(g);
+
+                    bufferStrategy.show();
+                    g.dispose();
+                }
+                try {
+                    Thread.sleep(100);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            device.setFullScreenWindow(null);
         }
-
     }
 
-    public static void main(String[] args) {
-
-        System.setProperty("sun.java2d.opengl", "true");
-
-        Dashboard d = new Dashboard();
-        d.init();
-        new ValueSource().launch(d);
+    @Override
+    public void onEvent(InputEvent event) {
+        dashboardPainter.valuePercent = event.getValue();
     }
 
     class DashboardPainter extends Component {
@@ -83,7 +92,7 @@ public class Dashboard extends Panel implements ChangeListener {
             //g.fillRect(0, 0, getWidth(), getHeight());
 
 
-            g2.setColor(Color.DARK_GRAY);
+            g2.setColor(Color.WHITE);
             Stroke stoke = g2.getStroke();
             g2.setStroke(new BasicStroke(10));
 
@@ -130,7 +139,7 @@ public class Dashboard extends Panel implements ChangeListener {
 
     static class ValueSource {
 
-        void launch(final ChangeListener changeListener) {
+        void launch(final InputListener inputListener) {
 
             new Thread(new Runnable() {
                 public void run() {
@@ -138,7 +147,7 @@ public class Dashboard extends Panel implements ChangeListener {
                     while (!Thread.currentThread().isInterrupted()) {
 
                         for (int i = 0; i < 100; i++) {
-                            changeListener.stateChanged(new ChangeEvent(i));
+                            inputListener.onEvent(new InputEvent(i));
                             try {
                                 Thread.sleep(100);
                             } catch (InterruptedException e) {
@@ -146,7 +155,7 @@ public class Dashboard extends Panel implements ChangeListener {
                             }
                         }
                         for (int i = 100; i > 0; i--) {
-                            changeListener.stateChanged(new ChangeEvent(i));
+                            inputListener.onEvent(new InputEvent(i));
                             try {
                                 Thread.sleep(100);
                             } catch (InterruptedException e) {
@@ -166,5 +175,5 @@ public class Dashboard extends Panel implements ChangeListener {
     }
 
 
-}
 
+}
