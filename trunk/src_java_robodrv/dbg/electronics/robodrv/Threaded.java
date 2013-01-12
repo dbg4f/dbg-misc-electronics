@@ -11,4 +11,6 @@ public interface Threaded {
 
     void launch();
 
+    void terminate();
+
 }
