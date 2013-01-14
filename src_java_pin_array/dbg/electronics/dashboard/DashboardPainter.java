@@ -1,15 +1,14 @@
-package dbg.electronics.robodrv.graphics;
+package dbg.electronics.dashboard;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
-import java.util.Map;
 
 /**
 * Created with IntelliJ IDEA.
 * User: dmitri
-* Date: 1/12/13
-* Time: 9:47 PM
+* Date: 1/14/13
+* Time: 9:39 PM
 * To change this template use File | Settings | File Templates.
 */
 class DashboardPainter extends Component {
@@ -17,7 +16,7 @@ class DashboardPainter extends Component {
     public static final int WIDTH = 450;
     public static final int HEIGHT = 325;
 
-    DashboardData dashboardData = new DashboardData();
+    public int valuePercent;
 
     public Dimension getPreferredSize() {
         return new Dimension(WIDTH, HEIGHT);
@@ -31,40 +30,17 @@ class DashboardPainter extends Component {
 
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
+
         drawCircleIndicator(g2);
-
-        drawHidControls(g2);
-
-
-    }
-
-    private void drawHidControls(Graphics2D g2) {
-
-        Font font = new Font("Courier New", Font.BOLD, 20);
-        g2.setFont(font);
-
-
-        int x = 100;
-        int y = 400;
-
-        for (Map.Entry<String, String> entry : dashboardData.getJsIndicators().entrySet()) {
-
-            g2.drawString(entry.getKey() + "   " + entry.getValue(), x, y);
-
-            y+=25;
-
-        }
-
 
     }
 
     private void drawCircleIndicator(Graphics2D g2) {
-
         //g2.setColor(Color.BLACK);
         //g2.fillRect(0, 0, getWidth(), getHeight());
 
 
-        g2.setColor(Color.WHITE);
+        g2.setColor(Color.DARK_GRAY);
         Stroke stoke = g2.getStroke();
         g2.setStroke(new BasicStroke(10));
 
@@ -75,7 +51,8 @@ class DashboardPainter extends Component {
         g2.setStroke(stoke);
 
 
-        int valuePercent = dashboardData.getTestValuePercent();
+        //g2.drawString("123", 100, 100);
+
 
         int angle = startAngle + arcAngle - arcAngle * valuePercent / 100;
 

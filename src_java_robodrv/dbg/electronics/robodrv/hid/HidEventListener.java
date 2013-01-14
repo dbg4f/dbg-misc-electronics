@@ -60,7 +60,7 @@ public class HidEventListener implements Threaded {
 
     }
 
-    private void closeResourcesQuietly(){
+    private void closeResourcesQuietly() {
         if (inputStream != null) {
             try {
                 inputStream.close();
@@ -80,35 +80,27 @@ public class HidEventListener implements Threaded {
 
         while (!Thread.currentThread().isInterrupted()) {
 
+            int buf[] = new int[24];
 
-
-            int buf[] = new int[16];
-
-            for (int i=0; i<16; i++) {
+            for (int i=0; i<24; i++) {
 
                 buf[i] = rd.read();
 
-                //System.out.print(String.format("%02X ", buf[i] & 0xFF));
-
             }
 
+            HidInputReport report = new HidInputReport(buf);
 
-            if (buf[8] == 0x03 && buf[10] == 0x01) {
+            inputListener.onEvent(new InputEvent(report.formatType() + "-" + report.formatCode(), report.formatValue()));
 
-                int jsRaw = buf[12];
-
-                inputListener.onEvent(new InputEvent(jsRaw));
-
+            if (report.getType() == 0x03 && report.getCode() == 0x01) {
+                inputListener.onEvent(new InputEvent((int)report.getValue()));
             }
-
 
         }
 
         closeResourcesQuietly();
 
         log.info("HID listener stopped");
-
-
 
     }
 
