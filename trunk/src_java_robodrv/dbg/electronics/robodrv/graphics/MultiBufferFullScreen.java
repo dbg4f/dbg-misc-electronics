@@ -1,19 +1,20 @@
 package dbg.electronics.robodrv.graphics;
 
-import dbg.electronics.robodrv.InputEvent;
-import dbg.electronics.robodrv.InputListener;
-import dbg.electronics.robodrv.Orchestrator;
+import dbg.electronics.robodrv.*;
 
 import java.awt.*;
 import java.awt.image.BufferStrategy;
+import java.io.IOException;
 
-public class MultiBufferFullScreen implements InputListener {
+public class MultiBufferFullScreen implements InputListener, Threaded {
 
     private DashboardPainter dashboardPainter;
 
     private Frame mainFrame;
 
     private GraphicsDevice device;
+
+    private Thread listeningThread;
 
     public MultiBufferFullScreen() {
 
@@ -22,6 +23,37 @@ public class MultiBufferFullScreen implements InputListener {
         device = env.getDefaultScreenDevice();
 
         //start();
+
+    }
+
+    @Override
+    public void launch() {
+
+        listeningThread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+
+                try {
+                    start();
+                } catch (Exception e) {
+                    Orchestrator.getInstance().onFailure(new Failure("Dashboard failure", e));
+                }
+
+            }
+        });
+
+        listeningThread.start();
+
+    }
+
+    @Override
+    public void terminate() {
+
+        if (listeningThread != null) {
+
+            listeningThread.interrupt();
+
+        }
 
     }
 
@@ -59,9 +91,9 @@ public class MultiBufferFullScreen implements InputListener {
                     g.dispose();
                 }
                 try {
-                    Thread.sleep(100);
+                    Thread.sleep(10);
                 } catch (InterruptedException e) {
-                    e.printStackTrace();
+                    break;
                 }
 
             }
@@ -74,7 +106,13 @@ public class MultiBufferFullScreen implements InputListener {
 
     @Override
     public void onEvent(InputEvent event) {
-        dashboardPainter.valuePercent = event.getValue();
+        if (event.getContent() == InputEvent.Content.TEST_INT_VALUE) {
+            dashboardPainter.dashboardData.setTestValuePercent(event.getValue());
+        }
+        else if (event.getContent() == InputEvent.Content.HID_CONTROL_VALUE) {
+            dashboardPainter.dashboardData.updateJs(event.getHidKey(), event.getHidValue());
+        }
+
     }
 
 

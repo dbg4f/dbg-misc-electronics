@@ -42,7 +42,7 @@ public class Orchestrator implements FailuresListener, InputListener{
 
       hidEventListener.launch();
 
-      screen.start();
+      screen.launch();
 
 
     }
@@ -55,18 +55,23 @@ public class Orchestrator implements FailuresListener, InputListener{
 
     @Override
     public void onEvent(InputEvent event) {
+
         log.info(String.valueOf(event));
 
-        if (event.getValue() == -999) {
+        if (event.getContent() == InputEvent.Content.TEST_INT_VALUE && event.getValue() == -999) {
 
             hidEventListener.terminate();
 
-            Thread.currentThread().interrupt();
+            screen.terminate();
+
+            log.info("Termination initiated");
+
+            System.exit(0);
 
         }
         else {
 
-            screen.onEvent(new InputEvent(event.getValue()/3));
+            screen.onEvent(event);
         }
 
     }
