@@ -1,8 +1,8 @@
 package dbg.electronics.robodrv.graphics;
 
+import dbg.electronics.robodrv.graphics.widgets.ClockLikeIndicator;
+
 import java.awt.*;
-import java.awt.font.FontRenderContext;
-import java.awt.geom.Rectangle2D;
 import java.util.Map;
 
 /**
@@ -31,7 +31,16 @@ class DashboardPainter extends Component {
 
         g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
 
-        drawCircleIndicator(g2);
+        ClockLikeIndicator indicator = new ClockLikeIndicator();
+
+        indicator.setValuePercent(dashboardData.getTestValuePercent());
+        indicator.setX(200);
+        indicator.setY(300);
+        indicator.setDimension(100);
+
+        //drawCircleIndicator(g2);
+
+        indicator.onDraw(g2);
 
         drawHidControls(g2);
 
@@ -57,50 +66,5 @@ class DashboardPainter extends Component {
 
 
     }
-
-    private void drawCircleIndicator(Graphics2D g2) {
-
-        //g2.setColor(Color.BLACK);
-        //g2.fillRect(0, 0, getWidth(), getHeight());
-
-
-        g2.setColor(Color.WHITE);
-        Stroke stoke = g2.getStroke();
-        g2.setStroke(new BasicStroke(10));
-
-        int startAngle = -30;
-        int arcAngle = 180 + 60;
-
-        g2.drawArc(100, 100, 200, 200, startAngle, arcAngle);
-        g2.setStroke(stoke);
-
-
-        int valuePercent = dashboardData.getTestValuePercent();
-
-        int angle = startAngle + arcAngle - arcAngle * valuePercent / 100;
-
-        double angleRad = ((double)angle / 180.0) * Math.PI;
-        Color color = g2.getColor();
-        g2.setColor(Color.MAGENTA);
-        double arrowX = 100 * Math.cos(angleRad);
-        double arrowY = 100 * Math.sin(angleRad);
-
-        g2.drawLine(200, 200, 200 + (int) arrowX, 200 - (int) arrowY);
-        g2.drawLine(200, 200, 200 - (int) (20 * Math.cos(angleRad)), 200 + (int) (20 * Math.sin(angleRad)));
-        g2.setColor(color);
-
-        String text = String.valueOf(valuePercent);
-
-        //System.out.println("angle = " + angle + " " + angleRad + " x=" + arrowX + " y=" + arrowY);
-
-        Font font = new Font("Courier New", Font.BOLD, 36);
-        g2.setFont(font);
-
-        FontRenderContext frc = g2.getFontRenderContext();
-        Rectangle2D boundsText = font.getStringBounds(text, frc);
-
-        g2.drawString(text, 200 - (int) boundsText.getWidth() / 2, 280);
-    }
-
 
 }

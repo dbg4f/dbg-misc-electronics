@@ -4,13 +4,6 @@ import java.awt.*;
 import java.awt.font.FontRenderContext;
 import java.awt.geom.Rectangle2D;
 
-/**
-* Created with IntelliJ IDEA.
-* User: dmitri
-* Date: 1/14/13
-* Time: 9:39 PM
-* To change this template use File | Settings | File Templates.
-*/
 class DashboardPainter extends Component {
 
     public static final int WIDTH = 450;
