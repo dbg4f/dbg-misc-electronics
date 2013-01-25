@@ -5,13 +5,6 @@ import dbg.electronics.robodrv.hid.HidEventListener;
 import dbg.electronics.robodrv.logging.LoggerFactory;
 import dbg.electronics.robodrv.logging.SimpleLogger;
 
-/**
- * Created with IntelliJ IDEA.
- * User: dmitri
- * Date: 1/12/13
- * Time: 1:56 PM
- * To change this template use File | Settings | File Templates.
- */
 public class Orchestrator implements FailuresListener, InputListener{
 
     private static final SimpleLogger log = LoggerFactory.getLogger();
@@ -23,6 +16,10 @@ public class Orchestrator implements FailuresListener, InputListener{
     private static Orchestrator instance;
 
     private Orchestrator() {
+    }
+
+    public void setHidEventListener(HidEventListener hidEventListener) {
+        this.hidEventListener = hidEventListener;
     }
 
     public static synchronized Orchestrator getInstance() {
@@ -38,7 +35,7 @@ public class Orchestrator implements FailuresListener, InputListener{
 
       screen = new MultiBufferFullScreen();
 
-      hidEventListener = new HidEventListener("/dev/input/event14", this, this);
+      //hidEventListener = new HidEventListener("/dev/input/event14", this, this);
 
       hidEventListener.launch();
 

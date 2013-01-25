@@ -37,7 +37,7 @@ public class SimpleConsoleLogger implements SimpleLogger {
         message("ERROR", text, throwable);
     }
 
-    private void message(String level, String text, Throwable throwable) {
+    protected void message(String level, String text, Throwable throwable) {
 
         long ts = System.currentTimeMillis() - startTs;
 
