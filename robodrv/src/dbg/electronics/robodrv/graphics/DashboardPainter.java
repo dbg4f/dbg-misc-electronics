@@ -5,13 +5,7 @@ import dbg.electronics.robodrv.graphics.widgets.ClockLikeIndicator;
 import java.awt.*;
 import java.util.Map;
 
-/**
-* Created with IntelliJ IDEA.
-* User: dmitri
-* Date: 1/12/13
-* Time: 9:47 PM
-* To change this template use File | Settings | File Templates.
-*/
+
 class DashboardPainter extends Component {
 
     public static final int WIDTH = 450;

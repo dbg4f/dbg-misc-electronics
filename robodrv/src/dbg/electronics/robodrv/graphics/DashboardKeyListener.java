@@ -1,7 +1,7 @@
 package dbg.electronics.robodrv.graphics;
 
-import dbg.electronics.robodrv.InputEvent;
-import dbg.electronics.robodrv.InputListener;
+import dbg.electronics.robodrv.Event;
+import dbg.electronics.robodrv.EventListener;
 import dbg.electronics.robodrv.logging.LoggerFactory;
 import dbg.electronics.robodrv.logging.SimpleLogger;
 
@@ -12,10 +12,10 @@ public class DashboardKeyListener implements KeyListener {
 
     private static final SimpleLogger log = LoggerFactory.getLogger();
 
-    private InputListener inputListener;
+    private EventListener<Event> eventListener;
 
-    public DashboardKeyListener(InputListener inputListener) {
-        this.inputListener = inputListener;
+    public DashboardKeyListener(EventListener<Event> eventListener) {
+        this.eventListener = eventListener;
     }
 
     @Override
@@ -31,7 +31,7 @@ public class DashboardKeyListener implements KeyListener {
         log.info("Key Pressed: " + e.paramString());
 
         if (e.getKeyCode() == 27) {
-            inputListener.onEvent(new InputEvent(-999));
+            eventListener.onEvent(new Event(-999));
         }
     }
 

@@ -1,10 +1,11 @@
 package dbg.electronics.robodrv.emulator;
 
 
+import dbg.electronics.robodrv.GenericThread;
 import dbg.electronics.robodrv.OutOfRange;
 import dbg.electronics.robodrv.Range;
 
-public class MotorDriveEmulator implements Runnable {
+public class MotorDriveEmulator extends GenericThread {
 
     public static final Range SPEED_RANGE = new Range(0, 255);
     public static final Range PWM_RANGE = new Range(0, 255);
@@ -69,9 +70,9 @@ public class MotorDriveEmulator implements Runnable {
 
     }
 
-    @Override
-    public void run() {
 
+    @Override
+    public void startWork() {
         while (!Thread.currentThread().isInterrupted()) {
 
             try {
@@ -92,4 +93,5 @@ public class MotorDriveEmulator implements Runnable {
         }
 
     }
+
 }

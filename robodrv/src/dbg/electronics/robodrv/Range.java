@@ -9,6 +9,11 @@ public class Range {
     public final int max;
 
     public Range(int min, int max) {
+
+        if (min > max) {
+            throw new IllegalArgumentException("min > max: " + min + " " + max);
+        }
+
         this.min = min;
         this.max = max;
     }

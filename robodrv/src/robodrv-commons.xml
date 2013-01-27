@@ -10,7 +10,7 @@
     </bean>
 
 
-    <bean id="orchestrator" class="dbg.electronics.robodrv.Orchestrator" factory-method="getInstance">
+    <bean id="orchestrator" class="dbg.electronics.robodrv.head.Orchestrator" factory-method="getInstance">
         <property name="hidEventListener" ref="hidEventListener"/>
     </bean>
 

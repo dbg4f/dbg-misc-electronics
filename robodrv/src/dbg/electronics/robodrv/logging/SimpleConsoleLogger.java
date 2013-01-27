@@ -1,12 +1,6 @@
 package dbg.electronics.robodrv.logging;
 
-/**
- * Created with IntelliJ IDEA.
- * User: dmitri
- * Date: 1/12/13
- * Time: 2:00 PM
- * To change this template use File | Settings | File Templates.
- */
+
 public class SimpleConsoleLogger implements SimpleLogger {
 
     private final String name;

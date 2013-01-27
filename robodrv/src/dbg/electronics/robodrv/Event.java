@@ -1,6 +1,6 @@
 package dbg.electronics.robodrv;
 
-public class InputEvent {
+public class Event {
 
     public enum Content {
         TEST_INT_VALUE,
@@ -14,13 +14,13 @@ public class InputEvent {
 
     private Integer value;
 
-    public InputEvent(String hidKey, String hidValue) {
+    public Event(String hidKey, String hidValue) {
         this.hidKey = hidKey;
         this.hidValue = hidValue;
         content = Content.HID_CONTROL_VALUE;
     }
 
-    public InputEvent(Integer value) {
+    public Event(Integer value) {
         this.value = value;
         content = Content.TEST_INT_VALUE;
     }
@@ -43,7 +43,7 @@ public class InputEvent {
 
     @Override
     public String toString() {
-        return "InputEvent{" +
+        return "Event{" +
                 "value=" + value +
                 '}';
     }
