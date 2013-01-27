@@ -1,5 +1,6 @@
 package dbg.electronics.robodrv;
 
+import dbg.electronics.robodrv.head.Orchestrator;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.support.ClassPathXmlApplicationContext;
 

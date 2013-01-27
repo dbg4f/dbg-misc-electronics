@@ -1,11 +1,13 @@
-package dbg.electronics.robodrv;
+package dbg.electronics.robodrv.head;
 
+import dbg.electronics.robodrv.Event;
+import dbg.electronics.robodrv.EventListener;
 import dbg.electronics.robodrv.graphics.MultiBufferFullScreen;
 import dbg.electronics.robodrv.hid.HidEventListener;
 import dbg.electronics.robodrv.logging.LoggerFactory;
 import dbg.electronics.robodrv.logging.SimpleLogger;
 
-public class Orchestrator implements FailuresListener, InputListener{
+public class Orchestrator implements FailureListener, EventListener<Event> {
 
     private static final SimpleLogger log = LoggerFactory.getLogger();
 
@@ -31,7 +33,7 @@ public class Orchestrator implements FailuresListener, InputListener{
         return instance;
     }
 
-    void start() {
+    public void start() {
 
       screen = new MultiBufferFullScreen();
 
@@ -51,11 +53,11 @@ public class Orchestrator implements FailuresListener, InputListener{
     }
 
     @Override
-    public void onEvent(InputEvent event) {
+    public void onEvent(Event event) {
 
         log.info(String.valueOf(event));
 
-        if (event.getContent() == InputEvent.Content.TEST_INT_VALUE && event.getValue() == -999) {
+        if (event.getContent() == Event.Content.TEST_INT_VALUE && event.getValue() == -999) {
 
             hidEventListener.terminate();
 

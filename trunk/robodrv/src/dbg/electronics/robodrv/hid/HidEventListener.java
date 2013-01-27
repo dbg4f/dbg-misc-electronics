@@ -1,6 +1,8 @@
 package dbg.electronics.robodrv.hid;
 
 import dbg.electronics.robodrv.*;
+import dbg.electronics.robodrv.head.Failure;
+import dbg.electronics.robodrv.head.FailureListener;
 import dbg.electronics.robodrv.logging.LoggerFactory;
 import dbg.electronics.robodrv.logging.SimpleLogger;
 
@@ -8,60 +10,30 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-public class HidEventListener implements Threaded {
+public class HidEventListener extends GenericThread {
 
     private static final SimpleLogger log = LoggerFactory.getLogger();
 
     private final String eventFileName;
-    private final InputListener inputListener;
-    private final FailuresListener failuresListener;
+    private final EventListener<Event> eventListener;
+    private final FailureListener failureListener;
 
     private FileInputStream inputStream;
-    private Thread listeningThread;
 
-
-    public HidEventListener(String eventFileName, InputListener inputListener, FailuresListener failuresListener) {
+    public HidEventListener(String eventFileName, EventListener<Event> eventListener, FailureListener failureListener) {
         this.eventFileName = eventFileName;
-        this.inputListener = inputListener;
-        this.failuresListener = failuresListener;
+        this.eventListener = eventListener;
+        this.failureListener = failureListener;
     }
 
 
-
-
-
     @Override
-    public void launch() {
-
-        listeningThread = new Thread(new Runnable() {
-            @Override
-            public void run() {
-
-                try {
-                    readEvents();
-                } catch (IOException e) {
-
-                   closeResourcesQuietly();
-
-                    failuresListener.onFailure(new Failure("HID input listening failed", e));
-                }
-
-            }
-        });
-
-        listeningThread.start();
-
-    }
-
-    @Override
-    public void terminate() {
-
-        if (listeningThread != null) {
-
-            listeningThread.interrupt();
-
+    public void startWork() {
+        try {
+            readEvents();
+        } catch (Exception e) {
+            failureListener.onFailure(new Failure("HID input listening failed", e));
         }
-
     }
 
     private void closeResourcesQuietly() {
@@ -94,10 +66,10 @@ public class HidEventListener implements Threaded {
 
             HidInputReport report = new HidInputReport(buf);
 
-            inputListener.onEvent(new InputEvent(report.formatType() + "-" + report.formatCode(), report.formatValue()));
+            eventListener.onEvent(new Event(report.formatType() + "-" + report.formatCode(), report.formatValue()));
 
             if (report.getType() == 0x03 && report.getCode() == 0x01) {
-                inputListener.onEvent(new InputEvent((int)report.getValue()));
+                eventListener.onEvent(new Event((int)report.getValue()));
             }
 
         }
