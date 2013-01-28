@@ -10,9 +10,11 @@ import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 
-public class HidEventListener extends GenericThread {
+public class HidEventFileReader extends GenericThread {
 
     private static final SimpleLogger log = LoggerFactory.getLogger();
+
+    public int sizeOfHidEvent = HidInputReport.HID_REPORT_SIZE;
 
     private final String eventFileName;
     private final EventListener<Event> eventListener;
@@ -20,7 +22,7 @@ public class HidEventListener extends GenericThread {
 
     private FileInputStream inputStream;
 
-    public HidEventListener(String eventFileName, EventListener<Event> eventListener, FailureListener failureListener) {
+    public HidEventFileReader(String eventFileName, EventListener<Event> eventListener, FailureListener failureListener) {
         this.eventFileName = eventFileName;
         this.eventListener = eventListener;
         this.failureListener = failureListener;
@@ -41,7 +43,7 @@ public class HidEventListener extends GenericThread {
             try {
                 inputStream.close();
             } catch (IOException e) {
-                // result is not meaningful
+                log.error("Failed to close HID input stream " + e.getMessage(), e);
             }
         }
     }
@@ -56,9 +58,9 @@ public class HidEventListener extends GenericThread {
 
         while (!Thread.currentThread().isInterrupted()) {
 
-            int buf[] = new int[24];
+            int buf[] = new int[sizeOfHidEvent];
 
-            for (int i=0; i<24; i++) {
+            for (int i=0; i< sizeOfHidEvent; i++) {
 
                 buf[i] = rd.read();
 
