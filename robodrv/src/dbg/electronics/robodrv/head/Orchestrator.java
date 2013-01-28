@@ -3,7 +3,7 @@ package dbg.electronics.robodrv.head;
 import dbg.electronics.robodrv.Event;
 import dbg.electronics.robodrv.EventListener;
 import dbg.electronics.robodrv.graphics.MultiBufferFullScreen;
-import dbg.electronics.robodrv.hid.HidEventListener;
+import dbg.electronics.robodrv.hid.HidEventFileReader;
 import dbg.electronics.robodrv.logging.LoggerFactory;
 import dbg.electronics.robodrv.logging.SimpleLogger;
 
@@ -13,15 +13,15 @@ public class Orchestrator implements FailureListener, EventListener<Event> {
 
     private MultiBufferFullScreen screen;
 
-    private HidEventListener hidEventListener;
+    private HidEventFileReader hidEventFileReader;
 
     private static Orchestrator instance;
 
     private Orchestrator() {
     }
 
-    public void setHidEventListener(HidEventListener hidEventListener) {
-        this.hidEventListener = hidEventListener;
+    public void setHidEventFileReader(HidEventFileReader hidEventFileReader) {
+        this.hidEventFileReader = hidEventFileReader;
     }
 
     public static synchronized Orchestrator getInstance() {
@@ -37,9 +37,9 @@ public class Orchestrator implements FailureListener, EventListener<Event> {
 
       screen = new MultiBufferFullScreen();
 
-      //hidEventListener = new HidEventListener("/dev/input/event14", this, this);
+      //hidEventFileReader = new HidEventFileReader("/dev/input/event14", this, this);
 
-      hidEventListener.launch();
+      hidEventFileReader.launch();
 
       screen.launch();
 
@@ -59,7 +59,7 @@ public class Orchestrator implements FailureListener, EventListener<Event> {
 
         if (event.getContent() == Event.Content.TEST_INT_VALUE && event.getValue() == -999) {
 
-            hidEventListener.terminate();
+            hidEventFileReader.terminate();
 
             screen.terminate();
 

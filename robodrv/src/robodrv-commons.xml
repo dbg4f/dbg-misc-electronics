@@ -11,11 +11,11 @@
 
 
     <bean id="orchestrator" class="dbg.electronics.robodrv.head.Orchestrator" factory-method="getInstance">
-        <property name="hidEventListener" ref="hidEventListener"/>
+        <property name="hidEventFileReader" ref="hidEventFileReader"/>
     </bean>
 
 
-    <bean id="hidEventListener" class="dbg.electronics.robodrv.hid.HidEventListener">
+    <bean id="hidEventFileReader" class="dbg.electronics.robodrv.hid.HidEventFileReader">
         <constructor-arg index="0" value="${hidEventsFile}"/>
         <constructor-arg index="1" ref="orchestrator"/>
         <constructor-arg index="2" ref="orchestrator"/>
