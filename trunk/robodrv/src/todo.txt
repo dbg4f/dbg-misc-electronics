@@ -1,0 +1,11 @@
+
+1. Accessor interface for widgets (mediator)
+2. Start all thread aware beans (by factory)
+3. Global Factory driven by configuration
+4. Command line widget
+5. Switchable widget sets
+6. MC drive implementation
+7. Asynchronous logging
+8. MasterParams History and DB
+9. Failover for MC communications
+
