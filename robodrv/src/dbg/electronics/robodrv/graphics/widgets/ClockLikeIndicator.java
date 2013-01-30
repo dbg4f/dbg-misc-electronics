@@ -8,6 +8,10 @@ import java.awt.geom.Rectangle2D;
 
 public class ClockLikeIndicator implements DashboardWidget {
 
+    public static final int ARC_START_ANGLE = -30;
+    public static final int ARC_ANGLE = 180 + 60;
+    public static final int ARC_WIDTH = 10;
+
     private int valuePercent;
     private int x, y;
     private int dimension;
@@ -40,17 +44,14 @@ public class ClockLikeIndicator implements DashboardWidget {
 
         g2.setColor(Color.WHITE);
         Stroke stoke = g2.getStroke();
-        g2.setStroke(new BasicStroke(10));
+        g2.setStroke(new BasicStroke(ARC_WIDTH));
 
-        int startAngle = -30;
-        int arcAngle = 180 + 60;
-
-        g2.drawArc(center.x - dimension, center.y - dimension, dimension * 2, dimension * 2, startAngle, arcAngle);
+        g2.drawArc(center.x - dimension, center.y - dimension, dimension * 2, dimension * 2, ARC_START_ANGLE, ARC_ANGLE);
         g2.setStroke(stoke);
 
-        int angle = startAngle + arcAngle - arcAngle * valuePercent / 100;
+        int arrowAngle = ARC_START_ANGLE + ARC_ANGLE - ARC_ANGLE * valuePercent / 100;
 
-        double angleRad = ((double)angle / 180.0) * Math.PI;
+        double angleRad = ((double)arrowAngle / 180.0) * Math.PI;
         Color color = g2.getColor();
         g2.setColor(Color.MAGENTA);
         double arrowX = dimension * Math.cos(angleRad);

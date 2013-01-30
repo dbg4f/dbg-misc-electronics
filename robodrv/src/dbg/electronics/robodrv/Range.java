@@ -26,6 +26,9 @@ public class Range {
         return value == max;
     }
 
+    public int length() {
+        return Math.abs(max - min);
+    }
 
     public boolean isBorder(int value) {
         return isMin(value) || isMax(value);
@@ -45,6 +48,14 @@ public class Range {
             return max;
         }
         return value;
+    }
+
+
+    public int remapTo(int value, Range targetRange) throws OutOfRange {
+        validate(value);
+        int distanceFromStart = Math.abs(value - min);
+        double lengthRatio = (double)targetRange.length() / (double)length();
+        return targetRange.min + (int)Math.round(distanceFromStart * lengthRatio);
     }
 
     @Override
