@@ -8,7 +8,7 @@ import java.util.Map;
 /**
  * Created: 1/28/13  9:30 PM
  */
-public class HeadController {
+public class HeadController implements ParameterUpdater {
 
     private Map<MasterParameterType, MasterParameter> actualParameters = new LinkedHashMap<MasterParameterType, MasterParameter>();
 
@@ -33,10 +33,8 @@ public class HeadController {
         return checkedGet(type, targetParameters).snapshot();
     }
 
-
-
-
-
-
-
+    @Override
+    public void update(MasterParameterType type, int value) {
+        checkedGet(type, targetParameters).update(value);
+    }
 }
