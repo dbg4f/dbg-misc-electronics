@@ -1,6 +1,8 @@
 package dbg.electronics.robodrv.graphics.widgets;
 
+import dbg.electronics.robodrv.Range;
 import dbg.electronics.robodrv.graphics.DashboardWidget;
+import dbg.electronics.robodrv.head.ParameterAccessor;
 
 import java.awt.*;
 import java.awt.font.FontRenderContext;
@@ -12,19 +14,14 @@ public class ClockLikeIndicator implements DashboardWidget {
     public static final int ARC_ANGLE = 180 + 60;
     public static final int ARC_WIDTH = 10;
 
-    private int valuePercent;
+    public static final Range PERCENT_RANGE = new Range(0, 100);
+
     private int x, y;
     private int dimension;
 
+    private ParameterAccessor parameterAccessor;
+
     Font font = new Font("Courier New", Font.BOLD, 36);
-
-    public int getValuePercent() {
-        return valuePercent;
-    }
-
-    public void setValuePercent(int valuePercent) {
-        this.valuePercent = valuePercent;
-    }
 
     public void setX(int x) {
         this.x = x;
@@ -38,6 +35,10 @@ public class ClockLikeIndicator implements DashboardWidget {
         this.dimension = dimension;
     }
 
+    public void setParameterAccessor(ParameterAccessor parameterAccessor) {
+        this.parameterAccessor = parameterAccessor;
+    }
+
     private void drawCircleIndicator(Graphics2D g2) {
 
         Point center = new Point(x, y);
@@ -48,6 +49,10 @@ public class ClockLikeIndicator implements DashboardWidget {
 
         g2.drawArc(center.x - dimension, center.y - dimension, dimension * 2, dimension * 2, ARC_START_ANGLE, ARC_ANGLE);
         g2.setStroke(stoke);
+
+        int currentParamValue = parameterAccessor.getValue();
+
+        int valuePercent = parameterAccessor.getRange().remapTo(currentParamValue, PERCENT_RANGE);
 
         int arrowAngle = ARC_START_ANGLE + ARC_ANGLE - ARC_ANGLE * valuePercent / 100;
 

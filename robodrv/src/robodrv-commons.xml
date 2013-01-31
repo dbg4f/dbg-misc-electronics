@@ -16,12 +16,18 @@
 
 
     <bean id="hidEventFileReader" class="dbg.electronics.robodrv.hid.HidEventFileReader">
-        <constructor-arg index="0" value="${hidEventsFile}"/>
-        <constructor-arg index="1" ref="orchestrator"/>
-        <constructor-arg index="2" ref="orchestrator"/>
+        <property name="eventFileName"      value="${hidEventsFile}"/>
+        <property name="eventListener"      ref="hidStickDriver"/>
+        <property name="failureListener"    ref="orchestrator"/>
     </bean>
 
+    <bean id="hidStickDriver" class="dbg.electronics.robodrv.hid.StickDriver">
+        <property name="updater" ref="headController"/>
+    </bean>
 
+    <bean id="headController" class="dbg.electronics.robodrv.head.HeadController">
+
+    </bean>
 
 
 </beans>

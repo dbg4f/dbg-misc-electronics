@@ -35,7 +35,7 @@ public class MasterParameter {
         return range;
     }
 
-    public MasterParameter update(int value) throws OutOfRange {
+    public MasterParameter update(int value) {
         range.validate(value);
         long ts = System.currentTimeMillis();
         MasterParameter oldParameter = new MasterParameter(type, range);

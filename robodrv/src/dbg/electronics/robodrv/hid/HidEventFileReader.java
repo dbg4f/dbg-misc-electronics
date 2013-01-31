@@ -16,18 +16,23 @@ public class HidEventFileReader extends GenericThread {
 
     public int sizeOfHidEvent = HidInputReport.HID_REPORT_SIZE;
 
-    private final String eventFileName;
-    private final EventListener<Event> eventListener;
-    private final FailureListener failureListener;
+    private String eventFileName;
+    private EventListener<HidInputReport> eventListener;
+    private FailureListener failureListener;
 
     private FileInputStream inputStream;
 
-    public HidEventFileReader(String eventFileName, EventListener<Event> eventListener, FailureListener failureListener) {
+    public void setEventFileName(String eventFileName) {
         this.eventFileName = eventFileName;
-        this.eventListener = eventListener;
-        this.failureListener = failureListener;
     }
 
+    public void setEventListener(EventListener<HidInputReport> eventListener) {
+        this.eventListener = eventListener;
+    }
+
+    public void setFailureListener(FailureListener failureListener) {
+        this.failureListener = failureListener;
+    }
 
     @Override
     public void startWork() {
@@ -68,11 +73,7 @@ public class HidEventFileReader extends GenericThread {
 
             HidInputReport report = new HidInputReport(buf);
 
-            eventListener.onEvent(new Event(report.formatType() + "-" + report.formatCode(), report.formatValue()));
-
-            if (report.getType() == 0x03 && report.getCode() == 0x01) {
-                eventListener.onEvent(new Event((int)report.getValue()));
-            }
+            eventListener.onEvent(report);
 
         }
 
