@@ -27,7 +27,7 @@ class DashboardPainter extends Component {
 
         ClockLikeIndicator indicator = new ClockLikeIndicator();
 
-        indicator.setValuePercent(dashboardData.getTestValuePercent());
+       // indicator.setValuePercent(dashboardData.getTestValuePercent());
         indicator.setX(200);
         indicator.setY(300);
         indicator.setDimension(100);

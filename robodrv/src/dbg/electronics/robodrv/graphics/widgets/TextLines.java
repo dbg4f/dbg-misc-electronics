@@ -1,12 +1,13 @@
 package dbg.electronics.robodrv.graphics.widgets;
 
 import dbg.electronics.robodrv.graphics.DashboardWidget;
+import dbg.electronics.robodrv.head.MultilineReportable;
 
 import java.awt.*;
 
 public class TextLines implements DashboardWidget {
 
-    private String[] lines;
+    private MultilineReportable multilineReportable;
 
     private int x, y;
 
@@ -14,8 +15,16 @@ public class TextLines implements DashboardWidget {
 
     private Font font = new Font("Courier New", Font.BOLD, fontSize);
 
-    public void setLines(String[] lines) {
-        this.lines = lines;
+    public void setMultilineReportable(MultilineReportable multilineReportable) {
+        this.multilineReportable = multilineReportable;
+    }
+
+    public void setX(int x) {
+        this.x = x;
+    }
+
+    public void setY(int y) {
+        this.y = y;
     }
 
     @Override
@@ -25,11 +34,11 @@ public class TextLines implements DashboardWidget {
 
         int currentY = y;
 
-        for (String line : lines) {
+        for (String line : multilineReportable.toStringArray()) {
 
             g2.drawString(line, x, currentY);
 
-            currentY += fontSize/4;
+            currentY += fontSize * 1.2;
 
         }
 

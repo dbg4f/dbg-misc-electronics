@@ -6,10 +6,11 @@ import dbg.electronics.robodrv.head.Orchestrator;
 
 import java.awt.*;
 import java.awt.image.BufferStrategy;
+import java.util.List;
 
-public class MultiBufferFullScreen extends GenericThread implements EventListener<Event> {
+public class MultiBufferFullScreen extends GenericThread {
 
-    private DashboardPainter dashboardPainter;
+    private List<DashboardWidget> widgets;
 
     private Frame mainFrame;
 
@@ -23,11 +24,15 @@ public class MultiBufferFullScreen extends GenericThread implements EventListene
 
     }
 
+    public void setWidgets(List<DashboardWidget> widgets) {
+        this.widgets = widgets;
+    }
+
     @Override
     public void startWork() {
         try {
 
-            dashboardPainter = new DashboardPainter();
+            //dashboardPainter = new DashboardPainter();
 
             GraphicsConfiguration gc = device.getDefaultConfiguration();
 
@@ -43,7 +48,7 @@ public class MultiBufferFullScreen extends GenericThread implements EventListene
 
             BufferStrategy bufferStrategy = mainFrame.getBufferStrategy();
 
-            mainFrame.addKeyListener(new DashboardKeyListener(Orchestrator.getInstance()));
+            //mainFrame.addKeyListener(new DashboardKeyListener(Orchestrator.getInstance()));
 
             while(!Thread.currentThread().isInterrupted()) {
                 Graphics g = bufferStrategy.getDrawGraphics();
@@ -52,7 +57,14 @@ public class MultiBufferFullScreen extends GenericThread implements EventListene
                     g.setColor(Color.BLACK);
                     g.fillRect(0, 0, bounds.width, bounds.height);
 
-                    dashboardPainter.paint(g);
+                    Graphics2D g2 = (Graphics2D) g;
+
+                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+
+                    for (DashboardWidget widget : widgets) {
+                        widget.onDraw(g2);
+                    }
+
 
                     bufferStrategy.show();
                     g.dispose();
@@ -69,17 +81,6 @@ public class MultiBufferFullScreen extends GenericThread implements EventListene
         } finally {
             device.setFullScreenWindow(null);
         }
-    }
-
-    @Override
-    public void onEvent(Event event) {
-        if (event.getContent() == Event.Content.TEST_INT_VALUE) {
-            dashboardPainter.dashboardData.setTestValuePercent(event.getValue());
-        }
-        else if (event.getContent() == Event.Content.HID_CONTROL_VALUE) {
-            dashboardPainter.dashboardData.updateJs(event.getHidKey(), event.getHidValue());
-        }
-
     }
 
 

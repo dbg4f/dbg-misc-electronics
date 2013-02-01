@@ -9,11 +9,14 @@
         <property name="locations" value="classpath:config.properties"/>
     </bean>
 
-
-    <bean id="orchestrator" class="dbg.electronics.robodrv.head.Orchestrator" factory-method="getInstance">
-        <property name="hidEventFileReader" ref="hidEventFileReader"/>
+    <bean id="orchestrator" class="dbg.electronics.robodrv.head.Orchestrator">
+        <property name="threads">
+            <list>
+                <ref bean="hidEventFileReader"/>
+                <ref bean="bufferedScreen"/>
+            </list>
+        </property>
     </bean>
-
 
     <bean id="hidEventFileReader" class="dbg.electronics.robodrv.hid.HidEventFileReader">
         <property name="eventFileName"      value="${hidEventsFile}"/>
@@ -25,9 +28,38 @@
         <property name="updater" ref="headController"/>
     </bean>
 
-    <bean id="headController" class="dbg.electronics.robodrv.head.HeadController">
-
+    <bean id="headController" class="dbg.electronics.robodrv.head.HeadController" init-method="init">
     </bean>
+
+
+    <bean id="targetSteeringParamAccessor" class="dbg.electronics.robodrv.head.TargetParameterAccessor">
+        <property name="headController"     ref="headController"/>
+        <property name="type"               value="STEERING_ANGLE"/>
+    </bean>
+
+    <bean id="widgetTargetSteering" class="dbg.electronics.robodrv.graphics.widgets.ClockLikeIndicator">
+        <property name="parameterAccessor"  ref="targetSteeringParamAccessor"/>
+        <property name="x"                  value="200"/>
+        <property name="y"                  value="200"/>
+        <property name="dimension"          value="100"/>
+    </bean>
+
+    <bean id="widgetHidControls" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
+        <property name="x"                   value="400"/>
+        <property name="y"                   value="100"/>
+        <property name="multilineReportable" ref="hidStickDriver"/>
+    </bean>
+
+    <bean id="bufferedScreen" class="dbg.electronics.robodrv.graphics.MultiBufferFullScreen">
+        <property name="widgets">
+            <list>
+                <ref bean="widgetTargetSteering"/>
+                <ref bean="widgetHidControls"/>
+            </list>
+        </property>
+    </bean>
+
+
 
 
 </beans>
