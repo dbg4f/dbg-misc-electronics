@@ -14,6 +14,16 @@ public class HeadController implements ParameterUpdater {
 
     private Map<MasterParameterType, MasterParameter> targetParameters = new LinkedHashMap<MasterParameterType, MasterParameter>();
 
+
+    public void init() {
+
+        actualParameters.put(MasterParameterType.STEERING_ANGLE, new MasterParameter(MasterParameterType.STEERING_ANGLE, new Range(0, 255)));
+        targetParameters.put(MasterParameterType.STEERING_ANGLE, new MasterParameter(MasterParameterType.STEERING_ANGLE, new Range(0, 255)));
+
+    }
+
+
+
     public Range getParameterRange(MasterParameterType type) {
         return checkedGet(type, actualParameters).getRange();
     }
