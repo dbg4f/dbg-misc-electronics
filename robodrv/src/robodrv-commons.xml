@@ -37,12 +37,25 @@
         <property name="type"               value="STEERING_ANGLE"/>
     </bean>
 
+    <bean id="targetMotionSpeedParamAccessor" class="dbg.electronics.robodrv.head.TargetParameterAccessor">
+        <property name="headController"     ref="headController"/>
+        <property name="type"               value="MOTION_SPEED"/>
+    </bean>
+
     <bean id="widgetTargetSteering" class="dbg.electronics.robodrv.graphics.widgets.ClockLikeIndicator">
         <property name="parameterAccessor"  ref="targetSteeringParamAccessor"/>
         <property name="x"                  value="200"/>
         <property name="y"                  value="200"/>
         <property name="dimension"          value="100"/>
     </bean>
+
+    <bean id="widgetTargetSpeed" class="dbg.electronics.robodrv.graphics.widgets.ClockLikeIndicator">
+        <property name="parameterAccessor"  ref="targetMotionSpeedParamAccessor"/>
+        <property name="x"                  value="600"/>
+        <property name="y"                  value="200"/>
+        <property name="dimension"          value="100"/>
+    </bean>
+
 
     <bean id="widgetHidControls" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
         <property name="x"                   value="400"/>
@@ -54,12 +67,18 @@
         <property name="widgets">
             <list>
                 <ref bean="widgetTargetSteering"/>
+                <ref bean="widgetTargetSpeed"/>
+                <!--
                 <ref bean="widgetHidControls"/>
+                -->
             </list>
         </property>
+        <property name="keyListener" ref="dashboardKeyListener"/>
     </bean>
 
-
+    <bean id="dashboardKeyListener" class="dbg.electronics.robodrv.graphics.DashboardKeyListener">
+        <property name="eventListener" ref="orchestrator"/>
+    </bean>
 
 
 </beans>

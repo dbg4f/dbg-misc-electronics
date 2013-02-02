@@ -8,13 +8,16 @@ import dbg.electronics.robodrv.logging.SimpleLogger;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
+import static dbg.electronics.robodrv.Event.EventCode.SHUTDOWN;
+
 public class DashboardKeyListener implements KeyListener {
 
     private static final SimpleLogger log = LoggerFactory.getLogger();
 
     private EventListener<Event> eventListener;
 
-    public DashboardKeyListener(EventListener<Event> eventListener) {
+
+    public void setEventListener(EventListener<Event> eventListener) {
         this.eventListener = eventListener;
     }
 
@@ -31,7 +34,7 @@ public class DashboardKeyListener implements KeyListener {
         log.info("Key Pressed: " + e.paramString());
 
         if (e.getKeyCode() == 27) {
-            eventListener.onEvent(new Event(-999));
+            eventListener.onEvent(new Event(SHUTDOWN));
         }
     }
 
