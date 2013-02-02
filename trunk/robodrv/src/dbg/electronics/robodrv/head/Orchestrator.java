@@ -14,8 +14,6 @@ public class Orchestrator implements FailureListener, EventListener<Event> {
 
     private static final SimpleLogger log = LoggerFactory.getLogger();
 
-    private MultiBufferFullScreen screen;
-
     private List<GenericThread> threads;
 
     public void setThreads(List<GenericThread> threads) {
@@ -44,6 +42,15 @@ public class Orchestrator implements FailureListener, EventListener<Event> {
     public void onEvent(Event event) {
 
         log.info(String.valueOf(event));
+
+        if (event.getEventCode() == Event.EventCode.SHUTDOWN) {
+
+            for (GenericThread thread : threads) {
+                thread.terminate();
+            }
+        }
+
+        System.exit(0);
 
 
     }

@@ -2,49 +2,25 @@ package dbg.electronics.robodrv;
 
 public class Event {
 
-    public enum Content {
-        TEST_INT_VALUE,
-        HID_CONTROL_VALUE
+    public enum EventCode {
+        SHUTDOWN
     }
 
-    private final Content content;
+    private final EventCode eventCode;
 
-    private String hidKey;
-    private String hidValue;
 
-    private Integer value;
-
-    public Event(String hidKey, String hidValue) {
-        this.hidKey = hidKey;
-        this.hidValue = hidValue;
-        content = Content.HID_CONTROL_VALUE;
+    public Event(EventCode eventCode) {
+        this.eventCode = eventCode;
     }
 
-    public Event(Integer value) {
-        this.value = value;
-        content = Content.TEST_INT_VALUE;
-    }
-
-    public Content getContent() {
-        return content;
-    }
-
-    public Integer getValue() {
-        return value;
-    }
-
-    public String getHidKey() {
-        return hidKey;
-    }
-
-    public String getHidValue() {
-        return hidValue;
+    public EventCode getEventCode() {
+        return eventCode;
     }
 
     @Override
     public String toString() {
         return "Event{" +
-                "value=" + value +
+                "eventCode=" + eventCode +
                 '}';
     }
 }

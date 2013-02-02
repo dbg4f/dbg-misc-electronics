@@ -16,6 +16,13 @@ public class MultiBufferFullScreen extends GenericThread {
 
     private GraphicsDevice device;
 
+    private DashboardKeyListener keyListener;
+
+
+    public void setKeyListener(DashboardKeyListener keyListener) {
+        this.keyListener = keyListener;
+    }
+
     public MultiBufferFullScreen() {
 
         GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
@@ -48,7 +55,7 @@ public class MultiBufferFullScreen extends GenericThread {
 
             BufferStrategy bufferStrategy = mainFrame.getBufferStrategy();
 
-            //mainFrame.addKeyListener(new DashboardKeyListener(Orchestrator.getInstance()));
+            mainFrame.addKeyListener(keyListener);
 
             while(!Thread.currentThread().isInterrupted()) {
                 Graphics g = bufferStrategy.getDrawGraphics();
@@ -80,6 +87,7 @@ public class MultiBufferFullScreen extends GenericThread {
             e.printStackTrace();
         } finally {
             device.setFullScreenWindow(null);
+            //mainFrame.dispose();
         }
     }
 

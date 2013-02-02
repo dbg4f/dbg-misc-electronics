@@ -20,6 +20,9 @@ public class HeadController implements ParameterUpdater {
         actualParameters.put(MasterParameterType.STEERING_ANGLE, new MasterParameter(MasterParameterType.STEERING_ANGLE, new Range(0, 255)));
         targetParameters.put(MasterParameterType.STEERING_ANGLE, new MasterParameter(MasterParameterType.STEERING_ANGLE, new Range(0, 255)));
 
+        actualParameters.put(MasterParameterType.MOTION_SPEED, new MasterParameter(MasterParameterType.MOTION_SPEED, new Range(0, 255)));
+        targetParameters.put(MasterParameterType.MOTION_SPEED, new MasterParameter(MasterParameterType.MOTION_SPEED, new Range(0, 255)));
+
     }
 
 
@@ -44,7 +47,8 @@ public class HeadController implements ParameterUpdater {
     }
 
     @Override
-    public void update(MasterParameterType type, int value) {
-        checkedGet(type, targetParameters).update(value);
+    public void update(MasterParameterType type, int value, Range valueRange) {
+        MasterParameter masterParameter = checkedGet(type, targetParameters);
+        masterParameter.update(valueRange.remapTo(value, masterParameter.getRange()));
     }
 }
