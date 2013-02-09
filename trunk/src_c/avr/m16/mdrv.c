@@ -36,6 +36,7 @@
 #define CMD_L1_ENABLE_ADC 	    0x17
 #define CMD_L1_SWITCH_WATCHDOG 	0x18
 #define CMD_L1_RESET_WATCHDOG 	0x19
+#define CMD_L1_WRITE_REG_MASK 	0x1A
 
 #define RESP_UNKNOWN_CMD	0xEE
 #define RESP_OK	            0xAA
@@ -51,16 +52,139 @@
 #define START_PACKET_MARKER   0x55
 
 
+#define ADC_BUFFER_SIZE         16
+#define ADC_BUFFER_DIV_SHIFT    4
+
+#define ADC_CHANNELS_IN_USE     3
+
+typedef struct struct_adc_buffer
+{
+    uint8_t valuations[ADC_BUFFER_SIZE];
+    uint8_t index;
+} ADC_BUFFER, *PADC_BUFFER;
+
+typedef struct struct_adc_context
+{
+    struct struct_adc_buffer adc_buffers[ADC_CHANNELS_IN_USE];
+    uint8_t avg_values[ADC_CHANNELS_IN_USE];
+    uint8_t adc_buf_index;
+    uint8_t valuations_count;
+} ADC_CONTEXT, *PADC_CONTEXT;
+
+struct struct_tx_context
+{
+    uint8_t enabled;
+
+
+
+};
+
+static ADC_CONTEXT adc_context;
+
 static uint8_t adc0_valueL;
 static uint8_t adc0_valueH;
 static uint8_t adc0_updated;
 
+// -----------------------------------------------------------------------------------------------------------------
+static uint8_t adc_buf_avg(PADC_BUFFER p_adc_buffer)
+{
+    uint16_t avg = 0;
+    uint8_t i = 0;
+    for (i = 0; i<ADC_BUFFER_SIZE; i++)
+    {
+        avg += p_adc_buffer->valuations[i];
+    }
+    return (uint8_t)(avg >> ADC_BUFFER_DIV_SHIFT);
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void adc_buf_init(PADC_BUFFER p_adc_buffer)
+{
+    uint8_t i = 0;
+    for (i = 0; i<ADC_BUFFER_SIZE; i++)
+    {
+        p_adc_buffer->valuations[i] = 0;
+    }
+    p_adc_buffer->index = 0;
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void adc_buf_add(PADC_BUFFER p_adc_buffer, uint8_t value)
+{
+    uint8_t i = p_adc_buffer->index + 1;
+    if (i == ADC_BUFFER_SIZE)
+    {
+        i = 0;
+    }
+    p_adc_buffer->valuations[i] = value;
+    p_adc_buffer->index = i;
+}
+
+
+// -----------------------------------------------------------------------------------------------------------------
+static void adc_ctx_init(PADC_CONTEXT p_adc_context)
+{
+    uint8_t i = 0;
+    for (i = 0; i<ADC_CHANNELS_IN_USE; i++)
+    {
+        adc_buf_init(&p_adc_context->adc_buffers[i]);
+        p_adc_context->avg_values[i] = 0;
+    }
+
+    p_adc_context->adc_buf_index = 0;
+    p_adc_context->valuations_count = 0;
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void adc_run_next(uint8_t channel)
+{
+
+    //TODO: start next adc conversion
+}
+
+
+// -----------------------------------------------------------------------------------------------------------------
+static void adc_ctx_new_value(PADC_CONTEXT p_adc_context, uint8_t value)
+{
+    p_adc_context->valuations_count++;
+
+    uint8_t buf_index = p_adc_context->adc_buf_index;
+
+    adc_buf_add(&p_adc_context->adc_buffers[buf_index], value);
+
+    if (p_adc_context->valuations_count == ADC_BUFFER_SIZE)
+    {
+
+        p_adc_context->avg_values[buf_index] = adc_buf_avg(&p_adc_context->adc_buffers[buf_index]);
+
+        buf_index++;
+
+        if (buf_index == ADC_CHANNELS_IN_USE)
+        {
+            buf_index = 0;
+        }
+
+        p_adc_context->adc_buf_index = buf_index;
+
+        p_adc_context->valuations_count = 0;
+
+    }
+
+    adc_run_next(p_adc_context->adc_buf_index);
+
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void sendchar_immediately(uint8_t data)
+{
+    UART_DATA = data;
+}
 
 // -----------------------------------------------------------------------------------------------------------------
 static void sendchar(uint8_t data)
 {
     while (!(UART_STATUS & (1<<UART_TXREADY)));
-    UART_DATA = data;
+   sendchar_immediately(data);
 }
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -140,6 +264,8 @@ static void serial_init(void)
 
 static void adc_init(void)
 {
+
+    adc_ctx_init(&adc_context);
 
     // enable ADC, int, start, sequential, div/8
     ADCSRA = (1<<ADEN)|(1<<ADIE)|(1<<ADSC)|(1<<ADATE)|(3<<ADPS0);
@@ -275,13 +401,15 @@ void read_reg(uint8_t reg)
 
 }
 
-#define CASE_WR(REG_NAME, REG_SEL) case REG_SEL: REG_NAME=value; value=REG_NAME ; break;
+#define CASE_WR(REG_NAME, REG_SEL) case REG_SEL: tmp = REG_NAME; REG_NAME = (tmp & mask); break;
 
 // -----------------------------------------------------------------------------------------------------------------
-void write_reg(uint8_t reg, uint8_t value)
+void write_reg(uint8_t reg, uint8_t value, uint8_t mask)
 {
 
     char found = 1;
+
+    uint8_t tmp;
 
     switch (reg)
     {
@@ -369,7 +497,7 @@ void write_reg(uint8_t reg, uint8_t value)
 
 
 // -----------------------------------------------------------------------------------------------------------------
-void exec_ext_command(uint8_t cmd, uint8_t param, uint8_t param2)
+void exec_ext_command(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3)
 {
 
     switch (cmd)
@@ -383,7 +511,11 @@ void exec_ext_command(uint8_t cmd, uint8_t param, uint8_t param2)
         break;
 
     case CMD_L1_WRITE_REG:
-        write_reg(param, param2);
+        write_reg(param, param2, 0xFF);
+        break;
+
+    case CMD_L1_WRITE_REG_MASK:
+        write_reg(param, param2, param3);
         break;
 
     case CMD_L1_READ_ADC0:
@@ -439,21 +571,27 @@ ISR(INT0_vect)
 }
 
 // -----------------------------------------------------------------------------------------------------------------
-
 ISR(INT1_vect)
 {
 
 
 }
-// -----------------------------------------------------------------------------------------------------------------
 
+// -----------------------------------------------------------------------------------------------------------------
 ISR(INT2_vect)
 {
 
 
 }
-// -----------------------------------------------------------------------------------------------------------------
 
+// -----------------------------------------------------------------------------------------------------------------
+ISR(USART_TXC_vect)
+{
+
+
+}
+
+// -----------------------------------------------------------------------------------------------------------------
 ISR(ADC_vect)
 {
     adc0_valueL = ADCL;
@@ -463,6 +601,8 @@ ISR(ADC_vect)
     {
         adc0_updated++;
     }
+
+    adc_ctx_new_value(&adc_context, adc0_valueH);
 
 
 }
@@ -483,6 +623,7 @@ int main(void)
     uint8_t command = 0;
     uint8_t parameter = 0;
     uint8_t parameter2 = 0;
+    uint8_t parameter3 = 0;
     uint8_t ext_crc;
 
     serial_init();
@@ -498,6 +639,7 @@ int main(void)
         command = 0;
         parameter = 0;
         parameter2 = 0;
+        parameter3 = 0;
 
         // marker
         value 	= recvchar();
@@ -536,6 +678,14 @@ int main(void)
                 parameter2 = value;
             }
 
+            if (length >= 4)
+            {
+                // parameter2
+                value 	= recvchar();
+                crc 	= crc_update(crc, value);
+                parameter3 = value;
+            }
+
             // crc from input
             ext_crc = recvchar();
 
@@ -544,7 +694,7 @@ int main(void)
             {
 
                 // forward validated input
-                exec_ext_command(command, parameter, parameter2);
+                exec_ext_command(command, parameter, parameter2, parameter3);
 
             }
             else
