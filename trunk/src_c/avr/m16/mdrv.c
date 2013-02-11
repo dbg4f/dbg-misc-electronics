@@ -50,6 +50,7 @@
 #define RESP_RESET_MARKER_B1   0x55
 
 #define START_PACKET_MARKER   0x55
+#define START_ASYNC_MARKER    0x51
 
 
 #define ADC_BUFFER_SIZE         16
@@ -57,29 +58,46 @@
 
 #define ADC_CHANNELS_IN_USE     3
 
+#define TX_MAX_BUFFER_SIZE      20
+
+// -----------------------------------------------------------------------------------------------------------------
+
 typedef struct struct_adc_buffer
 {
     uint8_t valuations[ADC_BUFFER_SIZE];
     uint8_t index;
 } ADC_BUFFER, *PADC_BUFFER;
 
+// -----------------------------------------------------------------------------------------------------------------
+
 typedef struct struct_adc_context
 {
-    struct struct_adc_buffer adc_buffers[ADC_CHANNELS_IN_USE];
+    ADC_BUFFER adc_buffers[ADC_CHANNELS_IN_USE];
     uint8_t avg_values[ADC_CHANNELS_IN_USE];
     uint8_t adc_buf_index;
     uint8_t valuations_count;
 } ADC_CONTEXT, *PADC_CONTEXT;
 
-struct struct_tx_context
+// -----------------------------------------------------------------------------------------------------------------
+
+typedef struct struct_tx_buffer
+{
+    uint8_t content[TX_MAX_BUFFER_SIZE];
+    uint8_t index;
+    uint8_t size;
+} TX_BUFFER, *PTX_BUFFER;
+
+// -----------------------------------------------------------------------------------------------------------------
+
+typedef struct struct_tx_context
 {
     uint8_t enabled;
+    TX_BUFFER adc_tx_buf;
 
-
-
-};
+} TX_CONTEXT, *PTX_CONTEXT;
 
 static ADC_CONTEXT adc_context;
+static TX_CONTEXT tx_context;
 
 static uint8_t adc0_valueL;
 static uint8_t adc0_valueH;
@@ -139,7 +157,14 @@ static void adc_ctx_init(PADC_CONTEXT p_adc_context)
 static void adc_run_next(uint8_t channel)
 {
 
-    //TODO: start next adc conversion
+    // enable ADC, int, start, once, div/8
+    ADCSRA = (1<<ADEN)|(1<<ADIE)|(1<<ADSC)|(0<<ADATE)|(3<<ADPS0);
+
+    //REFS  -- 0b[01]000101 use AVCC ref
+    //ADLAR -- 0b01[1]00101 left alignment
+    //MUX   -- 0b0100[0101] channel 5.
+    ADMUX = (0b01100000 | (channel & 0b00000111));
+
 }
 
 
@@ -181,6 +206,82 @@ static void sendchar_immediately(uint8_t data)
 }
 
 // -----------------------------------------------------------------------------------------------------------------
+static uint8_t crc_update(uint8_t crc, uint8_t data)
+{
+    uint8_t i;
+    //
+    crc ^= data;
+    for(i = 0; i < 8; i++)
+    {
+        if(crc & 0x80)
+            crc = (crc << 1) ^ 0xE5;
+        else
+            crc <<= 1;
+    }
+    return crc;
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void tx_adc_snapshot(PADC_CONTEXT p_adc_context, PTX_CONTEXT p_tx_context)
+{
+    PTX_BUFFER p_tx_buf = &p_tx_context->adc_tx_buf;
+    uint8_t crc = 0xFF;
+
+    p_tx_buf->index = 0;
+    p_tx_buf->size = ADC_CHANNELS_IN_USE + 2; // start marker + avg bytes + crc
+    p_tx_buf->content[0] = START_ASYNC_MARKER;
+
+    crc = crc_update(crc, p_tx_buf->content[0]);
+
+    uint8_t i = 0;
+    for (i=0; i<ADC_CHANNELS_IN_USE; i++)
+    {
+        p_tx_buf->content[i+1] = p_adc_context->avg_values[i];
+        crc = crc_update(crc, p_tx_buf->content[i+1]);
+    }
+
+    p_tx_buf->content[i+2] = crc;
+
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void tx_ctx_send_next(PTX_CONTEXT p_tx_context)
+{
+
+    PTX_BUFFER p_tx_buf = &p_tx_context->adc_tx_buf;
+    uint8_t next_byte = p_tx_buf->content[p_tx_buf->index++];
+
+    if (p_tx_buf->index == p_tx_buf->size)
+    {
+        tx_adc_snapshot(&adc_context, &tx_context);
+    }
+
+    sendchar_immediately(next_byte);
+}
+
+
+// -----------------------------------------------------------------------------------------------------------------
+static void tx_buf_init(PTX_BUFFER p_tx_buffer)
+{
+    p_tx_buffer->index = 0;
+    p_tx_buffer->size = 0;
+    uint8_t i = 0;
+    for (i=0; i<TX_MAX_BUFFER_SIZE; i++)
+    {
+        p_tx_buffer->content[i] = 0;
+    }
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void tx_ctx_init(PTX_CONTEXT p_tx_context)
+{
+    p_tx_context->enabled = 1;
+    tx_buf_init(&p_tx_context->adc_tx_buf);
+    tx_adc_snapshot(&adc_context, p_tx_context);
+    tx_ctx_send_next(p_tx_context); // start sending, next bytes are sent in ISR
+}
+
+// -----------------------------------------------------------------------------------------------------------------
 static void sendchar(uint8_t data)
 {
     while (!(UART_STATUS & (1<<UART_TXREADY)));
@@ -198,22 +299,6 @@ static uint8_t recvchar(void)
 {
     while (!is_rx_char_ready());
     return UART_DATA;
-}
-
-// -----------------------------------------------------------------------------------------------------------------
-static uint8_t crc_update(uint8_t crc, uint8_t data)
-{
-    uint8_t i;
-    //
-    crc ^= data;
-    for(i = 0; i < 8; i++)
-    {
-        if(crc & 0x80)
-            crc = (crc << 1) ^ 0xE5;
-        else
-            crc <<= 1;
-    }
-    return crc;
 }
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -267,13 +352,18 @@ static void adc_init(void)
 
     adc_ctx_init(&adc_context);
 
-    // enable ADC, int, start, sequential, div/8
-    ADCSRA = (1<<ADEN)|(1<<ADIE)|(1<<ADSC)|(1<<ADATE)|(3<<ADPS0);
+    adc_run_next(0);
 
-    //REFS  -- 0b[01]000101 use AVCC ref
-    //ADLAR -- 0b01[1]00101 left alignment
-    //MUX   -- 0b0100[0101] channel 5.
-    ADMUX = 0b01100101;
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+
+static void tx_init(void)
+{
+
+    tx_ctx_init(&tx_context);
+
+    UCSRB = (1<<RXEN)|(1<<TXEN)|(0<<RXCIE)|(1<<TXCIE)|(0<<UDRIE);
 
 }
 
@@ -524,7 +614,9 @@ void exec_ext_command(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3
 
     case CMD_L1_ENABLE_ADC:
         adc_init();
-        send_resp2(RESP_OK, 0x00);
+        //send_resp2(RESP_OK, 0x00);
+        sei();
+        tx_init();
         break;
 
     case CMD_L1_SWITCH_WATCHDOG:
@@ -587,8 +679,7 @@ ISR(INT2_vect)
 // -----------------------------------------------------------------------------------------------------------------
 ISR(USART_TXC_vect)
 {
-
-
+    tx_ctx_send_next(&tx_context);
 }
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -604,10 +695,7 @@ ISR(ADC_vect)
 
     adc_ctx_new_value(&adc_context, adc0_valueH);
 
-
 }
-
-
 
 
 
