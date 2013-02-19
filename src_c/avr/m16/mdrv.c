@@ -2,6 +2,7 @@
 #define F_CPU 7372800
 
 #define BAUDRATE 19200
+//#define BAUDRATE 115200
 
 #define UART_CALC_BAUDRATE(baudRate) ((uint32_t)((F_CPU) + ((uint32_t)baudRate * 8UL)) / ((uint32_t)(baudRate) * 16UL) - 1)
 
@@ -240,7 +241,7 @@ static void tx_adc_snapshot(PADC_CONTEXT p_adc_context, PTX_CONTEXT p_tx_context
         crc = crc_update(crc, p_tx_buf->content[i+1]);
     }
 
-    p_tx_buf->content[i+2] = crc;
+    p_tx_buf->content[i+1] = crc;
 
 }
 
@@ -491,7 +492,7 @@ void read_reg(uint8_t reg)
 
 }
 
-#define CASE_WR(REG_NAME, REG_SEL) case REG_SEL: tmp = REG_NAME; REG_NAME = (tmp & mask); break;
+#define CASE_WR(REG_NAME, REG_SEL) case REG_SEL: REG_NAME = value; break;
 
 // -----------------------------------------------------------------------------------------------------------------
 void write_reg(uint8_t reg, uint8_t value, uint8_t mask)
@@ -499,7 +500,7 @@ void write_reg(uint8_t reg, uint8_t value, uint8_t mask)
 
     char found = 1;
 
-    uint8_t tmp;
+    //uint8_t tmp;
 
     switch (reg)
     {
@@ -733,7 +734,16 @@ int main(void)
         value 	= recvchar();
         crc 	= crc_update(crc, value);
 
-        if (value == START_PACKET_MARKER)
+        if (value == 'S')
+        {
+            sendchar('R');
+            sendchar('D');
+            sendchar('R');
+            sendchar('V');
+            sendchar('0');
+            sendchar('1');
+        }
+        else if (value == START_PACKET_MARKER)
         {
             // length
             value 	= recvchar();
