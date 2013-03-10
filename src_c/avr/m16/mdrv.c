@@ -1,4 +1,10 @@
 
+//TODO:
+// Vsig (ADC3) periodic sending
+// Sonar (timer) input and sending
+// Steering PWM in internal mode
+// Write register using bitmask
+
 #define F_CPU 7372800
 
 #define BAUDRATE 19200
@@ -90,6 +96,15 @@ typedef struct struct_counter_context
 
 // -----------------------------------------------------------------------------------------------------------------
 
+typedef struct struct_response_context
+{
+    uint8_t response[TX_MAX_BUFFER_SIZE];
+    uint8_t length;
+    uint8_t updated;
+} RESP_CONTEXT, *PRESP_CONTEXT;
+
+// -----------------------------------------------------------------------------------------------------------------
+
 typedef struct struct_tx_buffer
 {
     uint8_t content[TX_MAX_BUFFER_SIZE];
@@ -104,12 +119,14 @@ typedef struct struct_tx_context
     uint8_t enabled;
     TX_BUFFER adc_tx_buf;
     TX_BUFFER ct_tx_buf;
+    TX_BUFFER resp_tx_buf;
     PTX_BUFFER current_buffer;
 } TX_CONTEXT, *PTX_CONTEXT;
 
 static ADC_CONTEXT adc_context;
 static TX_CONTEXT tx_context;
 static CT_CONTEXT ct_context;
+static RESP_CONTEXT resp_context;
 
 static uint8_t adc0_valueL;
 static uint8_t adc0_valueH;
@@ -276,6 +293,31 @@ static void tx_ct_snapshot(PCT_CONTEXT p_ct_context, PTX_CONTEXT p_tx_context)
 
 }
 
+
+// -----------------------------------------------------------------------------------------------------------------
+static void tx_resp_snapshot(PRESP_CONTEXT p_resp_context, PTX_CONTEXT p_tx_context)
+{
+    PTX_BUFFER p_tx_buf = &p_tx_context->resp_tx_buf;
+    uint8_t crc = 0xFF;
+
+    p_tx_buf->index = 0;
+    p_tx_buf->size = p_resp_context->length + 2; // start marker + len + crc
+    p_tx_buf->content[0] = START_PACKET_MARKER; // the same marker for synch transfer
+
+    crc = crc_update(crc, p_tx_buf->content[0]);
+
+    uint8_t i = 0;
+    for (i=0; i<p_resp_context->length; i++)
+    {
+        p_tx_buf->content[i+1] = p_resp_context->response[i];
+        crc = crc_update(crc, p_tx_buf->content[i+1]);
+    }
+
+    p_tx_buf->content[i+1] = crc;
+
+    p_resp_context->updated = 0;
+}
+
 // -----------------------------------------------------------------------------------------------------------------
 static void tx_ctx_send_next(PTX_CONTEXT p_tx_context)
 {
@@ -291,6 +333,11 @@ static void tx_ctx_send_next(PTX_CONTEXT p_tx_context)
         {
             tx_ct_snapshot(&ct_context, p_tx_context);
             p_tx_context->current_buffer = &p_tx_context->ct_tx_buf;
+        }
+        else if (resp_context.updated)
+        {
+            tx_resp_snapshot(&resp_context, p_tx_context);
+            p_tx_context->current_buffer = &p_tx_context->resp_tx_buf;
         }
         else
         {
@@ -308,6 +355,16 @@ static void ct_ctx_increase(PCT_CONTEXT p_ct_context)
 {
     p_ct_context->ct_value++;
     p_ct_context->updated = 1;
+}
+
+static void resp_ctx_add(PRESP_CONTEXT p_resp_context, uint8_t byte1, uint8_t byte2, uint8_t sequence)
+{
+    p_resp_context->response[0] = 3; // length of resp bytes
+    p_resp_context->response[1] = sequence;
+    p_resp_context->response[2] = byte1;
+    p_resp_context->response[3] = byte2;
+    p_resp_context->length = 4; // buf length
+    p_resp_context->updated = 1;
 }
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -328,6 +385,7 @@ static void tx_ctx_init(PTX_CONTEXT p_tx_context)
     p_tx_context->enabled = 1;
     tx_buf_init(&p_tx_context->adc_tx_buf);
     tx_buf_init(&p_tx_context->ct_tx_buf);
+    tx_buf_init(&p_tx_context->resp_tx_buf);
     p_tx_context->current_buffer = &p_tx_context->adc_tx_buf; // start with ADC buffer
     tx_adc_snapshot(&adc_context, p_tx_context);
     tx_ctx_send_next(p_tx_context); // start sending, next bytes are sent in ISR
@@ -338,6 +396,18 @@ static void ct_ctx_init(PCT_CONTEXT p_ct_context)
 {
     p_ct_context->ct_value = 0;
     p_ct_context->updated = 0;
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void resp_ctx_init(PRESP_CONTEXT p_resp_context)
+{
+    p_resp_context->length = 0;
+    uint8_t i = 0;
+    for (i=0; i<TX_MAX_BUFFER_SIZE; i++)
+    {
+        p_resp_context->response[i] = 0;
+    }
+    p_resp_context->updated = 0;
 }
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -369,14 +439,30 @@ static uint8_t send_with_crc(uint8_t crc, uint8_t data)
 
 // -----------------------------------------------------------------------------------------------------------------
 
-static void send_resp2(uint8_t byte1, uint8_t byte2)
+static void tx_send_resp2_immediately(uint8_t byte1, uint8_t byte2, uint8_t sequence)
 {
     uint8_t crc = 0xFF;
     crc = send_with_crc(crc, START_PACKET_MARKER);
-    crc = send_with_crc(crc, 0x02);
+    crc = send_with_crc(crc, 0x03);
+    crc = send_with_crc(crc, sequence);
     crc = send_with_crc(crc, byte1);
     crc = send_with_crc(crc, byte2);
     crc = send_with_crc(crc, crc);
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+
+
+static void send_resp2(uint8_t byte1, uint8_t byte2, uint8_t sequence)
+{
+    if (tx_context.enabled)
+    {
+        resp_ctx_add(&resp_context, byte1, byte2, sequence);
+    }
+    else
+    {
+        tx_send_resp2_immediately(byte1, byte2, sequence);
+    }
 }
 // -----------------------------------------------------------------------------------------------------------------
 /*
@@ -414,6 +500,13 @@ static void ct_init(void)
     MCUCR |= (_BV(ISC00)); // any level change at int0 generates int
     GICR |= _BV(INT0);
 
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+
+static void resp_init(void)
+{
+    resp_ctx_init(&resp_context);
 }
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -462,7 +555,7 @@ static void reset_watchdog(void)
 static void read_adc0(void)
 {
 
-    send_resp2(adc0_valueH, adc0_valueL);
+    send_resp2(adc0_valueH, adc0_valueL, 0);
 
 }
 
@@ -470,7 +563,7 @@ static void read_adc0(void)
 #define CASE_RD(REG_NAME, REG_SEL) case REG_SEL: res=REG_NAME ; break;
 
 // -----------------------------------------------------------------------------------------------------------------
-void read_reg(uint8_t reg)
+void read_reg(uint8_t reg, uint8_t sequence)
 {
     uint8_t res = 0x00;
 
@@ -550,11 +643,11 @@ void read_reg(uint8_t reg)
 
     if (found)
     {
-        send_resp2(0xDD, res);
+        send_resp2(0xDD, res, sequence);
     }
     else
     {
-        send_resp2(0xAC, res);
+        send_resp2(0xAC, res, sequence);
     }
 
 
@@ -563,7 +656,7 @@ void read_reg(uint8_t reg)
 #define CASE_WR(REG_NAME, REG_SEL) case REG_SEL: REG_NAME = value; break;
 
 // -----------------------------------------------------------------------------------------------------------------
-void write_reg(uint8_t reg, uint8_t value, uint8_t mask)
+void write_reg(uint8_t reg, uint8_t value, uint8_t mask, uint8_t sequence)
 {
 
     char found = 1;
@@ -644,11 +737,11 @@ void write_reg(uint8_t reg, uint8_t value, uint8_t mask)
 
     if (found)
     {
-        send_resp2(0xDA, value);
+        send_resp2(0xDA, value, sequence);
     }
     else
     {
-        send_resp2(0xDC, value);
+        send_resp2(0xDC, value, sequence);
     }
 
 }
@@ -656,25 +749,25 @@ void write_reg(uint8_t reg, uint8_t value, uint8_t mask)
 
 
 // -----------------------------------------------------------------------------------------------------------------
-void exec_ext_command(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3)
+void exec_ext_command(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3, uint8_t sequence)
 {
 
     switch (cmd)
     {
     case CMD_L1_ECHO:
-        send_resp2(param, param);
+        send_resp2(param, param, sequence);
         break;
 
     case CMD_L1_READ_REG:
-        read_reg(param);
+        read_reg(param, sequence);
         break;
 
     case CMD_L1_WRITE_REG:
-        write_reg(param, param2, 0xFF);
+        write_reg(param, param2, 0xFF, sequence);
         break;
 
     case CMD_L1_WRITE_REG_MASK:
-        write_reg(param, param2, param3);
+        write_reg(param, param2, param3, sequence);
         break;
 
     case CMD_L1_READ_ADC0:
@@ -687,41 +780,22 @@ void exec_ext_command(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3
         sei();
         tx_init();
         ct_init();
+        resp_init();
         break;
 
     case CMD_L1_SWITCH_WATCHDOG:
         switch_watchdog(param);
-        send_resp2(RESP_OK, 0x00);
+        send_resp2(RESP_OK, 0x00, sequence);
         break;
 
     case CMD_L1_RESET_WATCHDOG:
         reset_watchdog();
-        send_resp2(RESP_OK, 0x00);
+        send_resp2(RESP_OK, 0x00, sequence);
         break;
 
     default:
-        send_resp2(RESP_UNKNOWN_CMD, param);
+        send_resp2(RESP_UNKNOWN_CMD, param, sequence);
     }
-    /*
-    	if (cmd == CMD_L1_ECHO)
-    	{
-    		// echo
-    		send_resp2(param, param);
-    	}
-    	else if (cmd == CMD_L1_READ_REG)
-    	{
-    		read_reg(param);
-    	}
-    	else if (cmd == CMD_L1_WRITE_REG)
-    	{
-    		write_reg(param, param2);
-    	}
-    	else
-    	{
-    		// unknown command
-    		send_resp2(RESP_UNKNOWN_CMD, param);
-    	}
-    */
 
 }
 
@@ -754,6 +828,7 @@ ISR(USART_TXC_vect)
 // -----------------------------------------------------------------------------------------------------------------
 ISR(ADC_vect)
 {
+    // NB! sequence and count of ADC readings is important
     adc0_valueL = ADCL;
     adc0_valueH = ADCH;
 
@@ -772,6 +847,7 @@ int main(void)
     uint8_t value;
 
     uint8_t length = 0;
+    uint8_t sequence = 0;
     uint8_t command = 0;
     uint8_t parameter = 0;
     uint8_t parameter2 = 0;
@@ -780,14 +856,16 @@ int main(void)
 
     serial_init();
 
-    send_resp2(RESP_RESET_MARKER_A0, RESP_RESET_MARKER_A1);
+    send_resp2(RESP_RESET_MARKER_A0, RESP_RESET_MARKER_A1, 0);
 
-    send_resp2(RESP_RESET_MARKER_B0, RESP_RESET_MARKER_B1);
+    send_resp2(RESP_RESET_MARKER_B0, RESP_RESET_MARKER_B1, 0);
 
     for (;;)
     {
         crc 	= 0xFF;
 
+
+        sequence = 0;
         command = 0;
         parameter = 0;
         parameter2 = 0;
@@ -825,13 +903,22 @@ int main(void)
 
             if (length >= 2)
             {
+                // command
+                value 	= recvchar();
+                crc 	= crc_update(crc, value);
+                sequence = value;
+
+            }
+
+            if (length >= 3)
+            {
                 // parameter
                 value 	= recvchar();
                 crc 	= crc_update(crc, value);
                 parameter = value;
             }
 
-            if (length >= 3)
+            if (length >= 4)
             {
                 // parameter2
                 value 	= recvchar();
@@ -839,7 +926,7 @@ int main(void)
                 parameter2 = value;
             }
 
-            if (length >= 4)
+            if (length >= 5)
             {
                 // parameter2
                 value 	= recvchar();
@@ -855,13 +942,13 @@ int main(void)
             {
 
                 // forward validated input
-                exec_ext_command(command, parameter, parameter2, parameter3);
+                exec_ext_command(command, parameter, parameter2, parameter3, sequence);
 
             }
             else
             {
                 // crc not matched
-                send_resp2(RESP_ERROR_CRC_MISMATCH, crc);
+                send_resp2(RESP_ERROR_CRC_MISMATCH, crc, sequence);
             }
 
 
@@ -869,7 +956,7 @@ int main(void)
         else
         {
             // not in sync
-            send_resp2(RESP_ERROR_NOT_IN_SYNC, value);
+            send_resp2(RESP_ERROR_NOT_IN_SYNC, value, sequence);
         }
 
     }
