@@ -854,6 +854,8 @@ int main(void)
     uint8_t parameter3 = 0;
     uint8_t ext_crc;
 
+    tx_context.enabled = 0;
+
     serial_init();
 
     send_resp2(RESP_RESET_MARKER_A0, RESP_RESET_MARKER_A1, 0);
