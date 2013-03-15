@@ -63,6 +63,14 @@
         <property name="multilineReportable" ref="hidStickDriver"/>
     </bean>
 
+    <bean id="commandLineControl" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
+        <property name="x"                   value="100"/>
+        <property name="y"                   value="400"/>
+        <property name="multilineReportable" ref="commandLines"/>
+    </bean>
+
+
+
     <bean id="bufferedScreen" class="dbg.electronics.robodrv.graphics.MultiBufferFullScreen">
         <property name="widgets">
             <list>
@@ -71,13 +79,20 @@
                 <!--
                 <ref bean="widgetHidControls"/>
                 -->
+                <ref bean="commandLineControl"/>
+
             </list>
         </property>
         <property name="keyListener" ref="dashboardKeyListener"/>
     </bean>
 
+    <bean id="commandLines" class="dbg.electronics.robodrv.graphics.widgets.CommandLines">
+
+    </bean>
+
     <bean id="dashboardKeyListener" class="dbg.electronics.robodrv.graphics.DashboardKeyListener">
-        <property name="eventListener" ref="orchestrator"/>
+        <property name="eventListener"      ref="orchestrator"/>
+        <property name="commandLines"       ref="commandLines"/>
     </bean>
 
 

@@ -2,6 +2,7 @@ package dbg.electronics.robodrv.graphics;
 
 import dbg.electronics.robodrv.Event;
 import dbg.electronics.robodrv.EventListener;
+import dbg.electronics.robodrv.graphics.widgets.CommandLines;
 import dbg.electronics.robodrv.logging.LoggerFactory;
 import dbg.electronics.robodrv.logging.SimpleLogger;
 
@@ -16,9 +17,15 @@ public class DashboardKeyListener implements KeyListener {
 
     private EventListener<Event> eventListener;
 
+    private CommandLines commandLines;
+
 
     public void setEventListener(EventListener<Event> eventListener) {
         this.eventListener = eventListener;
+    }
+
+    public void setCommandLines(CommandLines commandLines) {
+        this.commandLines = commandLines;
     }
 
     @Override
@@ -36,6 +43,11 @@ public class DashboardKeyListener implements KeyListener {
         if (e.getKeyCode() == 27) {
             eventListener.onEvent(new Event(SHUTDOWN));
         }
+        
+        //if (e.getKeyChar() )
+
+        commandLines.onChar(e.getKeyChar());
+        
     }
 
     @Override
