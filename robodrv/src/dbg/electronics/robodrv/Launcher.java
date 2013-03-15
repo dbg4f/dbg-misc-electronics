@@ -11,6 +11,7 @@ public class Launcher {
         //Orchestrator.getInstance().start();
 
 
+
         ApplicationContext context = new ClassPathXmlApplicationContext(new String[] {"robodrv-commons.xml"});
 
         Orchestrator orchestrator = (Orchestrator) context.getBean("orchestrator");
