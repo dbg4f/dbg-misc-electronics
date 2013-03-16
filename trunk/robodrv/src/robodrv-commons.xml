@@ -86,7 +86,7 @@
         <property name="keyListener" ref="dashboardKeyListener"/>
     </bean>
 
-    <bean id="commandLines" class="dbg.electronics.robodrv.graphics.widgets.CommandLines">
+    <bean id="commandLines" class="dbg.electronics.robodrv.graphics.CommandLines">
 
     </bean>
 

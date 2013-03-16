@@ -2,7 +2,6 @@ package dbg.electronics.robodrv.graphics;
 
 import dbg.electronics.robodrv.Event;
 import dbg.electronics.robodrv.EventListener;
-import dbg.electronics.robodrv.graphics.widgets.CommandLines;
 import dbg.electronics.robodrv.logging.LoggerFactory;
 import dbg.electronics.robodrv.logging.SimpleLogger;
 
