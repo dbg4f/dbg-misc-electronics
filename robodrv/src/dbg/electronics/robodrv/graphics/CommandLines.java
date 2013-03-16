@@ -20,15 +20,19 @@ public class CommandLines implements MultilineReportable {
     @Override
     public String[] toStringArray() {
 
-        if (System.currentTimeMillis() - lastToggleTime > CURSOR_BLINK_INTERVAL_MSEC) {
-            toggleCursor();
+        if (isCursorBlinkPeriodExpired()) {
+            toggleCursorBlinking();
         }
 
         return new String[]{commandLine + currentCursorChar};  //To change body of implemented methods use File | Settings | File Templates.
     }
 
+    private boolean isCursorBlinkPeriodExpired() {
+        return System.currentTimeMillis() - lastToggleTime > CURSOR_BLINK_INTERVAL_MSEC;
+    }
 
-    private void toggleCursor() {
+
+    private void toggleCursorBlinking() {
         currentCursorChar = (currentCursorChar == CURSOR_CHAR ? ' ' : CURSOR_CHAR);
         lastToggleTime = System.currentTimeMillis();
     }
