@@ -2,6 +2,8 @@ package dbg.electronics.robodrv.mcu;
 
 import java.util.concurrent.atomic.AtomicLong;
 
+import static dbg.electronics.robodrv.mcu.McuUtils.crcPutToTail;
+
 public class McuCommand {
 
     /*
@@ -30,7 +32,27 @@ public class McuCommand {
 #define START_ASYNC_MARKER_CT   0x52
 
 
+out:
 marker,length,command,sequence,params...,crc
+
+in:
+packet marker,length,sequence,param1,param2,crc
+adc marker,values[3..4],crc
+ct marker,value,crc
+
+
+
+    crc = send_with_crc(crc, START_PACKET_MARKER);
+    crc = send_with_crc(crc, 0x03);
+    crc = send_with_crc(crc, sequence);
+    crc = send_with_crc(crc, byte1);
+    crc = send_with_crc(crc, byte2);
+    crc = send_with_crc(crc, crc);
+
+    p_resp_context->response[0] = 3; // length of resp bytes
+    p_resp_context->response[1] = sequence;
+    p_resp_context->response[2] = byte1;
+    p_resp_context->response[3] = byte2;
 
 
      */
@@ -44,8 +66,6 @@ marker,length,command,sequence,params...,crc
     private byte sequence;
     private byte[] params;
     private byte[] rawCommand;
-    private byte crc;
-
 
     private McuCommand(CodifierAware cmd,  int...  params) {
 
@@ -75,50 +95,13 @@ marker,length,command,sequence,params...,crc
         return (byte)(sequenceSource.incrementAndGet() & 0xFF);
     }
 
-    private void crcPutToTail(byte[] content) {
-
-        byte crc = (byte) 0xFF;
-
-        for (int i=0; i<content.length - 1; i++) {
-            crc = crcUpdate(crc, content[i]);
-        }
-
-        content[content.length - 1] = crc;
-
-    }
-
-    private byte crcUpdate(byte crc, byte data) {
-
-        int i;
-
-        crc ^= data;
-
-        for (i = 0; i < 8; i++) {
-            if ((crc & 0x80) != 0x00) {
-                crc = (byte) ((crc << 1) ^ 0xE5);
-            } else {
-                crc <<= 1;
-            }
-        }
-
-        return crc;
-    }
-
-    private String bytesToString(byte[] bytes) {
-        StringBuilder builder = new StringBuilder();
-        for (byte oneByte : bytes) {
-            builder.append(String.format("0x%02X(%03d) ", oneByte, oneByte & 0xFF));
-        }
-        return builder.toString();
-    }
-
     public String toRawBytesString() {
-        return bytesToString(rawCommand);
+        return McuUtils.bytesToString(rawCommand);
     }
 
     @Override
     public String toString() {
-        return String.format("%s [%03d] %s", cmd.toString(), sequence & 0xFF, bytesToString(params));
+        return String.format("%s [%03d] %s", cmd.toString(), sequence & 0xFF, McuUtils.bytesToString(params));
     }
 
 
