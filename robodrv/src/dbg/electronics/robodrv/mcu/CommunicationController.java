@@ -5,19 +5,18 @@ import dbg.electronics.robodrv.logging.SimpleLogger;
 
 import java.io.IOException;
 
-public class CommunicationController implements McuBytesWriter{
+import static dbg.electronics.robodrv.mcu.ChannelStatus.CONNECTED;
+import static dbg.electronics.robodrv.mcu.ChannelStatus.FAILURE;
+
+public class CommunicationController implements McuBytesWriter {
 
     private static final SimpleLogger log = LoggerFactory.getLogger();
-    
-    enum Status {
-        UNKNWON,
-        CONNECTED,
-        FAILURE
-    }
 
-    private Status status = Status.UNKNWON;
+    private ChannelStatus status = ChannelStatus.UNKNWON;
 
     private McuSocketCommunicator socketCommunicator;
+
+    private ChannelStatusListener statusListener;
 
     public void setSocketCommunicator(McuSocketCommunicator socketCommunicator) {
         this.socketCommunicator = socketCommunicator;
@@ -28,11 +27,25 @@ public class CommunicationController implements McuBytesWriter{
 
         try {
             socketCommunicator.write(command);
-            status = Status.CONNECTED;
+            updateStatus(CONNECTED);
         }
         catch (Exception e) {
             log.error("Communication error while sending bytes command : " + e.getMessage(), e);
-            status = Status.FAILURE;
+            updateStatus(FAILURE);
+        }
+
+    }
+
+    private void updateStatus(ChannelStatus communicationChannelStatus) {
+
+        if (status != communicationChannelStatus) {
+
+            log.info("Status change " + status + "->" + communicationChannelStatus);
+
+            status = communicationChannelStatus;
+
+            statusListener.onStatusChanged(status);
+
         }
 
     }
@@ -46,14 +59,15 @@ public class CommunicationController implements McuBytesWriter{
             }
             catch (Exception e) {
                 log.error("Communication error while listening bytes report : " + e.getMessage(), e);
-                status = Status.FAILURE;
+                updateStatus(FAILURE);
             }
 
-            if (status == Status.FAILURE) {
+            if (status == ChannelStatus.FAILURE) {
 
                 try {
                     Thread.sleep(3000);
-                } catch (InterruptedException e) {
+                }
+                catch (InterruptedException e) {
                     break;
                 }
 
@@ -61,7 +75,8 @@ public class CommunicationController implements McuBytesWriter{
 
                     socketCommunicator.init();
 
-                    status = Status.CONNECTED;
+                    updateStatus(CONNECTED);
+
                 }
                 catch (Exception e) {
                     log.error("Failed to restart communication : " + e.getMessage(), e);
