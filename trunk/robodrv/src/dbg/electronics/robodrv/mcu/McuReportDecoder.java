@@ -42,7 +42,7 @@ public class McuReportDecoder implements McuBytesListener {
 
             inSync = false;
 
-            // start branching of candidates
+            parallelDecode(nextByte);
 
         }
         else if (mainReportCandidate.isValidReportReady()) {
