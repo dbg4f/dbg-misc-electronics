@@ -13,12 +13,16 @@ public enum ReportMarker {
     private byte code;
 
     public static boolean isValidMarker(byte value) {
+        return fromByte(value) != null;
+    }
+
+    public static ReportMarker fromByte(byte value) {
         for (ReportMarker marker : ReportMarker.values()) {
             if (marker.getCode() == value) {
-                return true;
+                return marker;
             }
         }
-        return false;
+        return null;
     }
 
     public byte getCode() {
