@@ -75,12 +75,13 @@ ct marker,value,crc
         rawCommand = new byte[params.length + 5];
 
         rawCommand[0] = START_PACKET_MARKER;
-        rawCommand[1] = (byte)(params.length + 4);
+        rawCommand[1] = (byte)(params.length + 2);
         rawCommand[2] = (byte)cmd.toCode();
         rawCommand[3] = this.sequence;
 
         for (int i=0; i<params.length; i++) {
             rawCommand[i + 4] = (byte) params[i];
+            this.params[i] = (byte)params[i];
         }
 
         crcPutToTail(rawCommand);
@@ -93,6 +94,10 @@ ct marker,value,crc
 
     private byte nextSequence() {
         return (byte)(sequenceSource.incrementAndGet() & 0xFF);
+    }
+
+    public byte[] getRawCommand() {
+        return rawCommand;
     }
 
     public String toRawBytesString() {
