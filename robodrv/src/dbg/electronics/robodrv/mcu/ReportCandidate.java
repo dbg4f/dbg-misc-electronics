@@ -63,7 +63,7 @@ public class ReportCandidate {
         else if (bytesCounter == 3 && marker == ReportMarker.COMMAND_RESPONSE) {
             sequence = nextByte;
         }
-        else if (expectedLength < paramsList.size()) {
+        else if (expectedLength > paramsList.size()) {
             paramsList.add(nextByte);
         }
         else {
@@ -83,15 +83,15 @@ public class ReportCandidate {
 
         byte crc = (byte) 0xFF;
 
-        crcUpdate(crc, marker.getCode());
+        crc = crcUpdate(crc, marker.getCode());
 
         if (marker == ReportMarker.COMMAND_RESPONSE) {
-            crcUpdate(crc, (byte) expectedLength);
-            crcUpdate(crc, sequence);
+            crc = crcUpdate(crc, (byte) expectedLength);
+            crc = crcUpdate(crc, sequence);
         }
 
         for (byte param : paramsList) {
-            crcUpdate(crc, param);
+            crc = crcUpdate(crc, param);
         }
         
         return crc;

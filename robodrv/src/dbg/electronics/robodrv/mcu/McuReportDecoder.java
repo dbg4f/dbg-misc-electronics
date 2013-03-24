@@ -9,11 +9,11 @@ public class McuReportDecoder implements McuBytesListener {
 
     private McuReportListener reportListener;
 
-    private ReportCandidate mainReportCandidate;
+    private ReportCandidate mainReportCandidate = new ReportCandidate();
 
     private List<ReportCandidate> parallelCandidates = new ArrayList<ReportCandidate>();
 
-    private boolean inSync = true;
+    private boolean inSync = false;
 
     public void setReportListener(McuReportListener reportListener) {
         this.reportListener = reportListener;
