@@ -12,7 +12,7 @@ public class McuReport {
 
         marker = candidate.marker;
         sequence = candidate.sequence;
-        params = new byte[params.length];
+        params = new byte[candidate.paramsList.size()];
         for (int i=0; i<params.length; i++) {
             params[i] = candidate.paramsList.get(i);
         }
