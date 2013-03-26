@@ -9,6 +9,8 @@ public class McuSocketCommunicator implements McuBytesWriter {
     private int port;
     private Socket socket;
     private McuBytesListener bytesListener;
+    private long bytesSent;
+    private long bytesReceived;
 
     public void setBytesListener(McuBytesListener bytesListener) {
         this.bytesListener = bytesListener;
@@ -26,6 +28,7 @@ public class McuSocketCommunicator implements McuBytesWriter {
     @Override
     public void write(byte[] command) throws IOException {
         socket.getOutputStream().write(command);
+        bytesSent += command.length;
     }
 
     public void listeningCycle() throws IOException {
@@ -39,6 +42,14 @@ public class McuSocketCommunicator implements McuBytesWriter {
     public void waitAndProcessNextByte() throws IOException {
         int nextValue = socket.getInputStream().read();
         bytesListener.onNextByte((byte)nextValue);
+        bytesReceived++;
     }
 
+    public long getBytesSent() {
+        return bytesSent;
+    }
+
+    public long getBytesReceived() {
+        return bytesReceived;
+    }
 }

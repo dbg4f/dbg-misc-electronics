@@ -9,3 +9,24 @@
 8. MasterParams History and DB
 9. Failover for MC communications
 
+
+
+UI:
+
+MC connection status, last update, history
+MC protocol status, last update, history
+Echo turnover time
+Rx-Tx Bytes counter
+I
+Vp
+Vs
+Rst vs (HID pos)
+PWM0
+PWM1
+relays
+ticks
+speed
+
+
+
+

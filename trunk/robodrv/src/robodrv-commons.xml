@@ -69,6 +69,10 @@
         <property name="multilineReportable" ref="commandLines"/>
     </bean>
 
+    <bean id="timeSeries" class="dbg.electronics.robodrv.graphics.widgets.TimeSeriesChart" init-method="init">
+        <property name="x"                  value="300"/>
+        <property name="y"                  value="300"/>
+    </bean>
 
 
     <bean id="bufferedScreen" class="dbg.electronics.robodrv.graphics.MultiBufferFullScreen">
@@ -80,6 +84,7 @@
                 <ref bean="widgetHidControls"/>
                 -->
                 <ref bean="commandLineControl"/>
+                <ref bean="timeSeries"/>
 
             </list>
         </property>

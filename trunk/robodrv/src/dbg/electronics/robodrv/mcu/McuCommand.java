@@ -104,6 +104,10 @@ ct marker,value,crc
         return McuUtils.bytesToString(rawCommand);
     }
 
+    public byte getSequence() {
+        return sequence;
+    }
+
     @Override
     public String toString() {
         return String.format("%s [%03d] %s", cmd.toString(), sequence & 0xFF, McuUtils.bytesToString(params));
