@@ -58,7 +58,7 @@ public class ReportCandidate {
             }
         }
         else if (bytesCounter == 2 && marker == ReportMarker.COMMAND_RESPONSE) {
-            expectedLength = nextByte;
+            expectedLength = (nextByte - 1);
         }
         else if (bytesCounter == 3 && marker == ReportMarker.COMMAND_RESPONSE) {
             sequence = nextByte;
@@ -86,7 +86,7 @@ public class ReportCandidate {
         crc = crcUpdate(crc, marker.getCode());
 
         if (marker == ReportMarker.COMMAND_RESPONSE) {
-            crc = crcUpdate(crc, (byte) expectedLength);
+            crc = crcUpdate(crc, (byte) (expectedLength + 1));
             crc = crcUpdate(crc, sequence);
         }
 

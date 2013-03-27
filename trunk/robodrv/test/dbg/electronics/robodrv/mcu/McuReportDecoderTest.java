@@ -6,6 +6,9 @@ import junit.framework.TestCase;
 public class McuReportDecoderTest extends TestCase {
 
     private byte[] adcValues;
+    private byte counter;
+    private byte seq;
+    private byte[] response;
     
     McuReportListener listener = new McuReportListener() {
         @Override
@@ -15,10 +18,13 @@ public class McuReportDecoderTest extends TestCase {
 
         @Override
         public void onCounterUpdate(byte value) {
+            counter = value;
         }
 
         @Override
         public void onCommandResponse(byte sequence, byte[] params) {
+            seq = sequence;
+            response = params;
         }
 
         @Override
@@ -28,7 +34,10 @@ public class McuReportDecoderTest extends TestCase {
 
     @Override
     public void setUp() throws Exception {
-        adcValues = new byte[3];
+        adcValues = new byte[4];
+        seq = -1;
+        response = null;
+        counter = -1;
     }
 
     @Override
@@ -38,7 +47,7 @@ public class McuReportDecoderTest extends TestCase {
 
     public void testDecode() throws Exception {
 
-        int[] TEST_SET = new int[] {0x01, 0x83, 0xF8, 0x06, 0x51, 0x01, 0x7B, 0xF1, 0x08, 0x51, 0x10, 0x83, 0xF8, 0xD4};
+        int[] TEST_SET = new int[] {0x01, 0x83, 0xF8, 0x06, 0x51, 0x06, 0x7C, 0xF0, 0x61, 0xB0};
 
         McuReportDecoder decoder = new McuReportDecoder();
 
@@ -48,20 +57,45 @@ public class McuReportDecoderTest extends TestCase {
             decoder.onNextByte((byte) b);
         }
 
-        assertEquals((byte)0x10, adcValues[0]);
-        assertEquals((byte)0x83, adcValues[1]);
-        assertEquals((byte)0xF8, adcValues[2]);
+        assertEquals((byte)0x06, adcValues[0]);
+        assertEquals((byte)0x7C, adcValues[1]);
+        assertEquals((byte)0xF0, adcValues[2]);
+        assertEquals((byte)0x61, adcValues[3]);
 
     }
 
-    public void testCandidate() {
+    public void testCandidateAdc() {
         ReportCandidate candidate = new ReportCandidate();
 
         candidate.onNextByte((byte)0x51);
+        candidate.onNextByte((byte)0x06);
+        candidate.onNextByte((byte)0x7C);
+        candidate.onNextByte((byte)0xF0);
+        candidate.onNextByte((byte)0x61);
+        candidate.onNextByte((byte)0xB0);
+
+        assertTrue(candidate.isValidReportReady());
+    }
+
+    public void testCandidateCounter() {
+        ReportCandidate candidate = new ReportCandidate();
+
+        candidate.onNextByte((byte)0x52);
+        candidate.onNextByte((byte)0x06);
+        candidate.onNextByte((byte)0x38);
+
+        assertTrue(candidate.isValidReportReady());
+    }
+
+    public void testCandidateResponse() {
+        ReportCandidate candidate = new ReportCandidate();
+
+        candidate.onNextByte((byte)0x55);
+        candidate.onNextByte((byte)0x03);
         candidate.onNextByte((byte)0x01);
-        candidate.onNextByte((byte)0x7B);
-        candidate.onNextByte((byte)0xF1);
-        candidate.onNextByte((byte)0x08);
+        candidate.onNextByte((byte)0x00);
+        candidate.onNextByte((byte)0x00);
+        candidate.onNextByte((byte)0x1C);
 
         assertTrue(candidate.isValidReportReady());
     }

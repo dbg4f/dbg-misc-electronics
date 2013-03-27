@@ -64,7 +64,7 @@
 #define ADC_BUFFER_SIZE         16
 #define ADC_BUFFER_DIV_SHIFT    4
 
-#define ADC_CHANNELS_IN_USE     3
+#define ADC_CHANNELS_IN_USE     4
 
 #define TX_MAX_BUFFER_SIZE      20
 

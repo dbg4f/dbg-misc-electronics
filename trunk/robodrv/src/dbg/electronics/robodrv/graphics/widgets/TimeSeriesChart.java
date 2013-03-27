@@ -74,7 +74,7 @@ public class TimeSeriesChart implements DashboardWidget {
     @Override
     public void onDraw(Graphics2D g2) {
 
-        g2.setColor(Color.LIGHT_GRAY);
+        g2.setColor(Color.DARK_GRAY);
 
         for (int i=1; i<bricksHorizontal; i++) {
             g2.drawLine(x + brickWidth * i, y, x + brickWidth * i, y + bricksVertical * brickHeight);
