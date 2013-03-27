@@ -1,11 +1,15 @@
 package dbg.electronics.robodrv.mcu;
 
+import org.apache.log4j.Logger;
+
 import java.util.ArrayList;
 import java.util.List;
 
 public class McuReportDecoder implements McuBytesListener {
 
-    public static final int ADC_CHANNELS_IN_USE = 3;
+    private static final Logger log = Logger.getLogger(McuReportDecoder.class);
+
+    public static final int ADC_CHANNELS_IN_USE = 4;
 
     private McuReportListener reportListener;
 
@@ -22,6 +26,7 @@ public class McuReportDecoder implements McuBytesListener {
     @Override
     public void onNextByte(byte nextByte) {
 
+        log.debug(String.format("Next byte %02X", nextByte));
 
         if (inSync) {
 
@@ -39,6 +44,8 @@ public class McuReportDecoder implements McuBytesListener {
         mainReportCandidate.onNextByte(nextByte);
 
         if (mainReportCandidate.isWrongWay()) {
+
+            log.info(String.format("Out of sync %02X", nextByte));
 
             inSync = false;
 
@@ -71,6 +78,7 @@ public class McuReportDecoder implements McuBytesListener {
                 mainReportCandidate.reset();
                 inSync = true;
                 parallelCandidates.clear();
+                log.info(String.format("Sync restored %02X", nextByte));
                 break;
             }
 
