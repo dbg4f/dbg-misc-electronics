@@ -16,10 +16,14 @@ public class CommunicationController implements McuBytesWriter {
 
     private McuSocketCommunicator socketCommunicator;
 
-    private ChannelStatusListener statusListener;
+    private ChannelStatusListener<ChannelStatus> statusListener;
 
     public void setSocketCommunicator(McuSocketCommunicator socketCommunicator) {
         this.socketCommunicator = socketCommunicator;
+    }
+
+    public void setStatusListener(ChannelStatusListener<ChannelStatus> statusListener) {
+        this.statusListener = statusListener;
     }
 
     @Override

@@ -5,6 +5,9 @@ import org.apache.log4j.Logger;
 import java.util.ArrayList;
 import java.util.List;
 
+import static dbg.electronics.robodrv.mcu.ProtocolState.IN_SYNC;
+import static dbg.electronics.robodrv.mcu.ProtocolState.NOT_IN_SYNC;
+
 public class McuReportDecoder implements McuBytesListener {
 
     private static final Logger log = Logger.getLogger(McuReportDecoder.class);
@@ -13,14 +16,20 @@ public class McuReportDecoder implements McuBytesListener {
 
     private McuReportListener reportListener;
 
+    private ChannelStatusListener<ProtocolState> statusListener;
+
     private ReportCandidate mainReportCandidate = new ReportCandidate();
 
     private List<ReportCandidate> parallelCandidates = new ArrayList<ReportCandidate>();
 
-    private boolean inSync = false;
+    private ProtocolState syncState = NOT_IN_SYNC;
 
     public void setReportListener(McuReportListener reportListener) {
         this.reportListener = reportListener;
+    }
+
+    public void setStatusListener(ChannelStatusListener<ProtocolState> statusListener) {
+        this.statusListener = statusListener;
     }
 
     @Override
@@ -28,7 +37,7 @@ public class McuReportDecoder implements McuBytesListener {
 
         log.debug(String.format("Next byte %02X", nextByte));
 
-        if (inSync) {
+        if (syncState == IN_SYNC) {
 
             inSynchDecode(nextByte);
 
@@ -47,7 +56,7 @@ public class McuReportDecoder implements McuBytesListener {
 
             log.info(String.format("Out of sync %02X", nextByte));
 
-            inSync = false;
+            changeState(NOT_IN_SYNC);
 
             parallelDecode(nextByte);
 
@@ -56,6 +65,11 @@ public class McuReportDecoder implements McuBytesListener {
             forwardReport(mainReportCandidate.report);
             mainReportCandidate.reset();
         }
+    }
+
+    private void changeState(ProtocolState sync) {
+        syncState = sync;
+        statusListener.onStatusChanged(syncState);
     }
 
     private void parallelDecode(byte nextByte) {
@@ -76,7 +90,7 @@ public class McuReportDecoder implements McuBytesListener {
                 forwardReport(candidate.report);
                 mainReportCandidate = candidate;
                 mainReportCandidate.reset();
-                inSync = true;
+                changeState(IN_SYNC);
                 parallelCandidates.clear();
                 log.info(String.format("Sync restored %02X", nextByte));
                 break;
