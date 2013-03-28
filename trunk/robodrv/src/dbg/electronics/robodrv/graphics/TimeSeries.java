@@ -18,6 +18,6 @@ public class TimeSeries {
     public TimeSeries(String textLine) {
         String[] splitted = textLine.split("\\s");
         this.time = Long.valueOf(splitted[0]);
-        this.value = Integer.valueOf(splitted[1]);
+        this.value = Integer.valueOf(splitted[1]) & 0xFF;
     }
 }

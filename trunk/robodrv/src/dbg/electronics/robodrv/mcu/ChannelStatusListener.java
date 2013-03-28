@@ -1,8 +1,8 @@
 package dbg.electronics.robodrv.mcu;
 
 
-public interface ChannelStatusListener {
+public interface ChannelStatusListener<T extends Enum> {
 
-    void onStatusChanged(ChannelStatus status);
+    void onStatusChanged(T status);
 
 }
