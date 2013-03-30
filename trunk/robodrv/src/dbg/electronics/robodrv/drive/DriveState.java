@@ -13,9 +13,6 @@ public class DriveState implements McuReportListener {
     private int pwrCurrent;  // milliampers
     private int pwrVoltage;  // millivolts
     private int signalVoltage; // millivolts
-    private int echoTurnaroundTime; // msec
-    private int wheelTicks;
-    private int speed; // cm/s
 
     public class ProtocolStateUpdater implements ChannelStatusListener<ProtocolState> {
 
@@ -77,15 +74,4 @@ public class DriveState implements McuReportListener {
         return signalVoltage;
     }
 
-    public int getEchoTurnaroundTime() {
-        return echoTurnaroundTime;
-    }
-
-    public int getWheelTicks() {
-        return wheelTicks;
-    }
-
-    public int getSpeed() {
-        return speed;
-    }
 }

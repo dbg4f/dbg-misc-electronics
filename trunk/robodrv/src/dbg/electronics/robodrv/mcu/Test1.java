@@ -48,7 +48,7 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
 
 
-        //executor.immediateSend(createCommand(ENABLE_ADC));
+        //executor.sendOnly(createCommand(ENABLE_ADC));
 
         McuCommand cmd;
 
