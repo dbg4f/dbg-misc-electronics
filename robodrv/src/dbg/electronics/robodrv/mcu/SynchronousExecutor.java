@@ -17,24 +17,7 @@ public class SynchronousExecutor implements McuReportListener {
     
     private int responseTimeoutSeconds = 1;
 
-    class Response {
-        final byte sequence;
-        final byte[] params;
-        Response(byte sequence, byte[] params) {
-            this.sequence = sequence;
-            this.params = params;
-        }
-
-        @Override
-        public String toString() {
-            return "Response{" +
-                    "sequence=" + sequence +
-                    ", params=" + McuUtils.bytesToString(params) +
-                    '}';
-        }
-    }
-
-    private BlockingQueue<Response> responseBlockingQueue = new ArrayBlockingQueue<Response>(100);
+    private BlockingQueue<CommandResponse> responseBlockingQueue = new ArrayBlockingQueue<CommandResponse>(100);
 
     public void setResponseTimeoutSeconds(int responseTimeoutSeconds) {
         this.responseTimeoutSeconds = responseTimeoutSeconds;
@@ -48,7 +31,7 @@ public class SynchronousExecutor implements McuReportListener {
         this.nextListener = nextListener;
     }
 
-    public byte[] execute(McuCommand cmd) throws IOException, InterruptedException, McuCommunicationException {
+    public CommandResponse execute(McuCommand cmd) throws IOException, InterruptedException, McuCommunicationException {
 
         responseBlockingQueue.clear();
 
@@ -56,7 +39,7 @@ public class SynchronousExecutor implements McuReportListener {
 
         long ts = System.currentTimeMillis();
 
-        Response response = responseBlockingQueue.poll(responseTimeoutSeconds, TimeUnit.SECONDS);
+        CommandResponse response = responseBlockingQueue.poll(responseTimeoutSeconds, TimeUnit.SECONDS);
 
         long execTime = System.currentTimeMillis() - ts;
         
@@ -64,17 +47,24 @@ public class SynchronousExecutor implements McuReportListener {
             throw new McuCommunicationException("Timeout for command " + cmd + " " + cmd.toRawBytesString());
         }
 
+        response.setExecTime(execTime);
+
         if (response.sequence != cmd.getSequence()) {
             throw new McuCommunicationException("Sequence mismatch for command " + cmd + " " + cmd.toRawBytesString() + " response " + response);
         }
         
         log.info("Cmd=" + cmd + " response=" + response + " execTime=" + execTime);
 
-        return response.params;
+        return response;
 
     }
 
-    public void immediateSend(McuCommand cmd) throws IOException {
+    public void sendOnly(McuCommand cmd) throws IOException {
+        log.info("Cmd=" + cmd + " sending, no response expected");
+        immediateSend(cmd);
+    }
+
+    private void immediateSend(McuCommand cmd) throws IOException {
         bytesWriter.write(cmd.getRawCommand());
     }
 
@@ -83,7 +73,7 @@ public class SynchronousExecutor implements McuReportListener {
         nextListener.onCommandResponse(sequence, params);
 
         try {
-            responseBlockingQueue.put(new Response(sequence, params));
+            responseBlockingQueue.put(new CommandResponse(sequence, params));
         } catch (InterruptedException e) {
             // not significant
         }
