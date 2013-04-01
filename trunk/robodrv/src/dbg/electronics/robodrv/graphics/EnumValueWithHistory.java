@@ -1,13 +1,16 @@
 package dbg.electronics.robodrv.graphics;
 
+import dbg.electronics.robodrv.Range;
+
 /**
  */
-public class EnumValueWithHistory<T extends Enum> extends ValueWithHistory {
+public class EnumValueWithHistory<T extends Enum<T>> extends ValueWithHistory {
 
     private final T[] constants;
 
     public EnumValueWithHistory(Enum<T> sampleValue) {
         constants = sampleValue.getDeclaringClass().getEnumConstants();
+        setValueRange(new Range(0, constants.length-1));
     }
 
     public void update(Enum<T> value, long timestamp) {

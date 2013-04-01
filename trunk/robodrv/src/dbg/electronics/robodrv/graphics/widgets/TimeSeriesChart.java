@@ -3,6 +3,7 @@ package dbg.electronics.robodrv.graphics.widgets;
 import dbg.electronics.robodrv.Range;
 import dbg.electronics.robodrv.graphics.DashboardWidget;
 import dbg.electronics.robodrv.graphics.TimeSeries;
+import dbg.electronics.robodrv.graphics.ValueWithHistory;
 import dbg.electronics.robodrv.io.IoUtils;
 
 import java.awt.*;
@@ -13,20 +14,21 @@ import java.util.List;
 
 public class TimeSeriesChart implements DashboardWidget {
 
-    private List<TimeSeries> values = new ArrayList<TimeSeries>();
+    private ValueWithHistory valueWithHistory;
 
     private int brickWidth = 80;
     private int brickHeight = 120;
     private int bricksHorizontal = 12;
     private int bricksVertical = 4;
 
-    private Range timesRange;
-    private Range valuesRange;
-
     private int x, y;
-    
-    public void setValues(List<TimeSeries> values) {
-        this.values = values;
+
+    public void setValueWithHistory(ValueWithHistory valueWithHistory) {
+        this.valueWithHistory = valueWithHistory;
+    }
+
+    public ValueWithHistory getValueWithHistory() {
+        return valueWithHistory;
     }
 
     public void setX(int x) {
@@ -37,58 +39,48 @@ public class TimeSeriesChart implements DashboardWidget {
         this.y = y;
     }
 
-    public void init() throws IOException {
+    public void setBrickWidth(int brickWidth) {
+        this.brickWidth = brickWidth;
+    }
 
-        long timeMax = Integer.MIN_VALUE;
-        long timeMin = Integer.MAX_VALUE;
-        int valuesMax = Integer.MIN_VALUE;
-        int valuesMin = Integer.MAX_VALUE;
+    public void setBrickHeight(int brickHeight) {
+        this.brickHeight = brickHeight;
+    }
 
-        for (String line : IoUtils.readLines("test-set.txt")) {
+    public void setBricksHorizontal(int bricksHorizontal) {
+        this.bricksHorizontal = bricksHorizontal;
+    }
 
-            TimeSeries series = new TimeSeries(line);
-            values.add(series);
-
-            if (series.time > timeMax) {
-                timeMax = series.time;
-            }
-
-            if (series.time < timeMin) {
-                timeMin = series.time;
-            }
-
-            if (series.value > valuesMax) {
-                valuesMax = series.value;
-            }
-
-            if (series.value < valuesMin) {
-                valuesMin = series.value;
-            }
-        }
-
-        timesRange = new Range((int)timeMin, (int)timeMax);
-        valuesRange = new Range(valuesMin, valuesMax);
-
+    public void setBricksVertical(int bricksVertical) {
+        this.bricksVertical = bricksVertical;
     }
 
     @Override
     public void onDraw(Graphics2D g2) {
 
+        g2.setColor(Color.RED);
+
+        g2.drawString(valueWithHistory.getFormattedValue(valueWithHistory.getCurrentValue()), x-20, y+20);
+
         g2.setColor(Color.DARK_GRAY);
-
-        for (int i=1; i<bricksHorizontal; i++) {
-            g2.drawLine(x + brickWidth * i, y, x + brickWidth * i, y + bricksVertical * brickHeight);
-        }
-
-        for (int j=1; j<bricksVertical; j++) {
-            g2.drawLine(x, y + brickHeight * j, x + bricksHorizontal * brickWidth, y + brickHeight * j);
-        }
-
-        g2.drawString(String.valueOf(valuesRange.max), x, y);
-        g2.drawString(String.valueOf(valuesRange.min), x, y + brickHeight * bricksVertical);
 
         Range drawingRangeTimes = new Range(x, x + bricksHorizontal * brickWidth);
         Range drawingRangeValues = new Range(y, y + bricksVertical * brickHeight);
+
+        for (int i=1; i<bricksHorizontal; i++) {
+            g2.drawLine(x + brickWidth * i, y, x + brickWidth * i, drawingRangeValues.max);
+        }
+
+        for (int j=1; j<bricksVertical; j++) {
+            g2.drawLine(x, y + brickHeight * j, drawingRangeTimes.max, y + brickHeight * j);
+        }
+
+        Range valuesRange = valueWithHistory.getCurrentValuesRange();
+        Range timesRange = valueWithHistory.getTimeRange();
+        List<TimeSeries> values = valueWithHistory.getCurrentSeries();
+
+        g2.drawString(valueWithHistory.getFormattedValue(valuesRange.max), x, y);
+        g2.drawString(valueWithHistory.getFormattedValue(valuesRange.min), x, y + brickHeight * bricksVertical);
 
         int cx = timesRange.remapTo((int)values.get(0).time, drawingRangeTimes);
         int cy = valuesRange.remapTo(values.get(0).value, drawingRangeValues);
