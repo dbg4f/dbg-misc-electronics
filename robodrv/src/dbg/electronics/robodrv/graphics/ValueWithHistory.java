@@ -29,11 +29,20 @@ public class ValueWithHistory {
         this.valueFormatString = valueFormatString;
     }
 
+    public void setValueRange(Range valueRange) {
+        this.valueRange = valueRange;
+    }
+
     public synchronized void update(int value, long timestamp) {
 
         timeSeries.add(new TimeSeries(timestamp, value));
         currentValue = value;
 
+        adjustValueRange();
+
+    }
+
+    private void adjustValueRange() {
         if (currentValue > valueRange.max) {
             valueRange = new Range(valueRange.min, currentValue);
         }
@@ -41,7 +50,6 @@ public class ValueWithHistory {
         if (currentValue < valueRange.min) {
             valueRange = new Range(currentValue, valueRange.max);
         }
-
     }
 
     public synchronized List<TimeSeries> getCurrentSeries() {
@@ -68,11 +76,6 @@ public class ValueWithHistory {
 
         }
 
-        // contains only one entry (ts = 0), need to add tail entry
-        if (normalizedSeries.size() == 1) {
-            normalizedSeries.add(new TimeSeries(maxTimeDepth, currentValue));
-        }
-
         timeSeries.removeAll(seriesToRemove);
 
         return normalizedSeries;
@@ -89,6 +92,10 @@ public class ValueWithHistory {
 
     public Range getTimeRange() {
         return timeRange;
+    }
+
+    public int getCurrentValue() {
+        return currentValue;
     }
 
     public String getFormattedValue(int value) {

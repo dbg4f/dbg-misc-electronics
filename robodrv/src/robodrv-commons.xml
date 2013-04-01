@@ -14,6 +14,7 @@
             <list>
                 <ref bean="hidEventFileReader"/>
                 <ref bean="bufferedScreen"/>
+                <ref bean="testDataGenerator"/>
             </list>
         </property>
     </bean>
@@ -69,22 +70,32 @@
         <property name="multilineReportable" ref="commandLines"/>
     </bean>
 
+    <!--
     <bean id="timeSeries" class="dbg.electronics.robodrv.graphics.widgets.TimeSeriesChart" init-method="init">
         <property name="x"                  value="300"/>
         <property name="y"                  value="300"/>
     </bean>
+    -->
 
 
     <bean id="bufferedScreen" class="dbg.electronics.robodrv.graphics.MultiBufferFullScreen">
         <property name="widgets">
             <list>
+                <!--
                 <ref bean="widgetTargetSteering"/>
                 <ref bean="widgetTargetSpeed"/>
+                -->
                 <!--
                 <ref bean="widgetHidControls"/>
                 -->
-                <ref bean="commandLineControl"/>
+
+                <!-- <ref bean="commandLineControl"/> -->
+                <!--
                 <ref bean="timeSeries"/>
+                 -->
+                <ref bean="timeSeriesSeconds"/>
+                <ref bean="timeSeriesChannelStatus"/>
+
 
             </list>
         </property>
@@ -94,6 +105,48 @@
     <bean id="commandLines" class="dbg.electronics.robodrv.graphics.CommandLines">
 
     </bean>
+
+
+    <bean id="testValueWithHistorySeconds" class="dbg.electronics.robodrv.graphics.ValueWithHistory">
+        <property name="valueFormatString" value="%d sec"/>
+        <property name="valueRange">
+            <bean class="dbg.electronics.robodrv.Range">
+                <constructor-arg index="0" value="0" type="int"/>
+                <constructor-arg index="1" value="60" type="int"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="channelStatusValueUnknown" class="java.lang.Enum" factory-method="valueOf">
+        <constructor-arg index = "0"><value>dbg.electronics.robodrv.mcu.ChannelStatus</value></constructor-arg>
+        <constructor-arg index = "1"><value>UNKNWON</value></constructor-arg>
+    </bean>
+
+    <bean id="testValueChannelStatus" class="dbg.electronics.robodrv.graphics.EnumValueWithHistory">
+        <constructor-arg ref="channelStatusValueUnknown"/>
+    </bean>
+
+    <bean id="testDataGenerator" class="dbg.electronics.robodrv.emulator.TestDataGenerator">
+        <property name="secondsValue" ref="testValueWithHistorySeconds"/>
+        <property name="channelStatus" ref="testValueChannelStatus"/>
+    </bean>
+
+    <bean id="timeSeriesSeconds" class="dbg.electronics.robodrv.graphics.widgets.TimeSeriesChart">
+        <property name="valueWithHistory" ref="testValueWithHistorySeconds"/>
+        <property name="x" value="100"/>
+        <property name="y" value="100"/>
+        <property name="bricksHorizontal" value="12"/>
+        <property name="bricksVertical" value="2"/>
+    </bean>
+
+    <bean id="timeSeriesChannelStatus" class="dbg.electronics.robodrv.graphics.widgets.TimeSeriesChart">
+        <property name="valueWithHistory" ref="testValueChannelStatus"/>
+        <property name="x" value="100"/>
+        <property name="y" value="400"/>
+        <property name="bricksHorizontal" value="12"/>
+        <property name="bricksVertical" value="2"/>
+    </bean>
+
 
     <bean id="dashboardKeyListener" class="dbg.electronics.robodrv.graphics.DashboardKeyListener">
         <property name="eventListener"      ref="orchestrator"/>
