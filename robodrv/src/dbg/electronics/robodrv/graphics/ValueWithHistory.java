@@ -10,6 +10,8 @@ import java.util.List;
  */
 public class ValueWithHistory {
 
+    protected String name;
+
     protected int currentValue;
 
     private ArrayList<TimeSeries> timeSeries = new ArrayList<TimeSeries>();
@@ -20,6 +22,14 @@ public class ValueWithHistory {
     private Range valueRange = new Range(0, 0);
 
     private String valueFormatString = "%d";
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getName() {
+        return name;
+    }
 
     public void setMaxTimeDepth(long maxTimeDepth) {
         this.maxTimeDepth = maxTimeDepth;
@@ -103,7 +113,8 @@ public class ValueWithHistory {
     @Override
     public String toString() {
         return "ValueWithHistory{" +
-                "currentValue=" + currentValue +
+                "name='" + name + '\'' +
+                ", currentValue=" + currentValue +
                 ", timeSeries=" + timeSeries +
                 ", maxTimeDepth=" + maxTimeDepth +
                 ", timeRange=" + timeRange +

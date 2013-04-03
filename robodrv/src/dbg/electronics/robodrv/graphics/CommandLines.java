@@ -1,11 +1,18 @@
 package dbg.electronics.robodrv.graphics;
 
 import dbg.electronics.robodrv.head.MultilineReportable;
+import dbg.electronics.robodrv.logging.ValueHistorySerializer;
 
 import java.awt.event.KeyEvent;
+import java.io.IOException;
 
 public class CommandLines implements MultilineReportable {
 
+    private ValueHistorySerializer valueHistorySerializer;
+
+    public void setValueHistorySerializer(ValueHistorySerializer valueHistorySerializer) {
+        this.valueHistorySerializer = valueHistorySerializer;
+    }
 
     public static final char CURSOR_CHAR = '#';
 
@@ -39,10 +46,20 @@ public class CommandLines implements MultilineReportable {
 
 
     public void onChar(char ch) {
+
         if (isPrintableChar(ch)) {
             commandLine += ch;
         } else {
-            commandLine = "";
+            try {
+                if (commandLine.length() > 3)
+                valueHistorySerializer.save(commandLine);
+                commandLine = "saved";
+            } catch (IOException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+
+
+
         }
 
     }

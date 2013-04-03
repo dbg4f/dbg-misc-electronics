@@ -17,11 +17,13 @@
     <bean id="testValueStickX" class="dbg.electronics.robodrv.graphics.ValueWithHistory">
         <property name="valueFormatString" value="%d"/>
         <property name="valueRange" ref="rangeByte"/>
+        <property name="name"       value="Stick X"/>
     </bean>
 
     <bean id="testValueStickY" class="dbg.electronics.robodrv.graphics.ValueWithHistory">
         <property name="valueFormatString" value="%d"/>
         <property name="valueRange" ref="rangeByte"/>
+        <property name="name"       value="Stick Y"/>
     </bean>
 
     <bean id="channelStatusValueUnknown" class="java.lang.Enum" factory-method="valueOf">
