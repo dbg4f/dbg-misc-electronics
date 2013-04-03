@@ -40,6 +40,7 @@ public class HidEventFileReader extends GenericThread {
             readEvents();
         } catch (Exception e) {
             failureListener.onFailure(new Failure("HID input listening failed", e));
+            log.error("HID input listening failed " + e.getMessage(), e);
         }
     }
 
@@ -59,7 +60,7 @@ public class HidEventFileReader extends GenericThread {
 
         BufferedInputStream rd = new BufferedInputStream(inputStream);
 
-        log.info("HID listener started");
+        log.info("HID listener started: " + eventFileName);
 
         while (!Thread.currentThread().isInterrupted()) {
 

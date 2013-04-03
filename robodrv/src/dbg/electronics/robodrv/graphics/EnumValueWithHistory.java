@@ -14,11 +14,25 @@ public class EnumValueWithHistory<T extends Enum<T>> extends ValueWithHistory {
     }
 
     public void update(Enum<T> value, long timestamp) {
+        makeCorner(value, timestamp);
         super.update(value.ordinal(), timestamp);
     }
 
     public void update(Enum<T> value) {
+        makeCorner(value);
         super.update(value.ordinal());
+    }
+
+    private void makeCorner(Enum<T> value, long timestamp) {
+        if (value.ordinal() != currentValue) {
+            update(currentValue, timestamp);
+        }
+    }
+
+    private void makeCorner(Enum<T> value) {
+        if (value.ordinal() != currentValue) {
+            update(currentValue);
+        }
     }
 
     private T getByOrdinal(int ordinal) {

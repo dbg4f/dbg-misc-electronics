@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="commandLines" class="dbg.electronics.robodrv.graphics.CommandLines">
+
+    </bean>
+
+    <bean id="dashboardKeyListener" class="dbg.electronics.robodrv.graphics.DashboardKeyListener">
+        <property name="eventListener"      ref="orchestrator"/>
+        <property name="commandLines"       ref="commandLines"/>
+    </bean>
+
+
+    <bean id="widgetTargetSpeed" class="dbg.electronics.robodrv.graphics.widgets.ClockLikeIndicator">
+        <property name="parameterAccessor"  ref="targetMotionSpeedParamAccessor"/>
+        <property name="x"                  value="600"/>
+        <property name="y"                  value="200"/>
+        <property name="dimension"          value="100"/>
+    </bean>
+
+
+    <bean id="widgetHidControls" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
+        <property name="x"                   value="400"/>
+        <property name="y"                   value="100"/>
+        <property name="multilineReportable" ref="hidStickDriver"/>
+    </bean>
+
+    <bean id="commandLineControl" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
+        <property name="x"                   value="100"/>
+        <property name="y"                   value="400"/>
+        <property name="multilineReportable" ref="commandLines"/>
+    </bean>
+
+
+    <bean id="widgetTargetSteering" class="dbg.electronics.robodrv.graphics.widgets.ClockLikeIndicator">
+        <property name="parameterAccessor"  ref="targetSteeringParamAccessor"/>
+        <property name="x"                  value="200"/>
+        <property name="y"                  value="200"/>
+        <property name="dimension"          value="100"/>
+    </bean>
+
+    <bean id="bufferedScreen" class="dbg.electronics.robodrv.graphics.MultiBufferFullScreen">
+        <property name="widgets">
+            <list>
+                <!--
+                <ref bean="widgetTargetSteering"/>
+                <ref bean="widgetTargetSpeed"/>
+                -->
+                <!--
+                <ref bean="widgetHidControls"/>
+                -->
+
+                <!-- <ref bean="commandLineControl"/> -->
+                <!--
+                <ref bean="timeSeries"/>
+                 -->
+                <ref bean="timeSeriesSeconds"/>
+                <ref bean="timeSeriesChannelStatus"/>
+
+
+            </list>
+        </property>
+        <property name="keyListener" ref="dashboardKeyListener"/>
+    </bean>
+
+
+
+</beans>

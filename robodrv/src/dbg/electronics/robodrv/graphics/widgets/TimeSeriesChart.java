@@ -77,10 +77,15 @@ public class TimeSeriesChart implements DashboardWidget {
 
         Range valuesRange = valueWithHistory.getCurrentValuesRange();
         Range timesRange = valueWithHistory.getTimeRange();
-        List<TimeSeries> values = valueWithHistory.getCurrentSeries();
 
         g2.drawString(valueWithHistory.getFormattedValue(valuesRange.max), x, y);
         g2.drawString(valueWithHistory.getFormattedValue(valuesRange.min), x, y + brickHeight * bricksVertical);
+
+        List<TimeSeries> values = valueWithHistory.getCurrentSeries();
+
+        if (values.size() == 0) {
+            return;
+        }
 
         int cx = timesRange.remapTo((int)values.get(0).time, drawingRangeTimes);
         int cy = valuesRange.remapTo(values.get(0).value, drawingRangeValues);

@@ -10,7 +10,7 @@ import java.util.List;
  */
 public class ValueWithHistory {
 
-    private int currentValue;
+    protected int currentValue;
 
     private ArrayList<TimeSeries> timeSeries = new ArrayList<TimeSeries>();
 
@@ -61,8 +61,6 @@ public class ValueWithHistory {
 
         long currentTs = System.currentTimeMillis();
 
-        normalizedSeries.add(new TimeSeries(0, currentValue));
-
         for (TimeSeries series : timeSeries) {
 
             long relativeTs = currentTs - series.time;
@@ -102,5 +100,15 @@ public class ValueWithHistory {
         return String.format(valueFormatString, value);
     }
 
-
+    @Override
+    public String toString() {
+        return "ValueWithHistory{" +
+                "currentValue=" + currentValue +
+                ", timeSeries=" + timeSeries +
+                ", maxTimeDepth=" + maxTimeDepth +
+                ", timeRange=" + timeRange +
+                ", valueRange=" + valueRange +
+                ", valueFormatString='" + valueFormatString + '\'' +
+                '}';
+    }
 }

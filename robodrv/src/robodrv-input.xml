@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="hidEventFileReader" class="dbg.electronics.robodrv.hid.HidEventFileReader">
+        <property name="eventFileName"      value="${hidEventsFile}"/>
+        <property name="eventListener"      ref="hidStickDriver"/>
+        <property name="failureListener"    ref="orchestrator"/>
+    </bean>
+
+    <bean id="hidStickDriver" class="dbg.electronics.robodrv.hid.StickDriver">
+        <property name="updater"              ref="headController"/>
+        <property name="inputControlListener" ref="orchestrator"/>
+    </bean>
+
+
+</beans>

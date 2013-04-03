@@ -4,10 +4,18 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
-
     <bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
         <property name="locations" value="classpath:config.properties"/>
     </bean>
+
+    <bean id="rangeByte" class="dbg.electronics.robodrv.Range">
+        <constructor-arg index="0" value="0" type="int"/>
+        <constructor-arg index="1" value="255" type="int"/>
+    </bean>
+
+    <import resource="robodrv-testing.xml"/>
+    <import resource="robodrv-graphics.xml"/>
+    <import resource="robodrv-input.xml"/>
 
     <bean id="orchestrator" class="dbg.electronics.robodrv.head.Orchestrator">
         <property name="threads">
@@ -17,21 +25,12 @@
                 <ref bean="testDataGenerator"/>
             </list>
         </property>
-    </bean>
-
-    <bean id="hidEventFileReader" class="dbg.electronics.robodrv.hid.HidEventFileReader">
-        <property name="eventFileName"      value="${hidEventsFile}"/>
-        <property name="eventListener"      ref="hidStickDriver"/>
-        <property name="failureListener"    ref="orchestrator"/>
-    </bean>
-
-    <bean id="hidStickDriver" class="dbg.electronics.robodrv.hid.StickDriver">
-        <property name="updater" ref="headController"/>
+        <property name="stickX" ref="testValueStickX"/>
+        <property name="stickY" ref="testValueStickY"/>
     </bean>
 
     <bean id="headController" class="dbg.electronics.robodrv.head.HeadController" init-method="init">
     </bean>
-
 
     <bean id="targetSteeringParamAccessor" class="dbg.electronics.robodrv.head.TargetParameterAccessor">
         <property name="headController"     ref="headController"/>
@@ -43,115 +42,8 @@
         <property name="type"               value="MOTION_SPEED"/>
     </bean>
 
-    <bean id="widgetTargetSteering" class="dbg.electronics.robodrv.graphics.widgets.ClockLikeIndicator">
-        <property name="parameterAccessor"  ref="targetSteeringParamAccessor"/>
-        <property name="x"                  value="200"/>
-        <property name="y"                  value="200"/>
-        <property name="dimension"          value="100"/>
-    </bean>
-
-    <bean id="widgetTargetSpeed" class="dbg.electronics.robodrv.graphics.widgets.ClockLikeIndicator">
-        <property name="parameterAccessor"  ref="targetMotionSpeedParamAccessor"/>
-        <property name="x"                  value="600"/>
-        <property name="y"                  value="200"/>
-        <property name="dimension"          value="100"/>
-    </bean>
 
 
-    <bean id="widgetHidControls" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
-        <property name="x"                   value="400"/>
-        <property name="y"                   value="100"/>
-        <property name="multilineReportable" ref="hidStickDriver"/>
-    </bean>
-
-    <bean id="commandLineControl" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
-        <property name="x"                   value="100"/>
-        <property name="y"                   value="400"/>
-        <property name="multilineReportable" ref="commandLines"/>
-    </bean>
-
-    <!--
-    <bean id="timeSeries" class="dbg.electronics.robodrv.graphics.widgets.TimeSeriesChart" init-method="init">
-        <property name="x"                  value="300"/>
-        <property name="y"                  value="300"/>
-    </bean>
-    -->
-
-
-    <bean id="bufferedScreen" class="dbg.electronics.robodrv.graphics.MultiBufferFullScreen">
-        <property name="widgets">
-            <list>
-                <!--
-                <ref bean="widgetTargetSteering"/>
-                <ref bean="widgetTargetSpeed"/>
-                -->
-                <!--
-                <ref bean="widgetHidControls"/>
-                -->
-
-                <!-- <ref bean="commandLineControl"/> -->
-                <!--
-                <ref bean="timeSeries"/>
-                 -->
-                <ref bean="timeSeriesSeconds"/>
-                <ref bean="timeSeriesChannelStatus"/>
-
-
-            </list>
-        </property>
-        <property name="keyListener" ref="dashboardKeyListener"/>
-    </bean>
-
-    <bean id="commandLines" class="dbg.electronics.robodrv.graphics.CommandLines">
-
-    </bean>
-
-
-    <bean id="testValueWithHistorySeconds" class="dbg.electronics.robodrv.graphics.ValueWithHistory">
-        <property name="valueFormatString" value="%d sec"/>
-        <property name="valueRange">
-            <bean class="dbg.electronics.robodrv.Range">
-                <constructor-arg index="0" value="0" type="int"/>
-                <constructor-arg index="1" value="60" type="int"/>
-            </bean>
-        </property>
-    </bean>
-
-    <bean id="channelStatusValueUnknown" class="java.lang.Enum" factory-method="valueOf">
-        <constructor-arg index = "0"><value>dbg.electronics.robodrv.mcu.ChannelStatus</value></constructor-arg>
-        <constructor-arg index = "1"><value>UNKNWON</value></constructor-arg>
-    </bean>
-
-    <bean id="testValueChannelStatus" class="dbg.electronics.robodrv.graphics.EnumValueWithHistory">
-        <constructor-arg ref="channelStatusValueUnknown"/>
-    </bean>
-
-    <bean id="testDataGenerator" class="dbg.electronics.robodrv.emulator.TestDataGenerator">
-        <property name="secondsValue" ref="testValueWithHistorySeconds"/>
-        <property name="channelStatus" ref="testValueChannelStatus"/>
-    </bean>
-
-    <bean id="timeSeriesSeconds" class="dbg.electronics.robodrv.graphics.widgets.TimeSeriesChart">
-        <property name="valueWithHistory" ref="testValueWithHistorySeconds"/>
-        <property name="x" value="100"/>
-        <property name="y" value="100"/>
-        <property name="bricksHorizontal" value="12"/>
-        <property name="bricksVertical" value="2"/>
-    </bean>
-
-    <bean id="timeSeriesChannelStatus" class="dbg.electronics.robodrv.graphics.widgets.TimeSeriesChart">
-        <property name="valueWithHistory" ref="testValueChannelStatus"/>
-        <property name="x" value="100"/>
-        <property name="y" value="400"/>
-        <property name="bricksHorizontal" value="12"/>
-        <property name="bricksVertical" value="2"/>
-    </bean>
-
-
-    <bean id="dashboardKeyListener" class="dbg.electronics.robodrv.graphics.DashboardKeyListener">
-        <property name="eventListener"      ref="orchestrator"/>
-        <property name="commandLines"       ref="commandLines"/>
-    </bean>
 
 
 </beans>
