@@ -44,6 +44,11 @@ public class TestDataGenerator extends GenericThread {
 
             channelStatus.update(status);
 
+
+            //System.out.println("secondsValue = " + secondsValue.getCurrentSeries());
+
+            //System.out.println("channelStatus = " + channelStatus.getCurrentSeries());
+
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException e) {

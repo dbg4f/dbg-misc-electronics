@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+           http://www.springframework.org/schema/beans/spring-beans.xsd">
+
+    <bean id="testValueWithHistorySeconds" class="dbg.electronics.robodrv.graphics.ValueWithHistory">
+        <property name="valueFormatString" value="%d sec"/>
+        <property name="valueRange">
+            <bean class="dbg.electronics.robodrv.Range">
+                <constructor-arg index="0" value="0" type="int"/>
+                <constructor-arg index="1" value="60" type="int"/>
+            </bean>
+        </property>
+    </bean>
+
+    <bean id="testValueStickX" class="dbg.electronics.robodrv.graphics.ValueWithHistory">
+        <property name="valueFormatString" value="%d"/>
+        <property name="valueRange" ref="rangeByte"/>
+    </bean>
+
+    <bean id="testValueStickY" class="dbg.electronics.robodrv.graphics.ValueWithHistory">
+        <property name="valueFormatString" value="%d"/>
+        <property name="valueRange" ref="rangeByte"/>
+    </bean>
+
+    <bean id="channelStatusValueUnknown" class="java.lang.Enum" factory-method="valueOf">
+        <constructor-arg index = "0"><value>dbg.electronics.robodrv.mcu.ChannelStatus</value></constructor-arg>
+        <constructor-arg index = "1"><value>UNKNWON</value></constructor-arg>
+    </bean>
+
+    <bean id="testValueChannelStatus" class="dbg.electronics.robodrv.graphics.EnumValueWithHistory">
+        <constructor-arg ref="channelStatusValueUnknown"/>
+    </bean>
+
+    <bean id="testDataGenerator" class="dbg.electronics.robodrv.emulator.TestDataGenerator">
+        <property name="secondsValue" ref="testValueWithHistorySeconds"/>
+        <property name="channelStatus" ref="testValueChannelStatus"/>
+    </bean>
+
+
+
+
+
+    <bean id="timeSeriesSeconds" class="dbg.electronics.robodrv.graphics.widgets.TimeSeriesChart">
+        <property name="valueWithHistory" ref="testValueStickX"/>
+        <property name="x" value="100"/>
+        <property name="y" value="100"/>
+        <property name="bricksHorizontal" value="12"/>
+        <property name="bricksVertical" value="2"/>
+    </bean>
+
+    <bean id="timeSeriesChannelStatus" class="dbg.electronics.robodrv.graphics.widgets.TimeSeriesChart">
+        <property name="valueWithHistory" ref="testValueStickY"/>
+        <property name="x" value="100"/>
+        <property name="y" value="400"/>
+        <property name="bricksHorizontal" value="12"/>
+        <property name="bricksVertical" value="2"/>
+    </bean>
+
+
+
+</beans>

@@ -20,4 +20,12 @@ public class TimeSeries {
         this.time = Long.valueOf(splitted[0]);
         this.value = Integer.valueOf(splitted[1]) & 0xFF;
     }
+
+    @Override
+    public String toString() {
+        return "TimeSeries{" +
+                "time=" + time +
+                ", value=" + value +
+                '}';
+    }
 }
