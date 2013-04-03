@@ -30,6 +30,8 @@ public class TextLines implements DashboardWidget {
     @Override
     public void onDraw(Graphics2D g2) {
 
+        g2.setColor(Color.WHITE);
+
         g2.setFont(font);
 
         int currentY = y;

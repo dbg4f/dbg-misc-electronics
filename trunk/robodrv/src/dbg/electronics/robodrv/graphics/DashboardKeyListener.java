@@ -12,7 +12,7 @@ import static dbg.electronics.robodrv.Event.EventCode.SHUTDOWN;
 
 public class DashboardKeyListener implements KeyListener {
 
-    private static final SimpleLogger log = LoggerFactory.getLogger();
+    private static final SimpleLogger log = LoggerFactory.getLogger(DashboardKeyListener.class.getName());
 
     private EventListener<Event> eventListener;
 

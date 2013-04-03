@@ -5,7 +5,7 @@
            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
     <bean id="commandLines" class="dbg.electronics.robodrv.graphics.CommandLines">
-
+       <property name="valueHistorySerializer" ref="valueHistorySerializer"/>
     </bean>
 
     <bean id="dashboardKeyListener" class="dbg.electronics.robodrv.graphics.DashboardKeyListener">
@@ -30,7 +30,7 @@
 
     <bean id="commandLineControl" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
         <property name="x"                   value="100"/>
-        <property name="y"                   value="400"/>
+        <property name="y"                   value="800"/>
         <property name="multilineReportable" ref="commandLines"/>
     </bean>
 
@@ -53,10 +53,12 @@
                 <ref bean="widgetHidControls"/>
                 -->
 
-                <!-- <ref bean="commandLineControl"/> -->
+                <ref bean="commandLineControl"/>
                 <!--
                 <ref bean="timeSeries"/>
                  -->
+
+
                 <ref bean="timeSeriesSeconds"/>
                 <ref bean="timeSeriesChannelStatus"/>
 
@@ -66,6 +68,14 @@
         <property name="keyListener" ref="dashboardKeyListener"/>
     </bean>
 
+    <bean id="valueHistorySerializer" class="dbg.electronics.robodrv.logging.ValueHistorySerializer">
+        <property name="values">
+            <list>
+                <ref bean="testValueStickX"/>
+                <ref bean="testValueStickY"/>
+            </list>
+        </property>
+    </bean>
 
 
 </beans>

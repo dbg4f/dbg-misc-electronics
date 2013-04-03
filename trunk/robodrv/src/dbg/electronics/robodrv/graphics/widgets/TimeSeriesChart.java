@@ -60,7 +60,7 @@ public class TimeSeriesChart implements DashboardWidget {
 
         g2.setColor(Color.RED);
 
-        g2.drawString(valueWithHistory.getFormattedValue(valueWithHistory.getCurrentValue()), x-20, y+20);
+        g2.drawString(valueWithHistory.getName() + " " + valueWithHistory.getFormattedValue(valueWithHistory.getCurrentValue()), x-20, y+20);
 
         g2.setColor(Color.DARK_GRAY);
 
