@@ -13,6 +13,11 @@
         <constructor-arg index="1" value="255" type="int"/>
     </bean>
 
+    <bean id="rangeMinute" class="dbg.electronics.robodrv.Range">
+        <constructor-arg index="0" value="0" type="int"/>
+        <constructor-arg index="1" value="60000" type="int"/>
+    </bean>
+
     <import resource="robodrv-testing.xml"/>
     <import resource="robodrv-graphics.xml"/>
     <import resource="robodrv-input.xml"/>

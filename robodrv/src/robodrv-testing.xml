@@ -43,13 +43,14 @@
 
 
 
-
+    <!--
     <bean id="timeSeriesSeconds" class="dbg.electronics.robodrv.graphics.widgets.TimeSeriesChart">
         <property name="valueWithHistory" ref="testValueStickX"/>
         <property name="x" value="100"/>
         <property name="y" value="100"/>
         <property name="bricksHorizontal" value="12"/>
         <property name="bricksVertical" value="2"/>
+        <property name=""
     </bean>
 
     <bean id="timeSeriesChannelStatus" class="dbg.electronics.robodrv.graphics.widgets.TimeSeriesChart">
@@ -58,6 +59,26 @@
         <property name="y" value="400"/>
         <property name="bricksHorizontal" value="12"/>
         <property name="bricksVertical" value="2"/>
+    </bean>
+        -->
+    <bean id="timeSeriesTwo" class="dbg.electronics.robodrv.graphics.widgets.TimeSeriesChart" init-method="init">
+        <property name="valueWithHistoryList">
+            <list>
+                <ref bean="testValueStickX"/>
+                <ref bean="testValueStickY"/>
+            </list>
+        </property>
+        <property name="timesRange" ref="rangeMinute"/>
+        <property name="x" value="100"/>
+        <property name="y" value="400"/>
+        <property name="bricksHorizontal" value="12"/>
+        <property name="bricksVertical" value="2"/>
+    </bean>
+
+    <bean id="timeSeriesAgenda" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
+        <property name="multilineReportable" ref="timeSeriesTwo"/>
+        <property name="x" value="100"/>
+        <property name="y" value="100"/>
     </bean>
 
 

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
@@ -30,7 +30,7 @@
 
     <bean id="commandLineControl" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
         <property name="x"                   value="100"/>
-        <property name="y"                   value="800"/>
+        <property name="y"                   value="700"/>
         <property name="multilineReportable" ref="commandLines"/>
     </bean>
 
@@ -58,10 +58,14 @@
                 <ref bean="timeSeries"/>
                  -->
 
-
+                <!--
                 <ref bean="timeSeriesSeconds"/>
                 <ref bean="timeSeriesChannelStatus"/>
 
+                -->
+
+                <ref bean="timeSeriesTwo"/>
+                <ref bean="timeSeriesAgenda"/>
 
             </list>
         </property>
@@ -77,5 +81,11 @@
         </property>
     </bean>
 
-
+<!--
+    <bean id="colorArray" class="java.util.ArrayList">
+        <constructor-arg>
+            <util:constant static-field="java.awt.Color.RED"/>
+        </constructor-arg>
+    </bean>
+  -->
 </beans>
