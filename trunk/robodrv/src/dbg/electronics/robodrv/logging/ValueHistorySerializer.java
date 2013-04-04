@@ -13,6 +13,8 @@ public class ValueHistorySerializer {
 
     private List<ValueWithHistory> values = new ArrayList<ValueWithHistory>();
 
+    private String csvDelimiter = ",";
+
     public void setValues(List<ValueWithHistory> values) {
         this.values = values;
     }
@@ -41,9 +43,9 @@ public class ValueHistorySerializer {
 
         String toCsvRow(Set<String> colOrder) {
             StringBuilder builder = new StringBuilder();
-            builder.append(time).append(";");
+            builder.append(time).append(csvDelimiter);
             for (String name : colOrder) {
-                builder.append(columns.get(name)).append(";");
+                builder.append(columns.get(name)).append(csvDelimiter);
             }
             builder.append("\n");
             return builder.toString();
@@ -84,10 +86,10 @@ public class ValueHistorySerializer {
 
         StringBuilder header = new StringBuilder();
 
-        header.append("time").append(";");
+        header.append("time").append(csvDelimiter);
 
         for (String name : mapByNames.keySet()) {
-            header.append(name).append(";");
+            header.append(name).append(csvDelimiter);
         }
 
         header.append("\n");
