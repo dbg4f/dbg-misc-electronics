@@ -44,6 +44,8 @@
 #define CMD_L1_SWITCH_WATCHDOG 	0x18
 #define CMD_L1_RESET_WATCHDOG 	0x19
 #define CMD_L1_WRITE_REG_MASK 	0x1A
+#define CMD_L1_SET_PORT_BITS 	0x1B
+#define CMD_L1_CLEAR_PORT_BITS 	0x1C
 
 #define RESP_UNKNOWN_CMD	0xEE
 #define RESP_OK	            0xAA
@@ -746,7 +748,65 @@ void write_reg(uint8_t reg, uint8_t value, uint8_t mask, uint8_t sequence)
 
 }
 
+// -----------------------------------------------------------------------------------------------------------------
+#define CASE_SET_PORT(REG_NAME, REG_SEL) case REG_SEL: REG_NAME |= mask; break;
+void set_port_bits(uint8_t reg, uint8_t mask, uint8_t sequence)
+{
 
+    char found = 1;
+
+    switch (reg) {
+
+        CASE_SET_PORT(PORTD   ,0x12)
+        CASE_SET_PORT(PORTC   ,0x15)
+        CASE_SET_PORT(PORTB   ,0x18)
+        CASE_SET_PORT(PORTA   ,0x1B)
+
+    default :
+        found = 0;
+    }
+
+    if (found)
+    {
+        send_resp2(0xDA, mask, sequence);
+    }
+    else
+    {
+        send_resp2(0xDC, mask, sequence);
+    }
+
+
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+#define CASE_CLEAR_PORT(REG_NAME, REG_SEL) case REG_SEL: REG_NAME &= mask; break;
+void clear_port_bits(uint8_t reg, uint8_t mask, uint8_t sequence)
+{
+
+    char found = 1;
+
+    switch (reg) {
+
+        CASE_CLEAR_PORT(PORTD   ,0x12)
+        CASE_CLEAR_PORT(PORTC   ,0x15)
+        CASE_CLEAR_PORT(PORTB   ,0x18)
+        CASE_CLEAR_PORT(PORTA   ,0x1B)
+
+    default :
+        found = 0;
+    }
+
+    if (found)
+    {
+        send_resp2(0xDA, mask, sequence);
+    }
+    else
+    {
+        send_resp2(0xDC, mask, sequence);
+    }
+
+
+}
 
 // -----------------------------------------------------------------------------------------------------------------
 void exec_ext_command(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3, uint8_t sequence)
@@ -768,6 +828,14 @@ void exec_ext_command(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3
 
     case CMD_L1_WRITE_REG_MASK:
         write_reg(param, param2, param3, sequence);
+        break;
+
+    case CMD_L1_SET_PORT_BITS:
+        set_port_bits(param, param2, sequence);
+        break;
+
+    case CMD_L1_CLEAR_PORT_BITS:
+        clear_port_bits(param, param2, sequence);
         break;
 
     case CMD_L1_READ_ADC0:
