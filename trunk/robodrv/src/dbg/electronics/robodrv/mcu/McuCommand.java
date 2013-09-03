@@ -15,6 +15,9 @@ public class McuCommand {
 #define CMD_L1_SWITCH_WATCHDOG 	0x18
 #define CMD_L1_RESET_WATCHDOG 	0x19
 #define CMD_L1_WRITE_REG_MASK 	0x1A
+#define CMD_L1_SET_PORT_BITS 	0x1B
+#define CMD_L1_CLEAR_PORT_BITS 	0x1C
+
 
 #define RESP_UNKNOWN_CMD	0xEE
 #define RESP_OK	            0xAA

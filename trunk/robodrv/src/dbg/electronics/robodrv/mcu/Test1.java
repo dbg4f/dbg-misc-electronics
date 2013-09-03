@@ -1,11 +1,14 @@
 package dbg.electronics.robodrv.mcu;
 
+import dbg.electronics.robodrv.drive.DriveState;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 
+import static dbg.electronics.robodrv.drive.DriveState.*;
 import static dbg.electronics.robodrv.mcu.CommandCode.ECHO;
 import static dbg.electronics.robodrv.mcu.CommandCode.ENABLE_ADC;
+import static dbg.electronics.robodrv.mcu.CommandCode.WRITE_REG;
 import static dbg.electronics.robodrv.mcu.McuCommand.createCommand;
 
 public class Test1 implements McuBytesListener, McuReportListener {
@@ -20,7 +23,9 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
         Test1 t = new Test1();
 
-        final McuSocketCommunicator communicator = new McuSocketCommunicator("192.168.1.1", 4444);
+        final McuSocketCommunicator communicator = new McuSocketCommunicator("127.0.0.1", 4444);
+
+        final DriveState driveState = new DriveState();
 
         SynchronousExecutor executor = new SynchronousExecutor();
         executor.setBytesWriter(communicator);
@@ -28,6 +33,14 @@ public class Test1 implements McuBytesListener, McuReportListener {
         McuReportDecoder decoder = new McuReportDecoder();
 
         decoder.setReportListener(executor);
+        decoder.setStatusListener(new ChannelStatusListener<ProtocolState>() {
+            @Override
+            public void onStatusChanged(ProtocolState status) {
+                System.out.println("status = " + status);
+            }
+        }
+
+       );
         executor.setNextListener(t);
 
         communicator.init();
@@ -48,7 +61,12 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
 
 
-        //executor.sendOnly(createCommand(ENABLE_ADC));
+        executor.sendOnly(createCommand(ENABLE_ADC));
+
+
+        CommandResponse response = executor.execute(createCommand(WRITE_REG, M16Reg.DDRB.toCode()));
+
+        System.out.println("response = " + response);
 
         McuCommand cmd;
 
@@ -63,6 +81,9 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
 
     }
+
+
+
 
 
     @Override
