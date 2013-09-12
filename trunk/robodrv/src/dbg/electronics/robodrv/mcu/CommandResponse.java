@@ -17,6 +17,15 @@ public class CommandResponse {
         this.execTime = execTime;
     }
 
+    public int getResult(){
+        if (params.length > 0) {
+            return params[0];
+        }
+        else {
+            throw new IllegalArgumentException("No result params in response");
+        }
+    }
+
     @Override
     public String toString() {
         return "Response{" +
