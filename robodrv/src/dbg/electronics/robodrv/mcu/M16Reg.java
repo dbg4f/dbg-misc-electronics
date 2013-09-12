@@ -79,4 +79,23 @@ public enum M16Reg implements CodifierAware {
     public int toCode() {
         return getCode();
     }
+
+    public static M16Reg dirRegForPort(M16Reg portReg) {
+
+        switch (portReg) {
+
+            case PORTA:
+                return M16Reg.DDRA;
+            case PORTB:
+                return M16Reg.DDRB;
+            case PORTC:
+                return M16Reg.DDRC;
+            case PORTD:
+                return M16Reg.DDRD;
+
+            default:
+                throw new IllegalArgumentException("No direction register for " + portReg);
+        }
+    }
+
 }

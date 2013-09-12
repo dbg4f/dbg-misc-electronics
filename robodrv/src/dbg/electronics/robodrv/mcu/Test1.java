@@ -1,6 +1,7 @@
 package dbg.electronics.robodrv.mcu;
 
 import dbg.electronics.robodrv.drive.DriveState;
+import dbg.electronics.robodrv.drive.M16MultichannelPwmDrive;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -60,6 +61,9 @@ public class Test1 implements McuBytesListener, McuReportListener {
         }).start();
 
 
+        M16MultichannelPwmDrive drive = new M16MultichannelPwmDrive(executor);
+
+
 
         executor.sendOnly(createCommand(ENABLE_ADC));
 
@@ -81,6 +85,10 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
 
     }
+
+
+
+
 
 
 
