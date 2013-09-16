@@ -71,6 +71,10 @@ public class M16MultichannelPwmDrive {
             .set(6, 0) // COM1A0
             .set(5, 1) // COM1B1
             .set(4, 0) // COM1B0
+            .set(3, 0) // FOC1A
+            .set(2, 0) // FOC1B
+            .set(1, 0) // WGM11
+            .set(0, 0) // WGM10
         .applyRegValue(mcuRegisterAccess, M16Reg.TCCR1A); // direct(non-inverted) PWM  for A,B channels
 
 
@@ -90,7 +94,7 @@ public class M16MultichannelPwmDrive {
 
         int regValue = readReg(reg);
 
-        regValue =regBitSetter.apply(regValue);
+        regValue = regBitSetter.apply(regValue);
 
         writeReg(reg, regValue);
     }
