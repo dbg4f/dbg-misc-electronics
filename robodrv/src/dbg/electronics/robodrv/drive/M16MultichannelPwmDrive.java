@@ -12,8 +12,8 @@ import static dbg.electronics.robodrv.mcu.McuCommand.createCommand;
 public class M16MultichannelPwmDrive {
 
 
-    public static final int DIR_PIN_A = 6;
-    public static final int DIR_PIN_B = 7;
+    public static final int DIR_PIN_A = 3;
+    public static final int DIR_PIN_B = 4;
     private final SynchronousExecutor executor;
     private final McuRegisterAccess mcuRegisterAccess;
 
@@ -76,8 +76,6 @@ public class M16MultichannelPwmDrive {
             .set(1, 0) // WGM11
             .set(0, 0) // WGM10
         .applyRegValue(mcuRegisterAccess, M16Reg.TCCR1A); // direct(non-inverted) PWM  for A,B channels
-
-
 
 
     }

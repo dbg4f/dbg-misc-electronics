@@ -2,6 +2,8 @@ package dbg.electronics.robodrv.mcu;
 
 import dbg.electronics.robodrv.drive.DriveState;
 import dbg.electronics.robodrv.drive.M16MultichannelPwmDrive;
+import dbg.electronics.robodrv.util.BinUtils;
+import groovy.ui.Console;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
@@ -18,6 +20,7 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
     private byte[] adcValues = new byte[4];
     private byte counter = 0;
+    private McuRegisterAccess mcuRegisterAccess;
     
 
     public static void main(String[] args) throws IOException, InterruptedException, McuCommunicationException {
@@ -30,6 +33,8 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
         SynchronousExecutor executor = new SynchronousExecutor();
         executor.setBytesWriter(communicator);
+
+        t.mcuRegisterAccess = new McuRegisterAccess(executor);
 
         McuReportDecoder decoder = new McuReportDecoder();
 
@@ -63,14 +68,18 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
         M16MultichannelPwmDrive drive = new M16MultichannelPwmDrive(executor);
 
+       // executor.sendOnly(createCommand(ENABLE_ADC));
 
 
-        executor.sendOnly(createCommand(ENABLE_ADC));
+        //CommandResponse response = executor.execute(createCommand(WRITE_REG, M16Reg.DDRB.toCode()));
+
+        //System.out.println("response = " + response);
+
+        Console console = new Console();
+        console.setVariable("t", t);
+        console.run();
 
 
-        CommandResponse response = executor.execute(createCommand(WRITE_REG, M16Reg.DDRB.toCode()));
-
-        System.out.println("response = " + response);
 
         McuCommand cmd;
 
@@ -87,8 +96,15 @@ public class Test1 implements McuBytesListener, McuReportListener {
     }
 
 
+    public String read(String regName) throws InterruptedException, IOException, McuCommunicationException {
+        int regValue = mcuRegisterAccess.readReg(M16Reg.valueOf(regName));
+        regValue &= 0xFF;
+        return String.format("%s = 0x%02X (%s)", regName, regValue, BinUtils.asString(regValue, 8));
+    }
 
-
+    public void write(String regName, String binValue) throws InterruptedException, IOException, McuCommunicationException {
+        mcuRegisterAccess.writeReg(M16Reg.valueOf(regName), BinUtils.asNumber(binValue));
+    }
 
 
 
