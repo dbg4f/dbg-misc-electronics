@@ -18,8 +18,8 @@ public class CommandResponse {
     }
 
     public int getResult(){
-        if (params.length > 0) {
-            return params[0];
+        if (params.length > 1) {
+            return params[1];
         }
         else {
             throw new IllegalArgumentException("No result params in response");
