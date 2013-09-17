@@ -952,7 +952,7 @@ int main(void)
             sendchar('R');
             sendchar('V');
             sendchar('0');
-            sendchar('1');
+            sendchar('2');
         }
         else if (value == START_PACKET_MARKER)
         {
