@@ -25,7 +25,7 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
     public static void main(String[] args) throws IOException, InterruptedException, McuCommunicationException {
 
-        Test1 t = new Test1();
+        final Test1 t = new Test1();
 
         final McuSocketCommunicator communicator = new McuSocketCommunicator("127.0.0.1", 4444);
 
@@ -68,27 +68,74 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
         M16MultichannelPwmDrive drive = new M16MultichannelPwmDrive(executor);
 
-       // executor.sendOnly(createCommand(ENABLE_ADC));
+        executor.sendOnly(createCommand(ENABLE_ADC));
 
 
         //CommandResponse response = executor.execute(createCommand(WRITE_REG, M16Reg.DDRB.toCode()));
 
         //System.out.println("response = " + response);
 
-        Console console = new Console();
-        console.setVariable("t", t);
-        console.run();
+        /*
 
+        new Thread(new Runnable() {
+
+            @Override
+            public void run() {
+                Console console = new Console();
+                GroovyMcu groovyMcu = new GroovyMcu(t.mcuRegisterAccess);
+                console.setVariable("t", groovyMcu);
+                console.run();
+
+            }
+        }).start();
+
+          */
+
+
+        GroovyMcu t1 = new GroovyMcu(t.mcuRegisterAccess);
+
+
+        t1.write("DDRD",   "00110000");
+        t1.write("TCCR1A", "10100001");
+        t1.write("TCCR1B", "00001001");
+        t1.write("OCR1AH", "00000000");
+        t1.write("OCR1AL", "00000000");
+        t1.write("OCR1BH", "00000000");
+        t1.write("OCR1BL", "10000000");
+        t1.write("DDRB",   "00011000");
 
 
         McuCommand cmd;
 
-        for (int i = 0; i< 20; i++) {
+        for (int i = 0; i< 10; i++) {
 
-            cmd = createCommand(ECHO, i, i);
+            //cmd = createCommand(ECHO, i, i);
             //communicator.write(cmd.getRawCommand());
-            executor.execute(cmd);
+            //executor.execute(cmd);
+
+            t1.write("PORTB", "00011000");
+            t1.write("OCR1AH", "00000000");
+            t1.write("OCR1AL", "11111111");
+
+            Thread.sleep(3000);
+
+            t1.write("OCR1AH", "00000000");
+            t1.write("OCR1AL", "00000000");
+
             Thread.sleep(100);
+
+            t1.write("PORTB", "00000000");
+
+            Thread.sleep(100);
+
+            t1.write("OCR1AH", "00000000");
+            t1.write("OCR1AL", "11111111");
+
+            Thread.sleep(3000);
+
+            t1.write("OCR1AH", "00000000");
+            t1.write("OCR1AL", "00000000");
+
 
         }
 
@@ -96,18 +143,29 @@ public class Test1 implements McuBytesListener, McuReportListener {
     }
 
 
-    public String read(String regName) throws InterruptedException, IOException, McuCommunicationException {
-        int regValue = mcuRegisterAccess.readReg(M16Reg.valueOf(regName));
-        regValue &= 0xFF;
-        return String.format("%s = 0x%02X (%s)", regName, regValue, BinUtils.asString(regValue, 8));
+
+
+    static class GroovyMcu {
+
+        private final McuRegisterAccess mcuRegisterAccess;
+
+
+        GroovyMcu(McuRegisterAccess mcuRegisterAccess) {
+            this.mcuRegisterAccess = mcuRegisterAccess;
+        }
+
+        public String read(String regName) throws InterruptedException, IOException, McuCommunicationException {
+            int regValue = mcuRegisterAccess.readReg(M16Reg.valueOf(regName));
+            regValue &= 0xFF;
+            return String.format("%s = 0x%02X (%s)", regName, regValue, BinUtils.asString(regValue, 8));
+        }
+
+        public void write(String regName, String binValue) throws InterruptedException, IOException, McuCommunicationException {
+            mcuRegisterAccess.writeReg(M16Reg.valueOf(regName), BinUtils.asNumber(binValue));
+        }
+
+
     }
-
-    public void write(String regName, String binValue) throws InterruptedException, IOException, McuCommunicationException {
-        mcuRegisterAccess.writeReg(M16Reg.valueOf(regName), BinUtils.asNumber(binValue));
-    }
-
-
-
 
 
     @Override
