@@ -68,7 +68,7 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
         M16MultichannelPwmDrive drive = new M16MultichannelPwmDrive(executor);
 
-        executor.sendOnly(createCommand(ENABLE_ADC));
+        //executor.sendOnly(createCommand(ENABLE_ADC));
 
 
         //CommandResponse response = executor.execute(createCommand(WRITE_REG, M16Reg.DDRB.toCode()));
@@ -96,13 +96,33 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
 
         t1.write("DDRD",   "00110000");
+        t1.write("PORTD",  "00110000");
+
+        /*
         t1.write("TCCR1A", "10100001");
-        t1.write("TCCR1B", "00001001");
+        t1.write("TCCR1B", "00001010");
         t1.write("OCR1AH", "00000000");
         t1.write("OCR1AL", "00000000");
         t1.write("OCR1BH", "00000000");
         t1.write("OCR1BL", "10000000");
+        */
         t1.write("DDRB",   "00011000");
+
+
+        for (int i = 0; i<1000;i++) {
+
+            Thread.sleep(2000);
+            t1.write("PORTD",  "00110000");
+            Thread.sleep(2000);
+            t1.write("PORTD",  "00000000");
+
+
+            t1.write("PORTB", i%2 == 0 ? "00011000" : "00000000");
+            //t1.write("PORTB", "00011000");
+
+
+        }
+
 
 
         McuCommand cmd;
@@ -114,13 +134,17 @@ public class Test1 implements McuBytesListener, McuReportListener {
             //executor.execute(cmd);
 
             t1.write("PORTB", "00011000");
-            t1.write("OCR1AH", "00000000");
-            t1.write("OCR1AL", "11111111");
+            //t1.write("OCR1AH", "00000000");
+            //t1.write("OCR1AL", "11111111");
+            t1.write("OCR1BH", "00000000");
+            t1.write("OCR1BL", "11111111");
 
             Thread.sleep(3000);
 
-            t1.write("OCR1AH", "00000000");
-            t1.write("OCR1AL", "00000000");
+            //t1.write("OCR1AH", "00000000");
+            //t1.write("OCR1AL", "00000000");
+            t1.write("OCR1BH", "00000000");
+            t1.write("OCR1BL", "00000000");
 
             Thread.sleep(100);
 
@@ -128,13 +152,17 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
             Thread.sleep(100);
 
-            t1.write("OCR1AH", "00000000");
-            t1.write("OCR1AL", "11111111");
+            //t1.write("OCR1AH", "00000000");
+            //t1.write("OCR1AL", "11111111");
+            t1.write("OCR1BH", "00000000");
+            t1.write("OCR1BL", "11111111");
 
             Thread.sleep(3000);
 
-            t1.write("OCR1AH", "00000000");
-            t1.write("OCR1AL", "00000000");
+            //t1.write("OCR1AH", "00000000");
+            //t1.write("OCR1AL", "00000000");
+            t1.write("OCR1BH", "00000000");
+            t1.write("OCR1BL", "00000000");
 
 
         }
