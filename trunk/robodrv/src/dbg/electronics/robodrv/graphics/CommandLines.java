@@ -1,5 +1,6 @@
 package dbg.electronics.robodrv.graphics;
 
+import dbg.electronics.robodrv.groovy.GroovyEvaluator;
 import dbg.electronics.robodrv.head.MultilineReportable;
 import dbg.electronics.robodrv.logging.ValueHistorySerializer;
 
@@ -10,7 +11,7 @@ public class CommandLines implements MultilineReportable {
 
     private ValueHistorySerializer valueHistorySerializer;
 
-    private TextCommandEvaluator evaluator = new DefaultEvaluator();
+    private TextCommandEvaluator evaluator = new GroovyEvaluator();//DefaultEvaluator();
 
     public void setValueHistorySerializer(ValueHistorySerializer valueHistorySerializer) {
         this.valueHistorySerializer = valueHistorySerializer;
@@ -62,7 +63,10 @@ public class CommandLines implements MultilineReportable {
 
     public void onChar(char ch) {
 
-        if (isPrintableChar(ch)) {
+
+
+        //if (isPrintableChar(ch)) {
+        if (ch != 13) {
             commandLine += ch;
         } else {
             try {

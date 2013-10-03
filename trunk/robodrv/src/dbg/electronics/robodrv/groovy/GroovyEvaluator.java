@@ -1,12 +1,60 @@
 package dbg.electronics.robodrv.groovy;
 
 import dbg.electronics.robodrv.graphics.TextCommandEvaluator;
+import dbg.electronics.robodrv.mcu.M16Reg;
+import groovy.lang.Binding;
+import groovy.lang.GroovyShell;
+import org.codehaus.groovy.control.CompilerConfiguration;
+import org.codehaus.groovy.control.customizers.ImportCustomizer;
+
+import java.util.Date;
 
 public class GroovyEvaluator implements TextCommandEvaluator {
 
+
+    GroovyShell shell;
+
+    public GroovyEvaluator() {
+
+        Binding binding = new Binding();
+
+        //binding.setProperty("t", this);
+
+        CompilerConfiguration configuration = new CompilerConfiguration();
+
+        configuration.setScriptBaseClass(Functions.class.getName());
+
+        ImportCustomizer customizer = new ImportCustomizer();
+
+        customizer.addStaticStars(M16Reg.class.getName());
+
+        configuration.addCompilationCustomizers(customizer);
+
+        shell = new GroovyShell(binding, configuration);
+
+    }
+
+    public static void main(String[] args) {
+
+        GroovyEvaluator evaluator = new GroovyEvaluator();
+
+        evaluator.evaluate("time11()");
+
+    }
+
+
     @Override
     public String evaluate(String command) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        try {
+            //command = "t.time1";
+            return String.valueOf(shell.evaluate(command));
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
+
     }
+
 
 }

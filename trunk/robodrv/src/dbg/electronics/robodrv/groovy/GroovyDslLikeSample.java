@@ -13,7 +13,7 @@ import java.io.IOException;
 /**
  * @author Dmitri Bogdel
  */
-public class Test1 {
+public class GroovyDslLikeSample {
 
 
     public static void main(String[] args) throws IOException {
