@@ -7,13 +7,13 @@ import java.util.Date;
 
 public class Functions extends Script {
 
-    public String time11() {
+    public String time() {
 
         String t = new Date().toString();
 
         System.out.println("t = " + t);
 
-        return "11";
+        return t;
     }
 
 

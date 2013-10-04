@@ -5,9 +5,12 @@ import dbg.electronics.robodrv.head.MultilineReportable;
 import dbg.electronics.robodrv.logging.ValueHistorySerializer;
 
 import java.awt.event.KeyEvent;
-import java.io.IOException;
+import java.util.ArrayList;
 
 public class CommandLines implements MultilineReportable {
+
+    public static final int RESULTS_DEPTH = 3;
+    public static final int HISTORY_DEPTH = 10;
 
     private ValueHistorySerializer valueHistorySerializer;
 
@@ -31,6 +34,12 @@ public class CommandLines implements MultilineReportable {
 
     private char currentCursorChar = CURSOR_CHAR;
 
+    private int historyPointer = 0;
+
+    private ArrayList<String> results = new ArrayList<String>();
+    private ArrayList<String> history = new ArrayList<String>();
+
+
     @Override
     public String[] toStringArray() {
 
@@ -38,9 +47,25 @@ public class CommandLines implements MultilineReportable {
             toggleCursorBlinking();
         }
 
-        return new String[]{commandLine + currentCursorChar};  //To change body of implemented methods use File | Settings | File Templates.
+        ArrayList<String> currentLines = new ArrayList<String>();
+
+        currentLines.add(commandLine + currentCursorChar);
+        currentLines.addAll(results);
+
+        return currentLines.toArray(new String[currentLines.size()]);
     }
 
+
+    void addResult(String result) {
+        ringBufferAdd(result, RESULTS_DEPTH, results);
+    }
+
+    private void ringBufferAdd(String result, int depth, ArrayList<String> buffer) {
+        while (buffer.size() > depth) {
+            buffer.remove(buffer.size() - 1);
+        }
+        buffer.add(0, result);
+    }
 
     class DefaultEvaluator implements TextCommandEvaluator {
 
@@ -54,34 +79,58 @@ public class CommandLines implements MultilineReportable {
         return System.currentTimeMillis() - lastToggleTime > CURSOR_BLINK_INTERVAL_MSEC;
     }
 
-
     private void toggleCursorBlinking() {
         currentCursorChar = (currentCursorChar == CURSOR_CHAR ? ' ' : CURSOR_CHAR);
         lastToggleTime = System.currentTimeMillis();
     }
 
-
     public void onChar(char ch) {
 
-
-
-        //if (isPrintableChar(ch)) {
-        if (ch != 13) {
+        if (ch == '\b' && commandLine.length() > 0) {
+            onBackspace();
+        }
+        if (ch == '\n' && commandLine.length() > 0) {
+            onEnter();
+        }
+        else if (isPrintableChar(ch)) {
             commandLine += ch;
-        } else {
-            try {
-                if (commandLine.length() > 3)
-                //valueHistorySerializer.save(commandLine);
-                commandLine = evaluator.evaluate(commandLine);
-            } catch (Exception e) {
-                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                commandLine = "ERROR: " + e.getMessage();
-            }
-
-
-
+        }
+        else if (ch == 38) {
+            onArrowDown();
+        }
+        else if (ch == 40) {
+            onArrowUp();
         }
 
+    }
+
+    private void onBackspace() {
+        commandLine = commandLine.substring(0, commandLine.length()-1);
+    }
+
+    private void onArrowDown() {
+
+    }
+
+    private void onArrowUp() {
+
+    }
+
+    private void onEnter() {
+
+        String result;
+
+        try {
+            result = evaluator.evaluate(commandLine);
+            ringBufferAdd(commandLine, HISTORY_DEPTH, history);
+        } catch (Exception e) {
+            e.printStackTrace();
+            result = "ERROR: " + e.getMessage();
+        }
+
+        addResult(result);
+
+        commandLine = "";
     }
 
     public boolean isPrintableChar(char c) {
@@ -90,9 +139,6 @@ public class CommandLines implements MultilineReportable {
                 c != KeyEvent.CHAR_UNDEFINED &&
                 block != null &&
                 block != Character.UnicodeBlock.SPECIALS;
-    }
-
-    public void onCode(int code) {
     }
 
 }

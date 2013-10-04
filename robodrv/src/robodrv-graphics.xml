@@ -28,9 +28,25 @@
         <property name="multilineReportable" ref="hidStickDriver"/>
     </bean>
 
+    <bean id="colorYellow" class="java.awt.Color">
+        <constructor-arg type="int" value="255"/>
+        <constructor-arg type="int" value="255"/>
+        <constructor-arg type="int" value="0"/>
+    </bean>
+
     <bean id="commandLineControl" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
         <property name="x"                   value="100"/>
-        <property name="y"                   value="700"/>
+        <property name="y"                   value="600"/>
+        <property name="colors">
+            <list>
+                <ref bean="colorYellow"/>
+                <ref bean="colorYellow"/>
+                <ref bean="colorYellow"/>
+                <ref bean="colorYellow"/>
+                <ref bean="colorYellow"/>
+                <ref bean="colorYellow"/>
+            </list>
+        </property>
         <property name="multilineReportable" ref="commandLines"/>
     </bean>
 

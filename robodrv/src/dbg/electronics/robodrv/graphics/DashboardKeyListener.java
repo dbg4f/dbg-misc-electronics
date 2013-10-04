@@ -31,26 +31,22 @@ public class DashboardKeyListener implements KeyListener {
     public void keyTyped(KeyEvent e) {
         log.info("Key Typed: " + e.paramString());
 
-
+        commandLines.onChar(e.getKeyChar());
 
     }
 
     @Override
     public void keyPressed(KeyEvent e) {
-        log.info("Key Pressed: " + e.paramString());
+        log.debug("Key Pressed: " + e.paramString());
 
         if (e.getKeyCode() == 27) {
             eventListener.onEvent(new Event(SHUTDOWN));
         }
-        
-        //if (e.getKeyChar() )
 
-        commandLines.onChar(e.getKeyChar());
-        
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
-        log.info("Key Released: " + e.paramString());
+        log.debug("Key Released: " + e.paramString());
     }
 }

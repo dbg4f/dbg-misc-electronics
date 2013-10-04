@@ -29,6 +29,10 @@ public class TextLines implements DashboardWidget {
         this.colors = colors;
     }
 
+    public void setColors(java.util.List<Color> colorList) {
+        this.colors = colorList.toArray(new Color[colorList.size()]);
+    }
+
     public void setX(int x) {
         this.x = x;
     }
