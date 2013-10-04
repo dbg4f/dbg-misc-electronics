@@ -3,13 +3,15 @@ package dbg.electronics.robodrv.groovy;
 
 import groovy.lang.Script;
 
+import java.util.Date;
+
 public class Functions extends Script {
 
     public String time11() {
 
-        //String t = new Date().toString();
+        String t = new Date().toString();
 
-        //System.out.println("t = " + t);
+        System.out.println("t = " + t);
 
         return "11";
     }
