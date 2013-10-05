@@ -69,10 +69,10 @@
             </list>
         </property>
         <property name="timesRange" ref="rangeMinute"/>
-        <property name="x" value="100"/>
-        <property name="y" value="400"/>
+        <property name="x" value="300"/>
+        <property name="y" value="100"/>
         <property name="bricksHorizontal" value="12"/>
-        <property name="bricksVertical" value="2"/>
+        <property name="bricksVertical" value="4"/>
     </bean>
 
     <bean id="timeSeriesAgenda" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
