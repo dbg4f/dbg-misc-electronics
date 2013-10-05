@@ -84,6 +84,15 @@ public class CommandLines implements MultilineReportable {
         lastToggleTime = System.currentTimeMillis();
     }
 
+    public void onKey(int keyCode) {
+        if (keyCode == 40) {
+            onArrowDown();
+        }
+        else if (keyCode == 38) {
+            onArrowUp();
+        }
+    }
+
     public void onChar(char ch) {
 
         if (ch == '\b' && commandLine.length() > 0) {
@@ -95,12 +104,6 @@ public class CommandLines implements MultilineReportable {
         else if (isPrintableChar(ch)) {
             commandLine += ch;
         }
-        else if (ch == 38) {
-            onArrowDown();
-        }
-        else if (ch == 40) {
-            onArrowUp();
-        }
 
     }
 
@@ -110,9 +113,33 @@ public class CommandLines implements MultilineReportable {
 
     private void onArrowDown() {
 
+        if (historyPointer > 0) {
+            historyPointer--;
+        }
+        else if (history.size() > 0){
+            historyPointer = history.size() - 1;
+        }
+
+
+        if (history.size()-1 >= historyPointer) {
+            commandLine = history.get(historyPointer);
+        }
+
+
+
     }
 
     private void onArrowUp() {
+        if (historyPointer < history.size() - 1) {
+            historyPointer++;
+        }
+        else {
+            historyPointer = 0;
+        }
+
+        if (historyPointer <= history.size()-1) {
+            commandLine = history.get(historyPointer);
+        }
 
     }
 
@@ -122,7 +149,7 @@ public class CommandLines implements MultilineReportable {
 
         try {
             result = evaluator.evaluate(commandLine);
-            ringBufferAdd(commandLine, HISTORY_DEPTH, history);
+            addCommandToHistory(commandLine);
         } catch (Exception e) {
             e.printStackTrace();
             result = "ERROR: " + e.getMessage();
@@ -131,6 +158,13 @@ public class CommandLines implements MultilineReportable {
         addResult(result);
 
         commandLine = "";
+    }
+
+    private void addCommandToHistory(String cmd) {
+        if (history.size() == 0 || history.get(0).compareTo(cmd) != 0) {
+            ringBufferAdd(cmd, HISTORY_DEPTH, history);
+        }
+
     }
 
     public boolean isPrintableChar(char c) {

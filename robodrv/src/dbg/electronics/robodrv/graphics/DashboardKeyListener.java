@@ -42,6 +42,9 @@ public class DashboardKeyListener implements KeyListener {
         if (e.getKeyCode() == 27) {
             eventListener.onEvent(new Event(SHUTDOWN));
         }
+        else if (e.getKeyCode() == KeyEvent.VK_UP || e.getKeyCode() == KeyEvent.VK_DOWN) {
+            commandLines.onKey(e.getKeyCode());
+        }
 
     }
 
