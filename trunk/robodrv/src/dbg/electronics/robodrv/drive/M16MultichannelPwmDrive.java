@@ -111,7 +111,7 @@ CS12 CS11 CS10
 1    1     1   External clock source on T1 pin. Clock on rising edge.
 
 
-Fpwm = Fclk/(2*0xFF*N), N = 1,8,64,256,1024
+Fpwm = Fclk/(2*0x100*N), N = 1,8,64,256,1024
 
 #define F_CPU 7372800
 
@@ -131,7 +131,7 @@ Fpwm = Fclk/(2*0xFF*N), N = 1,8,64,256,1024
             .set(4, 1) // COM1B0
             .set(1, 0) // WGM11
             .set(0, 1) // WGM10
-        .applyRegValue(mcuRegisterAccess, M16Reg.TCCR1A); // , phase corrected PWM, non-inverted
+        .applyRegValue(mcuRegisterAccess, M16Reg.TCCR1A); // , phase correct PWM, non-inverted
 
         new RegBitSetter()
             .set(4, 0) // WGM13
@@ -139,7 +139,7 @@ Fpwm = Fclk/(2*0xFF*N), N = 1,8,64,256,1024
             .set(2, 0) // CS12
             .set(1, 0) // CS11
             .set(0, 1) // CS10
-        .applyRegValue(mcuRegisterAccess, M16Reg.TCCR1B); // no prescaling, 14kHz, phase corrected PWM
+        .applyRegValue(mcuRegisterAccess, M16Reg.TCCR1B); // no prescaling, 14kHz, phase correct PWM
 
 
     }
