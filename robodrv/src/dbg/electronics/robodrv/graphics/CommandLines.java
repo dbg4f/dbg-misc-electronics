@@ -14,7 +14,7 @@ public class CommandLines implements MultilineReportable {
 
     private ValueHistorySerializer valueHistorySerializer;
 
-    private TextCommandEvaluator evaluator = new GroovyEvaluator();//DefaultEvaluator();
+    private TextCommandEvaluator evaluator;
 
     public void setValueHistorySerializer(ValueHistorySerializer valueHistorySerializer) {
         this.valueHistorySerializer = valueHistorySerializer;

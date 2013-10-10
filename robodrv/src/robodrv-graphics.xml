@@ -4,8 +4,17 @@
        xsi:schemaLocation="http://www.springframework.org/schema/beans
            http://www.springframework.org/schema/beans/spring-beans.xsd">
 
+    <bean id="groovyFunctions" class="dbg.electronics.robodrv.groovy.Functions">
+        <property name="mcuRegisterAccess" ref="mcuRegisterAccess"/>
+    </bean>
+
+    <bean id="groovyEvaluator" class="dbg.electronics.robodrv.groovy.GroovyEvaluator">
+       <property name="functions" ref="groovyFunctions"/>
+    </bean>
+
     <bean id="commandLines" class="dbg.electronics.robodrv.graphics.CommandLines">
-       <property name="valueHistorySerializer" ref="valueHistorySerializer"/>
+       <property name="valueHistorySerializer"  ref="valueHistorySerializer"/>
+       <property name="evaluator"               ref="groovyEvaluator"/>
     </bean>
 
     <bean id="dashboardKeyListener" class="dbg.electronics.robodrv.graphics.DashboardKeyListener">
