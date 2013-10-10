@@ -1,11 +1,18 @@
 package dbg.electronics.robodrv.groovy;
 
 
+import dbg.electronics.robodrv.mcu.McuRegisterAccess;
 import groovy.lang.Script;
 
 import java.util.Date;
 
 public class Functions extends Script {
+
+    private McuRegisterAccess mcuRegisterAccess;
+
+    public void setMcuRegisterAccess(McuRegisterAccess mcuRegisterAccess) {
+        this.mcuRegisterAccess = mcuRegisterAccess;
+    }
 
     public String time() {
 

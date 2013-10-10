@@ -22,6 +22,30 @@
     <import resource="robodrv-graphics.xml"/>
     <import resource="robodrv-input.xml"/>
 
+
+    <bean id="mcuSocketCommunicator" class="dbg.electronics.robodrv.mcu.McuSocketCommunicator">
+        <constructor-arg index="0" value="${mcuCommunicationHost}"/>
+        <constructor-arg index="1" value="${mcuCommunicationPort}"/>
+        <property name="bytesListener" ref="mcuReportDecoder"/>
+    </bean>
+
+    <bean id="driveState" class="dbg.electronics.robodrv.drive.DriveState">
+    </bean>
+
+    <bean id="synchronousExecutor" class="dbg.electronics.robodrv.mcu.SynchronousExecutor">
+        <property name="bytesWriter" ref="mcuSocketCommunicator"/>
+        <property name="nextListener" ref="driveState"/>
+    </bean>
+
+    <bean id="mcuRegisterAccess" class="dbg.electronics.robodrv.mcu.McuRegisterAccess">
+        <constructor-arg ref="synchronousExecutor"/>
+    </bean>
+
+    <bean id="mcuReportDecoder" class="dbg.electronics.robodrv.mcu.McuReportDecoder">
+        <property name="reportListener" ref="synchronousExecutor"/>
+        <property name="statusListener" value="#{driveState.channelStatus}"/>
+    </bean>
+
     <bean id="orchestrator" class="dbg.electronics.robodrv.head.Orchestrator">
         <property name="threads">
             <list>

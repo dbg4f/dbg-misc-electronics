@@ -11,6 +11,12 @@ import java.util.Date;
 
 public class GroovyEvaluator implements TextCommandEvaluator {
 
+    private Functions functions;
+
+
+    public void setFunctions(Functions functions) {
+        this.functions = functions;
+    }
 
     GroovyShell shell;
 
