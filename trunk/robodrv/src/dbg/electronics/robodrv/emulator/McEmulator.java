@@ -22,6 +22,80 @@ public class McEmulator {
         this.outputStream = outputStream;
     }
 
+    public static int ADC_BUFFER_SIZE         = 16;
+    public static int ADC_BUFFER_DIV_SHIFT    = 4;
+
+    public static int ADC_CHANNELS_IN_USE     = 4;
+    public static int TX_MAX_BUFFER_SIZE      = 20;
+
+    public static int  START_ASYNC_MARKER_ADC  = 0x51;
+
+    class PADC_BUFFER
+    {
+        int valuations[];
+        int index;
+    }
+
+    class PTX_BUFFER
+    {
+        int content[];
+        int index;
+        int size;
+    };
+
+
+    class PADC_CONTEXT {
+        PADC_BUFFER adc_buffers[];
+        int avg_values[];
+        int adc_buf_index;
+        int valuations_count;
+    }
+
+    class PTX_CONTEXT
+    {
+        int enabled;
+        PTX_BUFFER adc_tx_buf;
+        PTX_BUFFER ct_tx_buf;
+        PTX_BUFFER resp_tx_buf;
+        PTX_BUFFER current_buffer;
+    } ;
+
+
+    void send_adc_snapshot(PTX_BUFFER p_tx_buf) throws IOException {
+
+        for (int i=0; i<p_tx_buf.content.length; i++){
+            sendchar(p_tx_buf.content[i]);
+        }
+
+    }
+
+    public void sendAdc(int[] adcValues) throws IOException {
+        PTX_BUFFER buffer = new PTX_BUFFER();
+        tx_adc_snapshot(buffer, adcValues);
+        send_adc_snapshot(buffer);
+    }
+
+    void tx_adc_snapshot(PTX_BUFFER p_tx_buf, int[] avg_values)
+    {
+        int crc = 0xFF;
+
+        p_tx_buf.index = 0;
+        p_tx_buf.size = ADC_CHANNELS_IN_USE + 2; // start marker + avg bytes + crc
+        p_tx_buf.content = new int[p_tx_buf.size];
+        p_tx_buf.content[0] = START_ASYNC_MARKER_ADC;
+
+        crc = crc_update(crc, p_tx_buf.content[0]);
+
+        int i;
+        for (i=0; i<ADC_CHANNELS_IN_USE; i++)
+        {
+            p_tx_buf.content[i+1] = avg_values[i];
+            crc = crc_update(crc, p_tx_buf.content[i+1]);
+        }
+
+        p_tx_buf.content[i+1] = crc;
+
+    }
 
     void read_reg(int reg, int sequence) throws IOException {
         int res = 0x55;
