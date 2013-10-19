@@ -45,6 +45,7 @@ public class EmulatorLauncher {
                             emulator.sendAdc(new int[]{i, i, i, i});
                         } catch (IOException e) {
                             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                            break;
                         }
 
                         try {

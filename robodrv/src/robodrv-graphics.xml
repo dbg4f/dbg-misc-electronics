@@ -6,6 +6,8 @@
 
     <bean id="groovyFunctions" class="dbg.electronics.robodrv.groovy.Functions">
         <property name="mcuRegisterAccess" ref="mcuRegisterAccess"/>
+        <property name="socketCommunicator" ref="mcuSocketCommunicator"/>
+        <property name="executor" ref="synchronousExecutor"/>
     </bean>
 
     <bean id="groovyEvaluator" class="dbg.electronics.robodrv.groovy.GroovyEvaluator">
@@ -31,6 +33,46 @@
     </bean>
 
 
+    <bean id="statTextReport" class="dbg.electronics.robodrv.head.stat.StatTextReport">
+        <property name="statistics" ref="statCounters"/>
+    </bean>
+
+    <bean id="widgetStatCounters" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
+        <property name="x"                   value="30"/>
+        <property name="y"                   value="20"/>
+        <property name="multilineReportable" ref="statTextReport"/>
+
+        <property name="colors">
+            <list>
+                <ref bean="colorGreen"/>
+                <ref bean="colorGreen"/>
+                <ref bean="colorGreen"/>
+                <ref bean="colorGreen"/>
+                <ref bean="colorGreen"/>
+                <ref bean="colorGreen"/>
+            </list>
+        </property>
+
+    </bean>
+
+    <bean id="widgetStatus" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
+        <property name="x"                   value="500"/>
+        <property name="y"                   value="20"/>
+        <property name="multilineReportable" ref="driveState"/>
+
+        <property name="colors">
+            <list>
+                <ref bean="colorBlue"/>
+                <ref bean="colorBlue"/>
+                <ref bean="colorBlue"/>
+                <ref bean="colorBlue"/>
+                <ref bean="colorBlue"/>
+                <ref bean="colorBlue"/>
+            </list>
+        </property>
+
+    </bean>
+
     <bean id="widgetHidControls" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
         <property name="x"                   value="400"/>
         <property name="y"                   value="100"/>
@@ -42,6 +84,20 @@
         <constructor-arg type="int" value="255"/>
         <constructor-arg type="int" value="0"/>
     </bean>
+
+    <bean id="colorGreen" class="java.awt.Color">
+        <constructor-arg type="int" value="0"/>
+        <constructor-arg type="int" value="255"/>
+        <constructor-arg type="int" value="0"/>
+    </bean>
+
+    <bean id="colorBlue" class="java.awt.Color">
+        <constructor-arg type="int" value="0"/>
+        <constructor-arg type="int" value="0"/>
+        <constructor-arg type="int" value="255"/>
+    </bean>
+
+
 
     <bean id="commandLineControl" class="dbg.electronics.robodrv.graphics.widgets.TextLines">
         <property name="x"                   value="100"/>
@@ -88,6 +144,9 @@
                 <ref bean="timeSeriesChannelStatus"/>
 
                 -->
+
+                <ref bean="widgetStatCounters"/>
+                <ref bean="widgetStatus"/>
 
                 <ref bean="timeSeriesTwo"/>
                 <ref bean="timeSeriesAgenda"/>

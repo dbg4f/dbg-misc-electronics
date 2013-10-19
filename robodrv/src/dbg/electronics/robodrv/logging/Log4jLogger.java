@@ -16,6 +16,17 @@ public class Log4jLogger extends SimpleConsoleLogger {
 
     @Override
     protected void message(String level, String text, Throwable throwable) {
-        logger.info(text, throwable);
+        if ("INFO".equalsIgnoreCase(level) && logger.isInfoEnabled()){
+            logger.info(text, throwable);
+        }
+        else if ("DEBUG".equalsIgnoreCase(level) && logger.isDebugEnabled()) {
+            logger.debug(text, throwable);
+        }
+        else if ("ERROR".equalsIgnoreCase(level)) {
+            logger.error(text, throwable);
+        }
+
+
+
     }
 }

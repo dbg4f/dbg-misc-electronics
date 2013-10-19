@@ -1,11 +1,12 @@
 package dbg.electronics.robodrv.drive;
 
+import dbg.electronics.robodrv.head.MultilineReportable;
 import dbg.electronics.robodrv.mcu.ChannelStatus;
 import dbg.electronics.robodrv.mcu.ChannelStatusListener;
 import dbg.electronics.robodrv.mcu.McuReportListener;
 import dbg.electronics.robodrv.mcu.ProtocolState;
 
-public class DriveState implements McuReportListener {
+public class DriveState implements McuReportListener, MultilineReportable {
 
     private ProtocolState protocolState;
     private ChannelStatus channelStatus;
@@ -13,6 +14,8 @@ public class DriveState implements McuReportListener {
     private int pwrCurrent;  // milliampers
     private int pwrVoltage;  // millivolts
     private int signalVoltage; // millivolts
+
+
 
     public class ProtocolStateUpdater implements ChannelStatusListener<ProtocolState> {
 
@@ -30,14 +33,21 @@ public class DriveState implements McuReportListener {
         }
     }
 
+    public ProtocolStateUpdater protocolStateUpdater = new ProtocolStateUpdater();
+
+    public ChannelStatusUpdater channelStatusUpdater = new ChannelStatusUpdater();
+
+
     @Override
     public void onAdcValue(int channel, byte value) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        //System.out.println("channel = " + channel + " value " + value);
+        pwrCurrent = value;
     }
 
     @Override
     public void onCounterUpdate(byte value) {
         //To change body of implemented methods use File | Settings | File Templates.
+
     }
 
     @Override
@@ -48,6 +58,16 @@ public class DriveState implements McuReportListener {
     @Override
     public void onMcuReset() {
         //To change body of implemented methods use File | Settings | File Templates.
+    }
+
+
+    @Override
+    public String[] toStringArray() {
+        return new String[] {
+                "Channel  " + channelStatus,
+                "Protocol " + protocolState,
+                "pwr      " + pwrCurrent
+        };
     }
 
     public ProtocolState getProtocolState() {

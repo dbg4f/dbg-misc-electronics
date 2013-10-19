@@ -18,19 +18,25 @@
         <constructor-arg index="1" value="60000" type="int"/>
     </bean>
 
+    <bean id="statCounters" class="dbg.electronics.robodrv.head.stat.Statistics">
+    </bean>
+
+    <bean id="driveState" class="dbg.electronics.robodrv.drive.DriveState">
+    </bean>
+
+
     <import resource="robodrv-testing.xml"/>
     <import resource="robodrv-graphics.xml"/>
     <import resource="robodrv-input.xml"/>
 
 
     <bean id="mcuSocketCommunicator" class="dbg.electronics.robodrv.mcu.McuSocketCommunicator">
-        <constructor-arg index="0" value="${mcuCommunicationHost}"/>
-        <constructor-arg index="1" value="${mcuCommunicationPort}"/>
-        <property name="bytesListener" ref="mcuReportDecoder"/>
+        <constructor-arg index="0"      value="${mcuCommunicationHost}"/>
+        <constructor-arg index="1"      value="${mcuCommunicationPort}"/>
+        <property name="bytesListener"  ref="mcuReportDecoder"/>
+        <property name='statistics'      ref="statCounters"/>
     </bean>
 
-    <bean id="driveState" class="dbg.electronics.robodrv.drive.DriveState">
-    </bean>
 
     <bean id="synchronousExecutor" class="dbg.electronics.robodrv.mcu.SynchronousExecutor">
         <property name="bytesWriter" ref="mcuSocketCommunicator"/>
@@ -43,7 +49,7 @@
 
     <bean id="mcuReportDecoder" class="dbg.electronics.robodrv.mcu.McuReportDecoder">
         <property name="reportListener" ref="synchronousExecutor"/>
-        <property name="statusListener" value="#{driveState.channelStatus}"/>
+        <property name="statusListener" value="#{driveState.protocolStateUpdater}"/>
     </bean>
 
     <bean id="orchestrator" class="dbg.electronics.robodrv.head.Orchestrator">
@@ -52,6 +58,9 @@
                 <ref bean="hidEventFileReader"/>
                 <ref bean="bufferedScreen"/>
                 <ref bean="testDataGenerator"/>
+                <!--
+                <ref bean="mcuSocketCommunicator"/>
+                -->
             </list>
         </property>
         <property name="stickX" ref="testValueStickX"/>
