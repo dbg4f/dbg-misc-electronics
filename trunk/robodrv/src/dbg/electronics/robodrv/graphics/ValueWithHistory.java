@@ -16,7 +16,7 @@ public class ValueWithHistory {
 
     private ArrayList<TimeSeries> timeSeries = new ArrayList<TimeSeries>();
 
-    private long maxTimeDepth = 1000*60; // 1 minute is max depth
+    private long maxTimeDepth = 5000;
 
     private Range timeRange = new Range(0, (int)maxTimeDepth);
     private Range valueRange = new Range(0, 0);
