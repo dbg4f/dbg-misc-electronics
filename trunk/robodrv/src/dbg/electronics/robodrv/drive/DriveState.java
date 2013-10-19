@@ -1,5 +1,6 @@
 package dbg.electronics.robodrv.drive;
 
+import dbg.electronics.robodrv.graphics.ValueWithHistory;
 import dbg.electronics.robodrv.head.MultilineReportable;
 import dbg.electronics.robodrv.mcu.ChannelStatus;
 import dbg.electronics.robodrv.mcu.ChannelStatusListener;
@@ -15,7 +16,12 @@ public class DriveState implements McuReportListener, MultilineReportable {
     private int pwrVoltage;  // millivolts
     private int signalVoltage; // millivolts
 
+    private ValueWithHistory sampleValueWithHistory;
 
+
+    public void setSampleValueWithHistory(ValueWithHistory sampleValueWithHistory) {
+        this.sampleValueWithHistory = sampleValueWithHistory;
+    }
 
     public class ProtocolStateUpdater implements ChannelStatusListener<ProtocolState> {
 
@@ -42,6 +48,7 @@ public class DriveState implements McuReportListener, MultilineReportable {
     public void onAdcValue(int channel, byte value) {
         //System.out.println("channel = " + channel + " value " + value);
         pwrCurrent = value;
+        sampleValueWithHistory.update(value);
     }
 
     @Override

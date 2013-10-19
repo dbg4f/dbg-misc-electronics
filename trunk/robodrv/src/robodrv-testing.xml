@@ -65,7 +65,7 @@
         <property name="valueWithHistoryList">
             <list>
                 <ref bean="testValueStickX"/>
-                <ref bean="testValueStickY"/>
+                <ref bean="testValue1"/>
             </list>
         </property>
         <property name="timesRange" ref="rangeMinute"/>
