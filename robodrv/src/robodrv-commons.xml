@@ -18,6 +18,11 @@
         <constructor-arg index="1" value="60000" type="int"/>
     </bean>
 
+    <bean id="range5Sec" class="dbg.electronics.robodrv.Range">
+        <constructor-arg index="0" value="0" type="int"/>
+        <constructor-arg index="1" value="5000" type="int"/>
+    </bean>
+
     <bean id="statCounters" class="dbg.electronics.robodrv.head.stat.Statistics">
     </bean>
 
@@ -47,6 +52,11 @@
     </bean>
 
 
+    <bean id="mcuCommunicationController" class="dbg.electronics.robodrv.mcu.CommunicationController">
+        <property name="socketCommunicator" ref="mcuSocketCommunicator"/>
+        <property name="statusListener"     value="#{driveState.channelStatusUpdater}"/>
+    </bean>
+
     <bean id="synchronousExecutor" class="dbg.electronics.robodrv.mcu.SynchronousExecutor">
         <property name="bytesWriter" ref="mcuSocketCommunicator"/>
         <property name="nextListener" ref="driveState"/>
@@ -70,6 +80,7 @@
                 <!--
                 <ref bean="mcuSocketCommunicator"/>
                 -->
+                <ref bean="mcuCommunicationController"/>
             </list>
         </property>
         <property name="stickX" ref="testValueStickX"/>

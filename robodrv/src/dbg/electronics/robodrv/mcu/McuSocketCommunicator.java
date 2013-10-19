@@ -8,7 +8,7 @@ import dbg.electronics.robodrv.head.stat.Statistics;
 import java.io.IOException;
 import java.net.Socket;
 
-public class McuSocketCommunicator extends GenericThread implements McuBytesWriter {
+public class McuSocketCommunicator implements McuBytesWriter {
 
     private String host;
     private int port;
@@ -33,6 +33,7 @@ public class McuSocketCommunicator extends GenericThread implements McuBytesWrit
         socket = new Socket(host, port);
 
         // TODO: use container to keep threads
+
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -43,6 +44,7 @@ public class McuSocketCommunicator extends GenericThread implements McuBytesWrit
                 }
             }
         }).start();
+
     }
 
     @Override
@@ -65,8 +67,4 @@ public class McuSocketCommunicator extends GenericThread implements McuBytesWrit
         statistics.update(StatisticCounterType.RAW_RECEIVED, 1);
     }
 
-    @Override
-    public void startWork() throws IOException {
-        listeningCycle();
-    }
 }

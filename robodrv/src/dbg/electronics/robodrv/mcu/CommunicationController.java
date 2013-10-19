@@ -1,5 +1,6 @@
 package dbg.electronics.robodrv.mcu;
 
+import dbg.electronics.robodrv.GenericThread;
 import dbg.electronics.robodrv.logging.LoggerFactory;
 import dbg.electronics.robodrv.logging.SimpleLogger;
 
@@ -8,7 +9,7 @@ import java.io.IOException;
 import static dbg.electronics.robodrv.mcu.ChannelStatus.CONNECTED;
 import static dbg.electronics.robodrv.mcu.ChannelStatus.FAILURE;
 
-public class CommunicationController implements McuBytesWriter {
+public class CommunicationController extends GenericThread implements McuBytesWriter {
 
     private static final SimpleLogger log = LoggerFactory.getLogger();
 
@@ -95,9 +96,8 @@ public class CommunicationController implements McuBytesWriter {
     }
 
 
-
-
-
-
-
+    @Override
+    public void startWork() throws IOException {
+        listeningCycle();
+    }
 }

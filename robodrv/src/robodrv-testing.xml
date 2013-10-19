@@ -68,7 +68,7 @@
                 <ref bean="testValue1"/>
             </list>
         </property>
-        <property name="timesRange" ref="rangeMinute"/>
+        <property name="timesRange" ref="range5Sec"/>
         <property name="x" value="300"/>
         <property name="y" value="100"/>
         <property name="bricksHorizontal" value="12"/>
