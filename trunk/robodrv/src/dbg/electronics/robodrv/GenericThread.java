@@ -2,6 +2,8 @@ package dbg.electronics.robodrv;
 
 import dbg.electronics.robodrv.head.Threaded;
 
+import java.io.IOException;
+
 /**
  * Created: 1/27/13  9:12 PM
  */
@@ -11,7 +13,11 @@ public abstract class GenericThread implements Runnable, Threaded {
 
     @Override
     public void run() {
-        startWork();
+        try {
+            startWork();
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+        }
     }
 
     @Override
@@ -21,7 +27,7 @@ public abstract class GenericThread implements Runnable, Threaded {
     }
 
 
-    public abstract void startWork();
+    public abstract void startWork() throws IOException;
 
     @Override
     public void terminate() {

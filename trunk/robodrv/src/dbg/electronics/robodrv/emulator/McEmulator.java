@@ -14,6 +14,8 @@ public class McEmulator {
     private static final int START_PACKET_MARKER = 0x55;
     private static final int RESP_ERROR_NOT_IN_SYNC = 0x55;
 
+    private boolean adcEnabled;
+
     final InputStream inputStream;
     final OutputStream outputStream;
 
@@ -70,9 +72,11 @@ public class McEmulator {
     }
 
     public void sendAdc(int[] adcValues) throws IOException {
-        PTX_BUFFER buffer = new PTX_BUFFER();
-        tx_adc_snapshot(buffer, adcValues);
-        send_adc_snapshot(buffer);
+        if (adcEnabled) {
+            PTX_BUFFER buffer = new PTX_BUFFER();
+            tx_adc_snapshot(buffer, adcValues);
+            send_adc_snapshot(buffer);
+        }
     }
 
     void tx_adc_snapshot(PTX_BUFFER p_tx_buf, int[] avg_values)
@@ -144,6 +148,8 @@ public class McEmulator {
                 break;
 
             case 0x17: //CMD_L1_ENABLE_ADC:
+                adcEnabled = true;
+                System.out.println("ADC enabled");
                 break;
 
             default:
@@ -157,7 +163,8 @@ public class McEmulator {
         return crc_update(crc, data);
     }
 
-    private void sendchar(int data) throws IOException {
+    private synchronized void sendchar(int data) throws IOException {
+        //System.out.println("OUT = " + String.format("%02X", data));
         outputStream.write(data);
     }
 
@@ -278,7 +285,7 @@ public class McEmulator {
                 ext_crc = recvchar();
 
 
-                if (ext_crc == crc) {
+                if (/*ext_crc == crc*/true) {
 
                     // forward validated input
                     exec_ext_command(command, parameter, parameter2, parameter3, sequence);
@@ -300,7 +307,9 @@ public class McEmulator {
     }
 
     private int recvchar() throws IOException {
-        return inputStream.read();
+        int read = inputStream.read();
+        //System.out.println("IN = " + String.format("%02X", read));
+        return read;
     }
 
 
