@@ -163,9 +163,14 @@ public class McEmulator {
         return crc_update(crc, data);
     }
 
-    private synchronized void sendchar(int data) throws IOException {
+    private synchronized void sendchar(int data) {
         //System.out.println("OUT = " + String.format("%02X", data));
-        outputStream.write(data);
+        try {
+            outputStream.write(data);
+        } catch (IOException e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            System.exit(0);
+        }
     }
 
     int crc_update(int crc, int data) {
@@ -285,6 +290,7 @@ public class McEmulator {
                 ext_crc = recvchar();
 
 
+                // TODO: enable crc checks
                 if (/*ext_crc == crc*/true) {
 
                     // forward validated input

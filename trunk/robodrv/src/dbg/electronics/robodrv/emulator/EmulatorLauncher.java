@@ -24,6 +24,7 @@ public class EmulatorLauncher {
                 emulator.main();
             } catch (Exception e) {
                 e.printStackTrace();
+                break;
             }
 
         } while (!Thread.currentThread().isInterrupted());
@@ -43,15 +44,17 @@ public class EmulatorLauncher {
 
                         try {
                             emulator.sendAdc(new int[]{i, i, i, i});
+                            System.out.println("i = " + i);
                         } catch (IOException e) {
                             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
-                            return;
+                            break;
                         }
 
                         try {
                             Thread.sleep(10);
                         } catch (InterruptedException e) {
                             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                            break;
                         }
 
                     }

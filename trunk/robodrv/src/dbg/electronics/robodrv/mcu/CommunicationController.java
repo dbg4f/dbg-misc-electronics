@@ -45,7 +45,7 @@ public class CommunicationController extends GenericThread implements McuBytesWr
 
         if (status != communicationChannelStatus) {
 
-            log.info("Status change " + status + "->" + communicationChannelStatus);
+            log.info("Channel Status change " + status + "->" + communicationChannelStatus);
 
             status = communicationChannelStatus;
 
@@ -58,6 +58,17 @@ public class CommunicationController extends GenericThread implements McuBytesWr
     public void listeningCycle() throws IOException {
 
         while (!Thread.currentThread().isInterrupted()) {
+
+
+            while (!socketCommunicator.isConnected()) {
+
+                try {
+                    Thread.sleep(1000);
+                } catch (InterruptedException e) {
+                    break;
+                }
+
+            }
 
             try {
                 socketCommunicator.waitAndProcessNextByte();
@@ -78,7 +89,7 @@ public class CommunicationController extends GenericThread implements McuBytesWr
 
                 try {
 
-                    socketCommunicator.init();
+                    //socketCommunicator.init();
 
                     updateStatus(CONNECTED);
 
