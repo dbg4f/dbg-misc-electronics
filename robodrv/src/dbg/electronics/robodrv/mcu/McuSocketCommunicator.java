@@ -4,11 +4,16 @@ package dbg.electronics.robodrv.mcu;
 import dbg.electronics.robodrv.GenericThread;
 import dbg.electronics.robodrv.head.stat.StatisticCounterType;
 import dbg.electronics.robodrv.head.stat.Statistics;
+import dbg.electronics.robodrv.logging.LoggerFactory;
+import dbg.electronics.robodrv.logging.SimpleLogger;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.Socket;
 
 public class McuSocketCommunicator implements McuBytesWriter {
+
+    private static final Logger log = Logger.getLogger(McuSocketCommunicator.class);
 
     private String host;
     private int port;
@@ -32,6 +37,8 @@ public class McuSocketCommunicator implements McuBytesWriter {
     public void init() throws IOException {
         socket = new Socket(host, port);
 
+        log.info("Socket connected " + socket);
+
         // TODO: use container to keep threads
 
         new Thread(new Runnable() {
@@ -45,6 +52,11 @@ public class McuSocketCommunicator implements McuBytesWriter {
             }
         }).start();
 
+    }
+
+
+    public boolean isConnected(){
+        return socket != null && socket.isConnected();
     }
 
     @Override

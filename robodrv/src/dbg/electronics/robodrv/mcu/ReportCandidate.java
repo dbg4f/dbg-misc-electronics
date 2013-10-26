@@ -68,7 +68,7 @@ public class ReportCandidate {
         }
         else {
 
-            if (crc() != nextByte) {
+            if (marker == null || crc() != nextByte) {
                 wrongWay = true;
             } else {
                 reportReady = true;
