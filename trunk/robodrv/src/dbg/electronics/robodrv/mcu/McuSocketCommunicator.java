@@ -4,12 +4,15 @@ package dbg.electronics.robodrv.mcu;
 import dbg.electronics.robodrv.GenericThread;
 import dbg.electronics.robodrv.head.stat.StatisticCounterType;
 import dbg.electronics.robodrv.head.stat.Statistics;
+import dbg.electronics.robodrv.io.FormatUtils;
 import dbg.electronics.robodrv.logging.LoggerFactory;
 import dbg.electronics.robodrv.logging.SimpleLogger;
 import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.Arrays;
 
 public class McuSocketCommunicator implements McuBytesWriter {
 
@@ -61,6 +64,7 @@ public class McuSocketCommunicator implements McuBytesWriter {
 
     @Override
     public void write(byte[] command) throws IOException {
+        log.debug("Write bytes " + FormatUtils.formatArray(command));
         socket.getOutputStream().write(command);
         statistics.update(StatisticCounterType.RAW_SENT, command.length);
     }

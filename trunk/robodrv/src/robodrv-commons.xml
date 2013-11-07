@@ -100,7 +100,9 @@
         <property name="type"               value="MOTION_SPEED"/>
     </bean>
 
-
+    <bean id="drive" class="dbg.electronics.robodrv.drive.M16MultichannelPwmDrive">
+        <constructor-arg ref="synchronousExecutor"/>
+    </bean>
 
 
 

@@ -8,6 +8,7 @@
         <property name="mcuRegisterAccess" ref="mcuRegisterAccess"/>
         <property name="socketCommunicator" ref="mcuSocketCommunicator"/>
         <property name="executor" ref="synchronousExecutor"/>
+        <property name="drive" ref="drive"/>
     </bean>
 
     <bean id="groovyEvaluator" class="dbg.electronics.robodrv.groovy.GroovyEvaluator">

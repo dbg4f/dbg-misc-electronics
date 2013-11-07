@@ -11,6 +11,8 @@ public class EmulatorLauncher {
 
         ServerSocket serverSocket = new ServerSocket(4444);
 
+        System.out.println("Emulator started");
+
         do {
 
             Socket clientSocket = serverSocket.accept();
@@ -26,6 +28,8 @@ public class EmulatorLauncher {
                 e.printStackTrace();
                 break;
             }
+
+            System.out.println("End of cycle");
 
         } while (!Thread.currentThread().isInterrupted());
 
