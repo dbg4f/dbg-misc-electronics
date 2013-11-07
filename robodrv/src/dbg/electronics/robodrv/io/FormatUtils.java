@@ -9,4 +9,13 @@ public class FormatUtils {
         return new SimpleDateFormat("HH:mm:ss").format(date);
     }
 
+    public static String formatArray(byte[] bytes){
+        StringBuffer buffer= new StringBuffer();
+        for (byte b : bytes){
+            buffer.append(String.format("%02X ", b));
+        }
+        return buffer.toString();
+    }
+
+
 }

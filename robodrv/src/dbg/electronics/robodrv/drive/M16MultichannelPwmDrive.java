@@ -50,10 +50,15 @@ public class M16MultichannelPwmDrive {
 
     private Map<Integer, McuPwmDrive> drives = new LinkedHashMap<Integer, McuPwmDrive>();
 
-    public M16MultichannelPwmDrive(SynchronousExecutor executor) throws InterruptedException, IOException, McuCommunicationException {
+    public M16MultichannelPwmDrive(SynchronousExecutor executor) {
+
         this.executor = executor;
 
         mcuRegisterAccess = new McuRegisterAccess(executor);
+
+    }
+
+    public void init() throws InterruptedException, IOException, McuCommunicationException {
 
         McuPwmDrive driveTimerA = new McuPwmDrive(M16Reg.PORTB, DIR_PIN_A, M16Reg.OCR1AH);
         McuPwmDrive driveTimerB = new McuPwmDrive(M16Reg.PORTB, DIR_PIN_B, M16Reg.OCR1BH);
