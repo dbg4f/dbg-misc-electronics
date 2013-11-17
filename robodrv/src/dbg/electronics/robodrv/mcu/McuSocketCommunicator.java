@@ -38,12 +38,17 @@ public class McuSocketCommunicator implements McuBytesWriter {
     }
 
     public void init() throws IOException {
+
+        if (socket != null) {
+            return;
+        }
+
         socket = new Socket(host, port);
 
         log.info("Socket connected " + socket);
 
         // TODO: use container to keep threads
-
+        /*
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -54,7 +59,7 @@ public class McuSocketCommunicator implements McuBytesWriter {
                 }
             }
         }).start();
-
+          */
     }
 
 
@@ -65,11 +70,24 @@ public class McuSocketCommunicator implements McuBytesWriter {
     @Override
     public void write(byte[] command) throws IOException {
         log.debug("Write bytes " + FormatUtils.formatArray(command));
+        /*
+        for (byte b : command) {
+          socket.getOutputStream().write(b);
+            try {
+                log.debug("Write byte " + FormatUtils.formatArray(new byte[]{b}));
+
+                Thread.sleep(100);
+
+            } catch (InterruptedException e) {
+                e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            }
+        }
+        */
         socket.getOutputStream().write(command);
         statistics.update(StatisticCounterType.RAW_SENT, command.length);
     }
 
-    public void listeningCycle() throws IOException {
+    public void listeningCycle() throws IOException, McuCommunicationException {
 
         while (!Thread.currentThread().isInterrupted()) {
             waitAndProcessNextByte();
@@ -77,8 +95,14 @@ public class McuSocketCommunicator implements McuBytesWriter {
 
     }
 
-    public void waitAndProcessNextByte() throws IOException {
+    public void waitAndProcessNextByte() throws IOException, McuCommunicationException {
+        // TODO: check for -1 value (end of stream)
         int nextValue = socket.getInputStream().read();
+
+        if (nextValue == -1) {
+            throw new McuCommunicationException("End of stream detected");
+        }
+
         bytesListener.onNextByte((byte)nextValue);
         statistics.update(StatisticCounterType.RAW_RECEIVED, 1);
     }

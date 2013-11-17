@@ -69,12 +69,12 @@ public class M16MultichannelPwmDrive {
         new RegBitSetter()
                 .set(4, 1)
                 .set(5, 1)
-                .applyRegValue(mcuRegisterAccess, M16Reg.DDRD); // configure out direction for PWM pins (OC1A=PD4, OC1B=PD5)
+                .applyRegValueNoRead(mcuRegisterAccess, M16Reg.DDRD); // configure out direction for PWM pins (OC1A=PD4, OC1B=PD5)
 
         new RegBitSetter()
                 .set(DIR_PIN_A, 1)
                 .set(DIR_PIN_B, 1)
-                .applyRegValue(mcuRegisterAccess, M16Reg.DDRB); // configure out pins for relays (DIR signal)
+                .applyRegValueNoRead(mcuRegisterAccess, M16Reg.DDRB); // configure out pins for relays (DIR signal)
 
         /*
 

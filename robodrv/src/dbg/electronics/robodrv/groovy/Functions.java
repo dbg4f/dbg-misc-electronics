@@ -41,14 +41,27 @@ public class Functions extends Script {
         try {
             return "ECHO res=" + executor.execute(createCommand(ECHO, 1)).getResult();
         } catch (Exception e) {
-            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            System.out.println("ERROR: " + e.getMessage());
+            //e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             return "ERROR: " + e.getMessage();
         }
     }
 
-    public String write(M16Reg reg, String value) {
+    public String read(String reg) {
         try {
-            mcuRegisterAccess.writeReg(reg, BinUtils.asNumber(value));
+            return reg + "=" + mcuRegisterAccess.readReg(M16Reg.valueOf(reg));
+        }
+        catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            return "ERROR: " + e.getMessage();
+        }
+
+    }
+
+
+    public String write(String reg, String value) {
+        try {
+            mcuRegisterAccess.writeReg(M16Reg.valueOf(reg), BinUtils.asNumber(value));
             return reg + "<=" + value;
         }
         catch (Exception e) {
@@ -70,23 +83,34 @@ public class Functions extends Script {
 
     }
 
+    public String comm() throws IOException {
+        socketCommunicator.init();
+        echo(1);
+        echo(2);
+        echo(3);
+        echo(4);
+        echo(5);
+        return "initialized";
+
+    }
+
     public String init() {
         try {
             socketCommunicator.init();
             drive.init();
             //executor.sendOnly(createCommand(ENABLE_ADC));
 
-            //drive.getChannelDrive(0).setDirection(true);
+            drive.getChannelDrive(0).setDirection(true);
             Thread.sleep(1000);
-            //drive.getChannelDrive(0).setDirection(false);
+            drive.getChannelDrive(0).setDirection(false);
             drive.getChannelDrive(0).setPwm(255);
             Thread.sleep(1000);
             drive.getChannelDrive(0).setPwm(0);
 
 
-            //drive.getChannelDrive(1).setDirection(true);
+            drive.getChannelDrive(1).setDirection(true);
             Thread.sleep(1000);
-            //drive.getChannelDrive(1).setDirection(false);
+            drive.getChannelDrive(1).setDirection(false);
             drive.getChannelDrive(1).setPwm(255);
             Thread.sleep(1000);
             drive.getChannelDrive(1).setPwm(0);
