@@ -25,6 +25,10 @@ public class RegBitSetter {
         registerAccess.writeReg(reg, apply(registerAccess.readReg(reg)));
     }
 
+    public void applyRegValueNoRead(McuRegisterAccess registerAccess, M16Reg reg) throws InterruptedException, IOException, McuCommunicationException {
+        registerAccess.writeReg(reg, apply(0));
+    }
+
     public int apply(int value) throws InterruptedException, IOException, McuCommunicationException {
 
         for (int i=0; i<bits.length; i++) {

@@ -35,6 +35,8 @@ public class SynchronousExecutor implements McuReportListener {
 
         responseBlockingQueue.clear();
 
+        log.info("Command to send: " + cmd);
+
         immediateSend(cmd);
 
         long ts = System.currentTimeMillis();

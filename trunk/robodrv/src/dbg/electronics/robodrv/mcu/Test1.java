@@ -2,6 +2,7 @@ package dbg.electronics.robodrv.mcu;
 
 import dbg.electronics.robodrv.drive.DriveState;
 import dbg.electronics.robodrv.drive.M16MultichannelPwmDrive;
+import dbg.electronics.robodrv.head.stat.Statistics;
 import dbg.electronics.robodrv.util.BinUtils;
 import groovy.ui.Console;
 import org.apache.log4j.Logger;
@@ -21,9 +22,46 @@ public class Test1 implements McuBytesListener, McuReportListener {
     private byte[] adcValues = new byte[4];
     private byte counter = 0;
     private McuRegisterAccess mcuRegisterAccess;
-    
+
 
     public static void main(String[] args) throws IOException, InterruptedException, McuCommunicationException {
+
+        final Test1 t = new Test1();
+
+        final McuSocketCommunicator communicator = new McuSocketCommunicator("127.0.0.1", 4444);
+
+        final int[] counter = {0};
+
+        communicator.setStatistics(new Statistics());
+
+        communicator.setBytesListener(new McuBytesListener() {
+            @Override
+            public void onNextByte(byte nextByte) {
+                log.info(String.format("[%02d] onNextByte %02X %c", counter[0], nextByte, nextByte));
+                counter[0]++;
+            }
+        });
+
+        communicator.init();
+
+        for (int i=0; i<10; i++) {
+
+            counter[0] = 0;
+            communicator.write(new byte[] {'S'});
+
+            while (counter[0] < 6) {
+                Thread.sleep(1);
+            }
+
+
+        }
+
+
+
+
+    }
+
+    public static void main1(String[] args) throws IOException, InterruptedException, McuCommunicationException {
 
         final Test1 t = new Test1();
 
@@ -60,6 +98,8 @@ public class Test1 implements McuBytesListener, McuReportListener {
                 try {
                     communicator.listeningCycle();
                 } catch (IOException e) {
+                    e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+                } catch (McuCommunicationException e) {
                     e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
                 }
             }
