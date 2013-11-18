@@ -1,6 +1,7 @@
 package dbg.electronics.robodrv.drive;
 
 import dbg.electronics.robodrv.mcu.*;
+import dbg.electronics.robodrv.util.BinUtils;
 
 import java.io.IOException;
 import java.util.LinkedHashMap;
@@ -12,8 +13,8 @@ import static dbg.electronics.robodrv.mcu.McuCommand.createCommand;
 public class M16MultichannelPwmDrive {
 
 
-    public static final int DIR_PIN_A = 3;
-    public static final int DIR_PIN_B = 4;
+    public static final int DIR_PIN_A = 4;
+    public static final int DIR_PIN_B = 3;
     private final SynchronousExecutor executor;
     private final McuRegisterAccess mcuRegisterAccess;
 
@@ -60,8 +61,8 @@ public class M16MultichannelPwmDrive {
 
     public void init() throws InterruptedException, IOException, McuCommunicationException {
 
-        McuPwmDrive driveTimerA = new McuPwmDrive(M16Reg.PORTB, DIR_PIN_A, M16Reg.OCR1AH);
-        McuPwmDrive driveTimerB = new McuPwmDrive(M16Reg.PORTB, DIR_PIN_B, M16Reg.OCR1BH);
+        McuPwmDrive driveTimerA = new McuPwmDrive(M16Reg.PORTB, DIR_PIN_A, M16Reg.OCR1AL);
+        McuPwmDrive driveTimerB = new McuPwmDrive(M16Reg.PORTB, DIR_PIN_B, M16Reg.OCR1BL);
 
         drives.put(0, driveTimerA);
         drives.put(1, driveTimerB);
@@ -145,6 +146,20 @@ Fpwm = Fclk/(2*0x100*N), N = 1,8,64,256,1024
             .set(1, 0) // CS11
             .set(0, 1) // CS10
         .applyRegValue(mcuRegisterAccess, M16Reg.TCCR1B); // no prescaling, 14kHz, phase correct PWM
+
+
+        mcuRegisterAccess.writeReg(M16Reg.TCCR1A, BinUtils.asNumber("10100001"));
+        mcuRegisterAccess.writeReg(M16Reg.TCCR1B, BinUtils.asNumber("00001101"));
+
+        mcuRegisterAccess.writeReg(M16Reg.OCR1AH, BinUtils.asNumber("00000000"));
+        mcuRegisterAccess.writeReg(M16Reg.OCR1AL, BinUtils.asNumber("00000000"));
+
+        mcuRegisterAccess.writeReg(M16Reg.OCR1BH, BinUtils.asNumber("00000000"));
+        mcuRegisterAccess.writeReg(M16Reg.OCR1BL, BinUtils.asNumber("00000000"));
+
+        mcuRegisterAccess.writeReg(M16Reg.DDRB, BinUtils.asNumber("00011000"));
+        mcuRegisterAccess.writeReg(M16Reg.DDRD, BinUtils.asNumber("00110000"));
+
 
 
     }
