@@ -72,6 +72,13 @@ public class Functions extends Script {
     }
 
 
+    public String pulse(int msec) throws InterruptedException {
+        pwm(0, 255);
+        Thread.sleep(msec);
+        pwm(0, 0);
+        return "pulse " + msec;
+    }
+
     public String adc() {
         try {
             executor.sendOnly(createCommand(ENABLE_ADC));
@@ -94,28 +101,60 @@ public class Functions extends Script {
 
     }
 
+
+    public String dir(int channel, int value) {
+        try {
+            drive.getChannelDrive(channel).setDirection(value != 0);
+            return "dir[" + channel + "] = " + (value != 0);
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
+
+    }
+
+    public String pwm(int channel, int value) {
+        try {
+            drive.getChannelDrive(channel).setPwm(value);
+            return "pwm[" + channel + "] = " + value;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
+
+    }
+
+
+    public String drv() throws InterruptedException, McuCommunicationException, IOException {
+
+        drive.getChannelDrive(0).setPwm(0);
+        drive.getChannelDrive(0).setDirection(true);
+        Thread.sleep(1000);
+        drive.getChannelDrive(0).setDirection(false);
+        drive.getChannelDrive(0).setPwm(255);
+        Thread.sleep(1000);
+        drive.getChannelDrive(0).setPwm(0);
+
+
+        drive.getChannelDrive(1).setPwm(1);
+        drive.getChannelDrive(1).setDirection(true);
+        Thread.sleep(1000);
+        drive.getChannelDrive(1).setDirection(false);
+        drive.getChannelDrive(1).setPwm(255);
+        Thread.sleep(1000);
+        drive.getChannelDrive(1).setPwm(0);
+
+        return "drv ok";
+
+    }
+
     public String init() {
         try {
             socketCommunicator.init();
             drive.init();
             //executor.sendOnly(createCommand(ENABLE_ADC));
-
-            drive.getChannelDrive(0).setDirection(true);
-            Thread.sleep(1000);
-            drive.getChannelDrive(0).setDirection(false);
-            drive.getChannelDrive(0).setPwm(255);
-            Thread.sleep(1000);
-            drive.getChannelDrive(0).setPwm(0);
-
-
-            drive.getChannelDrive(1).setDirection(true);
-            Thread.sleep(1000);
-            drive.getChannelDrive(1).setDirection(false);
-            drive.getChannelDrive(1).setPwm(255);
-            Thread.sleep(1000);
-            drive.getChannelDrive(1).setPwm(0);
-
-
 
             return "Socket communicator initialized";
         } catch (Exception e) {
