@@ -9,6 +9,12 @@
         <property name="socketCommunicator" ref="mcuSocketCommunicator"/>
         <property name="executor" ref="synchronousExecutor"/>
         <property name="drive" ref="drive"/>
+        <property name="valueWithHistoryList">
+            <list>
+                <ref bean="testValue1"/>
+                <ref bean="testValue2"/>
+            </list>
+        </property>
     </bean>
 
     <bean id="groovyEvaluator" class="dbg.electronics.robodrv.groovy.GroovyEvaluator">

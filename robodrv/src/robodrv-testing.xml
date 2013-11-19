@@ -64,7 +64,8 @@
     <bean id="timeSeriesTwo" class="dbg.electronics.robodrv.graphics.widgets.TimeSeriesChart" init-method="init">
         <property name="valueWithHistoryList">
             <list>
-                <ref bean="testValueStickX"/>
+                <!-- <ref bean="testValueStickX"/> -->
+                <ref bean="testValue2"/>
                 <ref bean="testValue1"/>
             </list>
         </property>

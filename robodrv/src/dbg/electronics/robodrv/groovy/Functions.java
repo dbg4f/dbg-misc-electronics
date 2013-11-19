@@ -2,6 +2,7 @@ package dbg.electronics.robodrv.groovy;
 
 
 import dbg.electronics.robodrv.drive.M16MultichannelPwmDrive;
+import dbg.electronics.robodrv.graphics.ValueWithHistory;
 import dbg.electronics.robodrv.mcu.*;
 
 import static dbg.electronics.robodrv.mcu.CommandCode.ENABLE_ADC;
@@ -13,6 +14,7 @@ import groovy.lang.Script;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.List;
 
 public class Functions extends Script {
 
@@ -20,6 +22,7 @@ public class Functions extends Script {
     private static McuSocketCommunicator socketCommunicator;
     private static SynchronousExecutor executor;
     private static M16MultichannelPwmDrive drive;
+    private static List<ValueWithHistory> valueWithHistoryList;
 
     public void setSocketCommunicator(McuSocketCommunicator socketCommunicator) {
         Functions.socketCommunicator = socketCommunicator;
@@ -35,6 +38,10 @@ public class Functions extends Script {
 
     public void setDrive(M16MultichannelPwmDrive drive) {
         Functions.drive = drive;
+    }
+
+    public void setValueWithHistoryList(List<ValueWithHistory> valueWithHistoryList) {
+        Functions.valueWithHistoryList = valueWithHistoryList;
     }
 
     public String echo(int value) {
@@ -58,6 +65,19 @@ public class Functions extends Script {
 
     }
 
+    public String freeze() {
+        for (ValueWithHistory valueWithHistory : valueWithHistoryList) {
+            valueWithHistory.freeze();
+        }
+        return "frozen";
+    }
+
+    public String unfreeze() {
+        for (ValueWithHistory valueWithHistory : valueWithHistoryList) {
+            valueWithHistory.unfreeze();
+        }
+        return "unfrozen";
+    }
 
     public String write(String reg, String value) {
         try {
@@ -76,6 +96,8 @@ public class Functions extends Script {
         pwm(0, 255);
         Thread.sleep(msec);
         pwm(0, 0);
+        Thread.sleep(1200);
+        freeze();
         return "pulse " + msec;
     }
 
