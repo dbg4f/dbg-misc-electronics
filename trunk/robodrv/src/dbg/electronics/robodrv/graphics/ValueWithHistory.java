@@ -16,6 +16,10 @@ public class ValueWithHistory {
 
     private ArrayList<TimeSeries> timeSeries = new ArrayList<TimeSeries>();
 
+    private List<TimeSeries> snapshot = new ArrayList<TimeSeries>();
+
+    private boolean frozen = false;
+
     private long maxTimeDepth = 5000;
 
     private Range timeRange = new Range(0, (int)maxTimeDepth);
@@ -63,6 +67,27 @@ public class ValueWithHistory {
     }
 
     public synchronized List<TimeSeries> getCurrentSeries() {
+        if (frozen) {
+            return snapshot;
+        }
+        else {
+            snapshot = generateCurrentSeries();
+            return snapshot;
+        }
+    }
+
+
+    public void freeze() {
+        frozen = true;
+    }
+
+    public void unfreeze() {
+        frozen = false;
+    }
+
+
+
+    public synchronized List<TimeSeries> generateCurrentSeries() {
 
         // TODO: construct more effective algorithms to avoid re-creation of full set of time series
 

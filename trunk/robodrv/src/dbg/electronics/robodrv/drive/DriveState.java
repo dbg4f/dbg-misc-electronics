@@ -17,10 +17,15 @@ public class DriveState implements McuReportListener, MultilineReportable {
     private int signalVoltage; // millivolts
 
     private ValueWithHistory sampleValueWithHistory;
+    private ValueWithHistory sampleValueWithHistory2;
 
 
     public void setSampleValueWithHistory(ValueWithHistory sampleValueWithHistory) {
         this.sampleValueWithHistory = sampleValueWithHistory;
+    }
+
+    public void setSampleValueWithHistory2(ValueWithHistory sampleValueWithHistory2) {
+        this.sampleValueWithHistory2 = sampleValueWithHistory2;
     }
 
     public class ProtocolStateUpdater implements ChannelStatusListener<ProtocolState> {
@@ -47,8 +52,25 @@ public class DriveState implements McuReportListener, MultilineReportable {
     @Override
     public void onAdcValue(int channel, byte value) {
         //System.out.println("channel = " + channel + " value " + value);
-        pwrCurrent = value;
-        sampleValueWithHistory.update(value);
+
+        /*
+        0 - V?
+        1 - current
+        2 - V?
+        3 - position
+         */
+
+
+        int unsignedValue = (0xFF & value);
+
+        if (channel == 1) {
+            pwrCurrent = value;
+            sampleValueWithHistory.update(unsignedValue);
+
+        }
+        if (channel == 3) {
+            sampleValueWithHistory2.update(unsignedValue);
+        }
     }
 
     @Override

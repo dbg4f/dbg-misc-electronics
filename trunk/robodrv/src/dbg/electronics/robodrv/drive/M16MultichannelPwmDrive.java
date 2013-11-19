@@ -149,7 +149,7 @@ Fpwm = Fclk/(2*0x100*N), N = 1,8,64,256,1024
 
 
         mcuRegisterAccess.writeReg(M16Reg.TCCR1A, BinUtils.asNumber("10100001"));
-        mcuRegisterAccess.writeReg(M16Reg.TCCR1B, BinUtils.asNumber("00001101"));
+        mcuRegisterAccess.writeReg(M16Reg.TCCR1B, BinUtils.asNumber("00000001"));
 
         mcuRegisterAccess.writeReg(M16Reg.OCR1AH, BinUtils.asNumber("00000000"));
         mcuRegisterAccess.writeReg(M16Reg.OCR1AL, BinUtils.asNumber("00000000"));

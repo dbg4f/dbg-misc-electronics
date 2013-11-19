@@ -33,9 +33,16 @@
         <property name="name"       value="Test Value 1"/>
     </bean>
 
+    <bean id="testValue2" class="dbg.electronics.robodrv.graphics.ValueWithHistory">
+        <property name="valueFormatString" value="%d"/>
+        <property name="valueRange" ref="rangeByte"/>
+        <property name="name"       value="Test Value 2"/>
+    </bean>
+
 
     <bean id="driveState" class="dbg.electronics.robodrv.drive.DriveState">
         <property name="sampleValueWithHistory" ref="testValue1"/>
+        <property name="sampleValueWithHistory2" ref="testValue2"/>
     </bean>
 
 
