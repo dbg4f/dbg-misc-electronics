@@ -2,6 +2,7 @@ package dbg.electronics.robodrv.logging;
 
 import dbg.electronics.robodrv.graphics.TimeSeries;
 import dbg.electronics.robodrv.graphics.ValueWithHistory;
+import dbg.electronics.robodrv.io.IoUtils;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -65,7 +66,7 @@ public class ValueHistorySerializer {
             Column column = new Column(valueWithHistory.getName(), valueWithHistory.getCurrentSeries());
             mapByNames.put(column.name, column);
             sortedTimes.addAll(column.valuesByTime.keySet());
-            currentData.put(column.name, "");
+            currentData.put(column.name, "0");
         }
 
         List<Row> rows = new ArrayList<Row>();
@@ -105,6 +106,34 @@ public class ValueHistorySerializer {
     }
 
 
+
+    public void restore(String fileName) throws IOException {
+        if (!fileName.endsWith(".csv")) {
+            fileName += ".csv";
+        }
+
+        List<String> lines = IoUtils.readLines(fileName);
+
+        if (lines.size() == 0) {
+            return;
+        }
+
+        // remove header line
+        lines.remove(0);
+
+
+        for (String line : lines) {
+
+            String[] columns = line.split(csvDelimiter);
+
+            for (int i=0; i<values.size(); i++) {
+                values.get(i).getSnapshot().add(new TimeSeries(Integer.valueOf(columns[0]),Integer.valueOf(columns[i + 1])));
+            }
+
+        }
+
+
+    }
 
 
 }
