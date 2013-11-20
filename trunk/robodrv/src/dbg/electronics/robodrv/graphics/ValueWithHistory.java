@@ -49,6 +49,10 @@ public class ValueWithHistory {
 
     public synchronized void update(int value, long timestamp) {
 
+        if (frozen) {
+            return;
+        }
+
         timeSeries.add(new TimeSeries(timestamp, value));
         currentValue = value;
 
@@ -71,9 +75,17 @@ public class ValueWithHistory {
             return snapshot;
         }
         else {
-            snapshot = generateCurrentSeries();
+            snapshot = generateCurrentSeries(System.currentTimeMillis());
             return snapshot;
         }
+    }
+
+    public List<TimeSeries> getSnapshot() {
+        return snapshot;
+    }
+
+    public synchronized void setSnapshot(List<TimeSeries> timeSerieses) {
+        snapshot = timeSerieses;
     }
 
 
@@ -87,14 +99,12 @@ public class ValueWithHistory {
 
 
 
-    public synchronized List<TimeSeries> generateCurrentSeries() {
+    public synchronized List<TimeSeries> generateCurrentSeries(long currentTs) {
 
         // TODO: construct more effective algorithms to avoid re-creation of full set of time series
 
         List<TimeSeries> normalizedSeries = new ArrayList<TimeSeries>();
         List<TimeSeries> seriesToRemove = new ArrayList<TimeSeries>();
-
-        long currentTs = System.currentTimeMillis();
 
         for (TimeSeries series : timeSeries) {
 
