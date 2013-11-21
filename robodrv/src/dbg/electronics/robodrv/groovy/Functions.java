@@ -3,6 +3,7 @@ package dbg.electronics.robodrv.groovy;
 
 import dbg.electronics.robodrv.drive.M16MultichannelPwmDrive;
 import dbg.electronics.robodrv.graphics.ValueWithHistory;
+import dbg.electronics.robodrv.logging.ValueHistorySerializer;
 import dbg.electronics.robodrv.mcu.*;
 
 import static dbg.electronics.robodrv.mcu.CommandCode.ENABLE_ADC;
@@ -23,6 +24,7 @@ public class Functions extends Script {
     private static SynchronousExecutor executor;
     private static M16MultichannelPwmDrive drive;
     private static List<ValueWithHistory> valueWithHistoryList;
+    private static ValueHistorySerializer serializer;
 
     public void setSocketCommunicator(McuSocketCommunicator socketCommunicator) {
         Functions.socketCommunicator = socketCommunicator;
@@ -42,6 +44,10 @@ public class Functions extends Script {
 
     public void setValueWithHistoryList(List<ValueWithHistory> valueWithHistoryList) {
         Functions.valueWithHistoryList = valueWithHistoryList;
+    }
+
+    public void setSerializer(ValueHistorySerializer serializer) {
+        Functions.serializer = serializer;
     }
 
     public String echo(int value) {
@@ -99,6 +105,27 @@ public class Functions extends Script {
         Thread.sleep(1200);
         freeze();
         return "pulse " + msec;
+    }
+
+
+    public String save(String fileName) {
+        try {
+            serializer.save(fileName);
+            return "saved to " + fileName;
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            return "ERROR: " + e.getMessage();
+        }
+    }
+
+    public String restore(String fileName) {
+        try {
+            serializer.restore(fileName);
+            return "restored from " + fileName;
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            return "ERROR: " + e.getMessage();
+        }
     }
 
     public String adc() {
