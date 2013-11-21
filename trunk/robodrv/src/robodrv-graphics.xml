@@ -15,6 +15,7 @@
                 <ref bean="testValue2"/>
             </list>
         </property>
+        <property name="serializer" ref="valueHistorySerializer"/>
     </bean>
 
     <bean id="groovyEvaluator" class="dbg.electronics.robodrv.groovy.GroovyEvaluator">
@@ -166,8 +167,8 @@
     <bean id="valueHistorySerializer" class="dbg.electronics.robodrv.logging.ValueHistorySerializer">
         <property name="values">
             <list>
-                <ref bean="testValueStickX"/>
-                <ref bean="testValueStickY"/>
+                <ref bean="testValue1"/>
+                <ref bean="testValue2"/>
             </list>
         </property>
     </bean>
