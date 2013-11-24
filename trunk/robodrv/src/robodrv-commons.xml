@@ -43,6 +43,7 @@
     <bean id="driveState" class="dbg.electronics.robodrv.drive.DriveState">
         <property name="sampleValueWithHistory" ref="testValue1"/>
         <property name="sampleValueWithHistory2" ref="testValue2"/>
+        <property name="headController" ref="headController"/>
     </bean>
 
 
@@ -97,9 +98,19 @@
     <bean id="headController" class="dbg.electronics.robodrv.head.HeadController" init-method="init">
     </bean>
 
-    <bean id="targetSteeringParamAccessor" class="dbg.electronics.robodrv.head.TargetParameterAccessor">
+    <bean id="steeringAngleParamAccessor" class="dbg.electronics.robodrv.head.TargetParameterAccessor">
         <property name="headController"     ref="headController"/>
         <property name="type"               value="STEERING_ANGLE"/>
+    </bean>
+
+    <bean id="encoderSteeringParamAccessor" class="dbg.electronics.robodrv.head.TargetParameterAccessor">
+        <property name="headController"     ref="headController"/>
+        <property name="type"               value="STEERING_ANGLE"/>
+    </bean>
+
+    <bean id="powerCurrentParamAccessor" class="dbg.electronics.robodrv.head.TargetParameterAccessor">
+        <property name="headController"     ref="headController"/>
+        <property name="type"               value="POWER_CURRENT"/>
     </bean>
 
     <bean id="targetMotionSpeedParamAccessor" class="dbg.electronics.robodrv.head.TargetParameterAccessor">

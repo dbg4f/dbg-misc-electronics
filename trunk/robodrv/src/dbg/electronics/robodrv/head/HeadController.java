@@ -23,6 +23,9 @@ public class HeadController implements ParameterUpdater {
         actualParameters.put(MasterParameterType.MOTION_SPEED, new MasterParameter(MasterParameterType.MOTION_SPEED, new Range(0, 255)));
         targetParameters.put(MasterParameterType.MOTION_SPEED, new MasterParameter(MasterParameterType.MOTION_SPEED, new Range(0, 255)));
 
+        actualParameters.put(MasterParameterType.POWER_CURRENT, new MasterParameter(MasterParameterType.POWER_CURRENT, new Range(0, 255)));
+        targetParameters.put(MasterParameterType.POWER_CURRENT, new MasterParameter(MasterParameterType.POWER_CURRENT, new Range(0, 255)));
+
     }
 
 
