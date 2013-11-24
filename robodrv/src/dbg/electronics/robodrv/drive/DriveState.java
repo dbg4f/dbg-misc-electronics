@@ -1,6 +1,9 @@
 package dbg.electronics.robodrv.drive;
 
+import dbg.electronics.robodrv.Range;
 import dbg.electronics.robodrv.graphics.ValueWithHistory;
+import dbg.electronics.robodrv.head.HeadController;
+import dbg.electronics.robodrv.head.MasterParameterType;
 import dbg.electronics.robodrv.head.MultilineReportable;
 import dbg.electronics.robodrv.mcu.ChannelStatus;
 import dbg.electronics.robodrv.mcu.ChannelStatusListener;
@@ -9,6 +12,10 @@ import dbg.electronics.robodrv.mcu.ProtocolState;
 
 public class DriveState implements McuReportListener, MultilineReportable {
 
+
+    private static final Range BYTE_RANGE = new Range(0, 255);
+
+    private HeadController headController;
     private ProtocolState protocolState;
     private ChannelStatus channelStatus;
     private int steeringAngle; // +/- degrees
@@ -26,6 +33,10 @@ public class DriveState implements McuReportListener, MultilineReportable {
 
     public void setSampleValueWithHistory2(ValueWithHistory sampleValueWithHistory2) {
         this.sampleValueWithHistory2 = sampleValueWithHistory2;
+    }
+
+    public void setHeadController(HeadController headController) {
+        this.headController = headController;
     }
 
     public class ProtocolStateUpdater implements ChannelStatusListener<ProtocolState> {
@@ -66,10 +77,12 @@ public class DriveState implements McuReportListener, MultilineReportable {
         if (channel == 1) {
             pwrCurrent = value;
             sampleValueWithHistory.update(unsignedValue);
+            headController.update(MasterParameterType.POWER_CURRENT, unsignedValue, BYTE_RANGE);
 
         }
         if (channel == 3) {
             sampleValueWithHistory2.update(unsignedValue);
+            headController.update(MasterParameterType.STEERING_ANGLE, unsignedValue, BYTE_RANGE);
         }
     }
 

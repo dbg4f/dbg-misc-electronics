@@ -124,20 +124,27 @@
     </bean>
 
 
-    <bean id="widgetTargetSteering" class="dbg.electronics.robodrv.graphics.widgets.ClockLikeIndicator">
-        <property name="parameterAccessor"  ref="targetSteeringParamAccessor"/>
-        <property name="x"                  value="200"/>
-        <property name="y"                  value="200"/>
-        <property name="dimension"          value="100"/>
+    <bean id="widgetSteeringAngle" class="dbg.electronics.robodrv.graphics.widgets.ClockLikeIndicator">
+        <property name="parameterAccessor"  ref="steeringAngleParamAccessor"/>
+        <property name="x"                  value="130"/>
+        <property name="y"                  value="220"/>
+        <property name="dimension"          value="50"/>
+    </bean>
+
+    <bean id="widgetPowerCurrent" class="dbg.electronics.robodrv.graphics.widgets.ClockLikeIndicator">
+        <property name="parameterAccessor"  ref="powerCurrentParamAccessor"/>
+        <property name="x"                  value="130"/>
+        <property name="y"                  value="350"/>
+        <property name="dimension"          value="50"/>
     </bean>
 
     <bean id="bufferedScreen" class="dbg.electronics.robodrv.graphics.MultiBufferFullScreen">
         <property name="widgets">
             <list>
-                <!--
-                <ref bean="widgetTargetSteering"/>
-                <ref bean="widgetTargetSpeed"/>
-                -->
+
+                <ref bean="widgetSteeringAngle"/>
+                <ref bean="widgetPowerCurrent"/>
+
                 <!--
                 <ref bean="widgetHidControls"/>
                 -->

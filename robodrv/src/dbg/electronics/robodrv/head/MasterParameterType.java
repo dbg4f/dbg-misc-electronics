@@ -7,5 +7,6 @@ public enum MasterParameterType {
 
     MOTION_SPEED,
     STEERING_ANGLE,
+    POWER_CURRENT,
 
 }
