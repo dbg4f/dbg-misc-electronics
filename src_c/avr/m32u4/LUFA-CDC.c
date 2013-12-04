@@ -255,7 +255,7 @@ void AddByteAndTryCommand(DrvCommand_t* const pDrvCommand, int8_t CommandByte)
 
             crc = 0xFF;
 
-            for (i = 0; i<FullLength - 2; i++)
+            for (i = 0; i <= FullLength - 2; i++)
             {
                 crc = crcUpdate(crc, pDrvCommand->CommandBuffer[i]);
             }
@@ -268,8 +268,8 @@ void AddByteAndTryCommand(DrvCommand_t* const pDrvCommand, int8_t CommandByte)
             }
             else
             {
-                Sequence    = pDrvCommand->CommandBuffer[2];
-                Command     = pDrvCommand->CommandBuffer[3];
+                Command     = pDrvCommand->CommandBuffer[2];
+                Sequence    = pDrvCommand->CommandBuffer[3];
 
                 if (Length >= 3)
                     Parameter   = pDrvCommand->CommandBuffer[4];
