@@ -158,12 +158,12 @@ static uint8_t crcUpdate(uint8_t crc, uint8_t data)
     return crc;
 }
 
-
 // -----------------------------------------------------------------------------------------------------------------
 static void Sendchar(uint8_t Data)
 {
     RingBuffer_Insert(&Response_Buffer, Data);
 }
+
 
 // -----------------------------------------------------------------------------------------------------------------
 static uint8_t send_with_crc(uint8_t crc, uint8_t data)
@@ -171,6 +171,7 @@ static uint8_t send_with_crc(uint8_t crc, uint8_t data)
     Sendchar(data);
     return crcUpdate(crc, data);
 }
+
 
 // -----------------------------------------------------------------------------------------------------------------
 
@@ -185,7 +186,158 @@ static void send_resp2(uint8_t byte1, uint8_t byte2, uint8_t sequence)
     crc = send_with_crc(crc, crc);
 }
 
+
+#define CASE_RD(REG_NAME, REG_SEL) case REG_SEL: res=REG_NAME ; break;
+
 // -----------------------------------------------------------------------------------------------------------------
+void read_reg(uint8_t reg, uint8_t sequence)
+{
+    uint8_t res = 0x00;
+
+    char found = 1;
+
+    switch (reg)
+    {
+
+        CASE_RD(PORTB   ,0x01)
+        CASE_RD(PORTC   ,0x03)
+        CASE_RD(PORTD   ,0x05)
+        CASE_RD(PORTE   ,0x07)
+        CASE_RD(PORTF   ,0x09)
+
+    default :
+        found = 0;
+    }
+
+    if (found)
+    {
+        send_resp2(0xDD, res, sequence);
+    }
+    else
+    {
+        send_resp2(0xAC, res, sequence);
+    }
+
+
+}
+
+#define CASE_WR(REG_NAME, REG_SEL) case REG_SEL: REG_NAME = value; break;
+
+// -----------------------------------------------------------------------------------------------------------------
+void write_reg(uint8_t reg, uint8_t value, uint8_t mask, uint8_t sequence)
+{
+
+    char found = 1;
+
+    //uint8_t tmp;
+
+    switch (reg)
+    {
+
+        CASE_WR(PORTB   ,0x01)
+        CASE_WR(PORTC   ,0x03)
+        CASE_WR(PORTD   ,0x05)
+        CASE_WR(PORTE   ,0x07)
+        CASE_WR(PORTF   ,0x09)
+
+        CASE_WR(DDRB   ,0x02)
+        CASE_WR(DDRC   ,0x04)
+        CASE_WR(DDRD   ,0x06)
+        CASE_WR(DDRE   ,0x08)
+        CASE_WR(DDRF   ,0x0A)
+
+
+        CASE_WR(TCCR1A  ,0x0B)
+        CASE_WR(TCCR3A  ,0x0C)
+        CASE_WR(TCCR1B  ,0x0D)
+        CASE_WR(TCCR3B  ,0x0E)
+        CASE_WR(OCR1AH  ,0x0F)
+        CASE_WR(OCR1AL  ,0x10)
+        CASE_WR(OCR1BH  ,0x11)
+        CASE_WR(OCR1BL  ,0x12)
+
+
+    default :
+        found = 0;
+    }
+
+    if (found)
+    {
+        send_resp2(0xDA, value, sequence);
+    }
+    else
+    {
+        send_resp2(0xDC, value, sequence);
+    }
+
+}
+
+
+
+// -----------------------------------------------------------------------------------------------------------------
+
+
+// -----------------------------------------------------------------------------------------------------------------
+#define CASE_CLEAR_PORT(REG_NAME, REG_SEL) case REG_SEL: REG_NAME &= mask; break;
+void clear_port_bits(uint8_t reg, uint8_t mask, uint8_t sequence)
+{
+
+    char found = 1;
+
+    switch (reg) {
+
+        CASE_CLEAR_PORT(PORTB   ,0x01)
+        CASE_CLEAR_PORT(PORTC   ,0x03)
+        CASE_CLEAR_PORT(PORTD   ,0x05)
+        CASE_CLEAR_PORT(PORTE   ,0x07)
+        CASE_CLEAR_PORT(PORTF   ,0x09)
+
+
+    default :
+        found = 0;
+    }
+
+    if (found)
+    {
+        send_resp2(0xDA, mask, sequence);
+    }
+    else
+    {
+        send_resp2(0xDC, mask, sequence);
+    }
+
+
+}
+// -----------------------------------------------------------------------------------------------------------------
+#define CASE_SET_PORT(REG_NAME, REG_SEL) case REG_SEL: REG_NAME |= mask; break;
+void set_port_bits(uint8_t reg, uint8_t mask, uint8_t sequence)
+{
+
+    char found = 1;
+
+    switch (reg) {
+
+        CASE_SET_PORT(PORTB   ,0x01)
+        CASE_SET_PORT(PORTC   ,0x03)
+        CASE_SET_PORT(PORTD   ,0x05)
+        CASE_SET_PORT(PORTE   ,0x07)
+        CASE_SET_PORT(PORTF   ,0x09)
+
+    default :
+        found = 0;
+    }
+
+    if (found)
+    {
+        send_resp2(0xDA, mask, sequence);
+    }
+    else
+    {
+        send_resp2(0xDC, mask, sequence);
+    }
+
+
+}
 
 
 void ExecExtCommand(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3, uint8_t sequence)
@@ -195,6 +347,22 @@ void ExecExtCommand(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3, 
     {
     case CMD_L1_ECHO:
         send_resp2(param, param, sequence);
+        break;
+
+   case CMD_L1_SET_PORT_BITS:
+        set_port_bits(param, param2, sequence);
+        break;
+
+   case CMD_L1_CLEAR_PORT_BITS:
+        clear_port_bits(param, param2, sequence);
+        break;
+
+    case CMD_L1_READ_REG:
+        read_reg(param, sequence);
+        break;
+
+    case CMD_L1_WRITE_REG:
+        write_reg(param, param2, 0xFF, sequence);
         break;
 
     default:
@@ -305,6 +473,19 @@ void AddByteAndTryCommand(DrvCommand_t* const pDrvCommand, int8_t CommandByte)
 
 
 }
+
+
+// -----------------------------------------------------------------------------------------------------------------
+ISR(ADC_vect)
+{
+    // NB! sequence and count of ADC readings is important
+    //adc0_valueL = ADCL;
+    //adc0_valueH = ADCH;
+
+    //adc_ctx_new_value(&adc_context, adc0_valueH);
+
+}
+
 
 
 
