@@ -113,6 +113,404 @@ USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface =
 // -----------------------------------------------------------------------------------------------------------------
 
 
+
+// -----------------------------------------------------------------------------------------------------------------
+
+typedef struct struct_adc_buffer
+{
+    uint8_t valuations[ADC_BUFFER_SIZE];
+    uint8_t index;
+} ADC_BUFFER, *PADC_BUFFER;
+
+// -----------------------------------------------------------------------------------------------------------------
+
+typedef struct struct_adc_context
+{
+    ADC_BUFFER adc_buffers[ADC_CHANNELS_IN_USE];
+    uint8_t avg_values[ADC_CHANNELS_IN_USE];
+    uint8_t adc_buf_index;
+    uint8_t valuations_count;
+    uint8_t updated;
+} ADC_CONTEXT, *PADC_CONTEXT;
+
+// -----------------------------------------------------------------------------------------------------------------
+
+typedef struct struct_counter_context
+{
+    uint8_t ct_value;
+    uint8_t updated;
+} CT_CONTEXT, *PCT_CONTEXT;
+
+// -----------------------------------------------------------------------------------------------------------------
+
+typedef struct struct_response_context
+{
+    uint8_t response[TX_MAX_BUFFER_SIZE];
+    uint8_t length;
+    uint8_t updated;
+} RESP_CONTEXT, *PRESP_CONTEXT;
+
+// -----------------------------------------------------------------------------------------------------------------
+
+typedef struct struct_tx_buffer
+{
+    uint8_t content[TX_MAX_BUFFER_SIZE];
+    uint8_t index;
+    uint8_t size;
+} TX_BUFFER, *PTX_BUFFER;
+
+// -----------------------------------------------------------------------------------------------------------------
+
+typedef struct struct_tx_context
+{
+    uint8_t enabled;
+    TX_BUFFER adc_tx_buf;
+    TX_BUFFER ct_tx_buf;
+    TX_BUFFER resp_tx_buf;
+} TX_CONTEXT, *PTX_CONTEXT;
+
+static ADC_CONTEXT adc_context;
+static TX_CONTEXT tx_context;
+static CT_CONTEXT ct_context;
+static RESP_CONTEXT resp_context;
+
+
+
+static uint8_t crcUpdate(uint8_t crc, uint8_t data);
+static void TxContextSendNext(PTX_CONTEXT p_tx_context);
+static uint8_t send_with_crc(uint8_t crc, uint8_t data);
+
+
+// -----------------------------------------------------------------------------------------------------------------
+static uint8_t adc_buf_avg(PADC_BUFFER p_adc_buffer)
+{
+    uint16_t avg = 0;
+    uint8_t i = 0;
+    for (i = 0; i<ADC_BUFFER_SIZE; i++)
+    {
+        avg += p_adc_buffer->valuations[i];
+    }
+    return (uint8_t)(avg >> ADC_BUFFER_DIV_SHIFT);
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void adc_buf_init(PADC_BUFFER p_adc_buffer)
+{
+    uint8_t i = 0;
+    for (i = 0; i<ADC_BUFFER_SIZE; i++)
+    {
+        p_adc_buffer->valuations[i] = 0;
+    }
+    p_adc_buffer->index = 0;
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void adc_buf_add(PADC_BUFFER p_adc_buffer, uint8_t value)
+{
+    uint8_t i = p_adc_buffer->index + 1;
+    if (i == ADC_BUFFER_SIZE)
+    {
+        i = 0;
+    }
+    p_adc_buffer->valuations[i] = value;
+    p_adc_buffer->index = i;
+}
+
+
+// -----------------------------------------------------------------------------------------------------------------
+static void tx_resp_snapshot(PRESP_CONTEXT p_resp_context)
+{
+
+    uint16_t expectedSize = p_resp_context->length + 2;
+    uint8_t crc = 0xFF;
+    if (RingBuffer_GetFreeCount(&Response_Buffer) >= expectedSize)
+    {
+
+        p_resp_context->updated = 0;
+
+        crc = send_with_crc(crc, START_PACKET_MARKER);
+
+        uint8_t i = 0;
+        for (i=0; i<p_resp_context->length; i++)
+        {
+            crc = send_with_crc(crc, p_resp_context->response[i]);
+        }
+
+        crc = send_with_crc(crc, crc);
+
+    }
+
+}
+
+
+// -----------------------------------------------------------------------------------------------------------------
+static void tx_ct_snapshot(PCT_CONTEXT p_ct_context)
+{
+
+    uint16_t expectedSize = 3;
+    uint8_t crc = 0xFF;
+    if (RingBuffer_GetFreeCount(&Response_Buffer) >= expectedSize)
+    {
+
+        p_ct_context->updated = 0;
+
+        crc = send_with_crc(crc, START_ASYNC_MARKER_CT);
+        crc = send_with_crc(crc, p_ct_context->ct_value);
+        crc = send_with_crc(crc, crc);
+
+
+    }
+
+
+}
+
+
+// -----------------------------------------------------------------------------------------------------------------
+static void tx_adc_snapshot(PADC_CONTEXT p_adc_context)
+{
+
+    uint16_t expectedSize = ADC_CHANNELS_IN_USE + 2;
+    uint8_t crc = 0xFF;
+    if (RingBuffer_GetFreeCount(&Response_Buffer) >= expectedSize)
+    {
+
+        p_adc_context->updated = 0;
+
+        crc = send_with_crc(crc, START_ASYNC_MARKER_ADC);
+
+        uint8_t i = 0;
+        for (i=0; i<ADC_CHANNELS_IN_USE; i++)
+        {
+            crc = send_with_crc(crc, p_adc_context->avg_values[i]);
+        }
+
+        crc = send_with_crc(crc, crc);
+
+    }
+
+
+
+}
+
+
+// -----------------------------------------------------------------------------------------------------------------
+static void adc_ctx_init(PADC_CONTEXT p_adc_context)
+{
+    uint8_t i = 0;
+    for (i = 0; i<ADC_CHANNELS_IN_USE; i++)
+    {
+        adc_buf_init(&p_adc_context->adc_buffers[i]);
+        p_adc_context->avg_values[i] = 0;
+    }
+
+    p_adc_context->adc_buf_index = 0;
+    p_adc_context->valuations_count = 0;
+    p_adc_context->updated = 0;
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void adc_run_next(uint8_t channel)
+{
+
+    // enable ADC, int, start, once, div/8
+    ADCSRA = (1<<ADEN)|(1<<ADIE)|(1<<ADSC)|(0<<ADATE)|(3<<ADPS0);
+
+    //REFS  -- 0b[01]000101 use AVCC ref
+    //ADLAR -- 0b01[1]00101 left alignment
+    //MUX   -- 0b0100[0101] channel 5.
+    ADMUX = (0b01100000 | (channel & 0b00000111));
+
+}
+
+
+// -----------------------------------------------------------------------------------------------------------------
+static void adc_ctx_new_value(PADC_CONTEXT p_adc_context, uint8_t value)
+{
+    p_adc_context->valuations_count++;
+
+    uint8_t buf_index = p_adc_context->adc_buf_index;
+
+    adc_buf_add(&p_adc_context->adc_buffers[buf_index], value);
+
+    if (p_adc_context->valuations_count == ADC_BUFFER_SIZE)
+    {
+
+        p_adc_context->avg_values[buf_index] = adc_buf_avg(&p_adc_context->adc_buffers[buf_index]);
+
+        buf_index++;
+
+        if (buf_index == ADC_CHANNELS_IN_USE)
+        {
+            buf_index = 0;
+            p_adc_context->updated = 1; // all buffers filled with new values, set flag for TX cycle
+        }
+
+        p_adc_context->adc_buf_index = buf_index;
+
+        p_adc_context->valuations_count = 0;
+
+    }
+
+    adc_run_next(p_adc_context->adc_buf_index);
+
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void ct_ctx_increase(PCT_CONTEXT p_ct_context)
+{
+    p_ct_context->ct_value++;
+    p_ct_context->updated = 1;
+}
+
+static void resp_ctx_add(PRESP_CONTEXT p_resp_context, uint8_t byte1, uint8_t byte2, uint8_t sequence)
+{
+    p_resp_context->response[0] = 3; // length of resp bytes
+    p_resp_context->response[1] = sequence;
+    p_resp_context->response[2] = byte1;
+    p_resp_context->response[3] = byte2;
+    p_resp_context->length = 4; // buf length
+    p_resp_context->updated = 1;
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void tx_buf_init(PTX_BUFFER p_tx_buffer)
+{
+    p_tx_buffer->index = 0;
+    p_tx_buffer->size = 0;
+    uint8_t i = 0;
+    for (i=0; i<TX_MAX_BUFFER_SIZE; i++)
+    {
+        p_tx_buffer->content[i] = 0;
+    }
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void tx_ctx_init(PTX_CONTEXT p_tx_context)
+{
+    p_tx_context->enabled = 1;
+    tx_buf_init(&p_tx_context->adc_tx_buf);
+    tx_buf_init(&p_tx_context->ct_tx_buf);
+    tx_buf_init(&p_tx_context->resp_tx_buf);
+    // tx_adc_snapshot(&adc_context, p_tx_context);
+    // TxContextSendNext(p_tx_context); // start sending, next bytes are sent in ISR
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void ct_ctx_init(PCT_CONTEXT p_ct_context)
+{
+    p_ct_context->ct_value = 0;
+    p_ct_context->updated = 0;
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+static void resp_ctx_init(PRESP_CONTEXT p_resp_context)
+{
+    p_resp_context->length = 0;
+    uint8_t i = 0;
+    for (i=0; i<TX_MAX_BUFFER_SIZE; i++)
+    {
+        p_resp_context->response[i] = 0;
+    }
+    p_resp_context->updated = 0;
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+
+static void tx_send_resp2_immediately(uint8_t byte1, uint8_t byte2, uint8_t sequence);
+
+static void send_resp2(uint8_t byte1, uint8_t byte2, uint8_t sequence)
+{
+    if (tx_context.enabled)
+    {
+        resp_ctx_add(&resp_context, byte1, byte2, sequence);
+    }
+    else
+    {
+        tx_send_resp2_immediately(byte1, byte2, sequence);
+    }
+}
+
+
+// -----------------------------------------------------------------------------------------------------------------
+static void TxContextSendNext(PTX_CONTEXT p_tx_context)
+{
+
+    if (tx_context.enabled) // send snapshots only in asynch mode
+    {
+
+        //For all updated buffers:
+        // Check if snapshot will fit the USB TX ring buffer, copy and reset flag 'updated'
+
+        if (ct_context.updated)
+        {
+            tx_ct_snapshot(&ct_context);
+        }
+
+        if (resp_context.updated)
+        {
+            tx_resp_snapshot(&resp_context);
+        }
+
+        if (adc_context.updated)
+        {
+            tx_adc_snapshot(&adc_context);
+        }
+
+    }
+
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+
+static void ct_init(void)
+{
+    ct_ctx_init(&ct_context);
+
+    /// TODO: implement for m32u4
+
+    //MCUCR |= (_BV(ISC00)); // any level change at int0 generates int
+    //GICR |= _BV(INT0);
+
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+
+static void resp_init(void)
+{
+    resp_ctx_init(&resp_context);
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+
+static void adc_init(void)
+{
+
+    adc_ctx_init(&adc_context);
+
+    adc_run_next(0);
+
+}
+
+// -----------------------------------------------------------------------------------------------------------------
+
+static void tx_init(void)
+{
+
+    tx_ctx_init(&tx_context);
+
+    ////////// UCSRB = (1<<RXEN)|(1<<TXEN)|(0<<RXCIE)|(1<<TXCIE)|(0<<UDRIE);
+
+}
+
+
+
+
+
+// -----------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------------------
+// -----------------------------------------------------------------------------------------------------------------
+
+
 #define COMMAND_BUF_LEN 10
 
 typedef struct
@@ -175,7 +573,7 @@ static uint8_t send_with_crc(uint8_t crc, uint8_t data)
 
 // -----------------------------------------------------------------------------------------------------------------
 
-static void send_resp2(uint8_t byte1, uint8_t byte2, uint8_t sequence)
+static void tx_send_resp2_immediately(uint8_t byte1, uint8_t byte2, uint8_t sequence)
 {
     uint8_t crc = 0xFF;
     crc = send_with_crc(crc, START_PACKET_MARKER);
@@ -365,6 +763,13 @@ void ExecExtCommand(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3, 
         write_reg(param, param2, 0xFF, sequence);
         break;
 
+    case CMD_L1_ENABLE_ADC:
+        adc_init();
+        tx_init();
+        ct_init();
+        resp_init();
+        break;
+
     default:
         send_resp2(RESP_UNKNOWN_CMD, param, sequence);
     }
@@ -479,11 +884,20 @@ void AddByteAndTryCommand(DrvCommand_t* const pDrvCommand, int8_t CommandByte)
 ISR(ADC_vect)
 {
     // NB! sequence and count of ADC readings is important
-    //adc0_valueL = ADCL;
-    //adc0_valueH = ADCH;
+    uint8_t adc0_valueL = ADCL;
+    uint8_t adc0_valueH = ADCH;
 
-    //adc_ctx_new_value(&adc_context, adc0_valueH);
+    adc_ctx_new_value(&adc_context, adc0_valueH);
 
+}
+
+
+
+
+// -----------------------------------------------------------------------------------------------------------------
+ISR(INT0_vect)
+{
+    ct_ctx_increase(&ct_context);
 }
 
 
@@ -514,6 +928,9 @@ int main(void)
 			}
 
 		}
+
+
+        TxContextSendNext(&tx_context);
 
 		uint16_t BufferCount = RingBuffer_GetCount(&Response_Buffer);
 		if (BufferCount)
