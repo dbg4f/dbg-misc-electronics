@@ -150,23 +150,12 @@ typedef struct struct_response_context
     uint8_t updated;
 } RESP_CONTEXT, *PRESP_CONTEXT;
 
-// -----------------------------------------------------------------------------------------------------------------
-
-typedef struct struct_tx_buffer
-{
-    uint8_t content[TX_MAX_BUFFER_SIZE];
-    uint8_t index;
-    uint8_t size;
-} TX_BUFFER, *PTX_BUFFER;
 
 // -----------------------------------------------------------------------------------------------------------------
 
 typedef struct struct_tx_context
 {
     uint8_t enabled;
-    TX_BUFFER adc_tx_buf;
-    TX_BUFFER ct_tx_buf;
-    TX_BUFFER resp_tx_buf;
 } TX_CONTEXT, *PTX_CONTEXT;
 
 static ADC_CONTEXT adc_context;
@@ -372,27 +361,11 @@ static void resp_ctx_add(PRESP_CONTEXT p_resp_context, uint8_t byte1, uint8_t by
     p_resp_context->updated = 1;
 }
 
-// -----------------------------------------------------------------------------------------------------------------
-static void tx_buf_init(PTX_BUFFER p_tx_buffer)
-{
-    p_tx_buffer->index = 0;
-    p_tx_buffer->size = 0;
-    uint8_t i = 0;
-    for (i=0; i<TX_MAX_BUFFER_SIZE; i++)
-    {
-        p_tx_buffer->content[i] = 0;
-    }
-}
 
 // -----------------------------------------------------------------------------------------------------------------
 static void tx_ctx_init(PTX_CONTEXT p_tx_context)
 {
     p_tx_context->enabled = 1;
-    tx_buf_init(&p_tx_context->adc_tx_buf);
-    tx_buf_init(&p_tx_context->ct_tx_buf);
-    tx_buf_init(&p_tx_context->resp_tx_buf);
-    // tx_adc_snapshot(&adc_context, p_tx_context);
-    // TxContextSendNext(p_tx_context); // start sending, next bytes are sent in ISR
 }
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -466,10 +439,9 @@ static void ct_init(void)
 {
     ct_ctx_init(&ct_context);
 
-    /// TODO: implement for m32u4
-
-    //MCUCR |= (_BV(ISC00)); // any level change at int0 generates int
-    //GICR |= _BV(INT0);
+    // any level change at int0 generates int
+    EICRA |= (0<<ISC01)|(1<<ISC00);
+    EIMSK |= (1<<INT0);
 
 }
 
