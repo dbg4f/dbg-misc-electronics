@@ -21,14 +21,14 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
     private byte[] adcValues = new byte[4];
     private byte counter = 0;
-    private McuRegisterAccess mcuRegisterAccess;
+    private McuRegisterAccess<M16Reg> mcuRegisterAccess;
 
 
     public static void main(String[] args) throws IOException, InterruptedException, McuCommunicationException {
 
         final Test1 t = new Test1();
 
-        final McuSocketCommunicator communicator = new McuSocketCommunicator("127.0.0.1", 4444);
+        final McuSocketCommunicator communicator = new McuSocketCommunicator("127.0.0.1", 5555);
 
         final int[] counter = {0};
 
@@ -72,7 +72,7 @@ public class Test1 implements McuBytesListener, McuReportListener {
         SynchronousExecutor executor = new SynchronousExecutor();
         executor.setBytesWriter(communicator);
 
-        t.mcuRegisterAccess = new McuRegisterAccess(executor);
+        t.mcuRegisterAccess = new McuRegisterAccess<M16Reg>(executor);
 
         McuReportDecoder decoder = new McuReportDecoder();
 
@@ -215,10 +215,10 @@ public class Test1 implements McuBytesListener, McuReportListener {
 
     static class GroovyMcu {
 
-        private final McuRegisterAccess mcuRegisterAccess;
+        private final McuRegisterAccess<M16Reg> mcuRegisterAccess;
 
 
-        GroovyMcu(McuRegisterAccess mcuRegisterAccess) {
+        GroovyMcu(McuRegisterAccess<M16Reg> mcuRegisterAccess) {
             this.mcuRegisterAccess = mcuRegisterAccess;
         }
 

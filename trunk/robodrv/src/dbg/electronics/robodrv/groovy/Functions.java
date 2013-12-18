@@ -2,6 +2,7 @@ package dbg.electronics.robodrv.groovy;
 
 
 import dbg.electronics.robodrv.drive.M16MultichannelPwmDrive;
+import dbg.electronics.robodrv.drive.M32U4MultichannelPwmDrive;
 import dbg.electronics.robodrv.graphics.ValueWithHistory;
 import dbg.electronics.robodrv.logging.ValueHistorySerializer;
 import dbg.electronics.robodrv.mcu.*;
@@ -19,10 +20,11 @@ import java.util.List;
 
 public class Functions extends Script {
 
-    private static McuRegisterAccess mcuRegisterAccess;
+    private static McuRegisterAccess<M16Reg> mcuRegisterAccess;
     private static McuSocketCommunicator socketCommunicator;
     private static SynchronousExecutor executor;
     private static M16MultichannelPwmDrive drive;
+    private static M32U4MultichannelPwmDrive drive2;
     private static List<ValueWithHistory> valueWithHistoryList;
     private static ValueHistorySerializer serializer;
 
@@ -30,8 +32,12 @@ public class Functions extends Script {
         Functions.socketCommunicator = socketCommunicator;
     }
 
-    public void setMcuRegisterAccess(McuRegisterAccess mcuRegisterAccess) {
+    public void setMcuRegisterAccess(McuRegisterAccess<M16Reg> mcuRegisterAccess) {
         Functions.mcuRegisterAccess = mcuRegisterAccess;
+    }
+
+    public void setDrive2(M32U4MultichannelPwmDrive drive2) {
+        Functions.drive2 = drive2;
     }
 
     public void setExecutor(SynchronousExecutor executor) {
@@ -165,6 +171,7 @@ public class Functions extends Script {
 
     public String pwm(int channel, int value) {
         try {
+            M32U4MultichannelPwmDrive drive = drive2;
             drive.getChannelDrive(channel).setPwm(value);
             return "pwm[" + channel + "] = " + value;
         }
@@ -177,6 +184,8 @@ public class Functions extends Script {
 
 
     public String drv() throws InterruptedException, McuCommunicationException, IOException {
+
+        M32U4MultichannelPwmDrive drive = drive2;
 
         drive.getChannelDrive(0).setPwm(0);
         drive.getChannelDrive(0).setDirection(true);
@@ -202,6 +211,9 @@ public class Functions extends Script {
     public String init() {
         try {
             socketCommunicator.init();
+
+            M32U4MultichannelPwmDrive drive = drive2;
+
             drive.init();
             //executor.sendOnly(createCommand(ENABLE_ADC));
 

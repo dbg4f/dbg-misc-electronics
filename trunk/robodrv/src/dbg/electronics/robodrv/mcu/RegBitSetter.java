@@ -2,11 +2,11 @@ package dbg.electronics.robodrv.mcu;
 
 import java.io.IOException;
 
-public class RegBitSetter {
+public class RegBitSetter<T extends CodifierAware> {
 
     int[] bits = new int[] {-1, -1, -1, -1, -1, -1, -1, -1};
 
-    public RegBitSetter set(int bit, int value) {
+    public RegBitSetter<T> set(int bit, int value) {
 
         if (bit < 0 || bit > 7) {
             throw new IllegalArgumentException("bits must be in interval [0..7] " + bit);
@@ -21,11 +21,11 @@ public class RegBitSetter {
         return this;
     }
 
-    public void applyRegValue(McuRegisterAccess registerAccess, M16Reg reg) throws InterruptedException, IOException, McuCommunicationException {
+    public void applyRegValue(McuRegisterAccess<T> registerAccess, T reg) throws InterruptedException, IOException, McuCommunicationException {
         registerAccess.writeReg(reg, apply(registerAccess.readReg(reg)));
     }
 
-    public void applyRegValueNoRead(McuRegisterAccess registerAccess, M16Reg reg) throws InterruptedException, IOException, McuCommunicationException {
+    public void applyRegValueNoRead(McuRegisterAccess<T> registerAccess, T reg) throws InterruptedException, IOException, McuCommunicationException {
         registerAccess.writeReg(reg, apply(0));
     }
 

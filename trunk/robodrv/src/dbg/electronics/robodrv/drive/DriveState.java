@@ -81,13 +81,22 @@ public class DriveState implements McuReportListener, MultilineReportable {
 
         }
         if (channel == 3) {
-            sampleValueWithHistory2.update(unsignedValue);
-            headController.update(MasterParameterType.STEERING_ANGLE, unsignedValue, BYTE_RANGE);
+            //sampleValueWithHistory2.update(unsignedValue);
+            //headController.update(MasterParameterType.STEERING_ANGLE, unsignedValue, BYTE_RANGE);
         }
     }
 
     @Override
     public void onCounterUpdate(byte value) {
+
+        int unsignedValue = (0xFF & value);
+
+        sampleValueWithHistory2.update(unsignedValue);
+        headController.update(MasterParameterType.STEERING_ANGLE, unsignedValue, BYTE_RANGE);
+
+
+        System.out.println("unsignedValue = " + unsignedValue);
+
         //To change body of implemented methods use File | Settings | File Templates.
 
     }

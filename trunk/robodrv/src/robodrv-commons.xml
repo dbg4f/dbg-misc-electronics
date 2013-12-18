@@ -122,6 +122,10 @@
         <constructor-arg ref="synchronousExecutor"/>
     </bean>
 
+    <bean id="drive32u4" class="dbg.electronics.robodrv.drive.M32U4MultichannelPwmDrive">
+        <constructor-arg ref="synchronousExecutor"/>
+    </bean>
+
 
 
 </beans>
