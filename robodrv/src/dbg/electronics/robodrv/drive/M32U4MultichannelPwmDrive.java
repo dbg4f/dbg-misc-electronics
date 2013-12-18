@@ -7,26 +7,27 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import static dbg.electronics.robodrv.mcu.CommandCode.*;
+import static dbg.electronics.robodrv.mcu.CommandCode.CLEAR_PORT_BITS;
+import static dbg.electronics.robodrv.mcu.CommandCode.SET_PORT_BITS;
 import static dbg.electronics.robodrv.mcu.McuCommand.createCommand;
 
-public class M16MultichannelPwmDrive {
+public class M32U4MultichannelPwmDrive {
 
 
     public static final int DIR_PIN_A = 4;
     public static final int DIR_PIN_B = 3;
     private final SynchronousExecutor executor;
-    private final McuRegisterAccess<M16Reg> mcuRegisterAccess;
+    private final McuRegisterAccess<M32U4Reg> mcuRegisterAccess;
 
 
 
     class McuPwmDrive implements MotorDrive {
 
-        final M16Reg dirPinPort;
-        final M16Reg pwmReg;
+        final M32U4Reg dirPinPort;
+        final M32U4Reg pwmReg;
         final int dirPin;
 
-        McuPwmDrive(M16Reg dirPinPort,  int dirPin, M16Reg pwmReg) {
+        McuPwmDrive(M32U4Reg dirPinPort,  int dirPin, M32U4Reg pwmReg) {
             this.dirPinPort = dirPinPort;
             this.pwmReg = pwmReg;
             this.dirPin = dirPin;
@@ -51,33 +52,31 @@ public class M16MultichannelPwmDrive {
 
     private Map<Integer, McuPwmDrive> drives = new LinkedHashMap<Integer, McuPwmDrive>();
 
-    public M16MultichannelPwmDrive(SynchronousExecutor executor) {
+    public M32U4MultichannelPwmDrive(SynchronousExecutor executor) {
 
         this.executor = executor;
 
-        mcuRegisterAccess = new McuRegisterAccess<M16Reg>(executor);
+        mcuRegisterAccess = new McuRegisterAccess<M32U4Reg>(executor);
 
     }
 
     public void init() throws InterruptedException, IOException, McuCommunicationException {
 
-        McuPwmDrive driveTimerA = new McuPwmDrive(M16Reg.PORTB, DIR_PIN_A, M16Reg.OCR1AL);
-        McuPwmDrive driveTimerB = new McuPwmDrive(M16Reg.PORTB, DIR_PIN_B, M16Reg.OCR1BL);
+        McuPwmDrive driveTimerA = new McuPwmDrive(M32U4Reg.PORTB, DIR_PIN_A, M32U4Reg.OCR1AL);
+        McuPwmDrive driveTimerB = new McuPwmDrive(M32U4Reg.PORTB, DIR_PIN_B, M32U4Reg.OCR1BL);
 
         drives.put(0, driveTimerA);
         drives.put(1, driveTimerB);
 
-        new RegBitSetter<M16Reg>()
+        new RegBitSetter<M32U4Reg>()
                 .set(4, 1)
                 .set(5, 1)
-                .applyRegValueNoRead(mcuRegisterAccess, M16Reg.DDRD); // configure out direction for PWM pins (OC1A=PD4, OC1B=PD5)
+                .applyRegValueNoRead(mcuRegisterAccess, M32U4Reg.DDRD); // configure out direction for PWM pins (OC1A=PD4, OC1B=PD5)
 
-        new RegBitSetter<M16Reg>()
+        new RegBitSetter<M32U4Reg>()
                 .set(DIR_PIN_A, 1)
                 .set(DIR_PIN_B, 1)
-                .applyRegValueNoRead(mcuRegisterAccess, M16Reg.DDRB); // configure out pins for relays (DIR signal)
-
-
+                .applyRegValueNoRead(mcuRegisterAccess, M32U4Reg.DDRB); // configure out pins for relays (DIR signal)
 
         /*
 
@@ -99,7 +98,7 @@ public class M16MultichannelPwmDrive {
 
 
 WGM13 WGM12 WGM11 WGM10
-0     0     0     1       PWM Phase correct
+0     0     0     1       PWM Phase correct, 8-bit
 
 
         TCCR1B
@@ -132,36 +131,36 @@ Fpwm = Fclk/(2*0x100*N), N = 1,8,64,256,1024
          */
 
 
-        new RegBitSetter<M16Reg>()
+        new RegBitSetter<M32U4Reg>()
             .set(7, 1) // COM1A1
             .set(6, 1) // COM1A0
             .set(5, 1) // COM1B1
             .set(4, 1) // COM1B0
             .set(1, 0) // WGM11
             .set(0, 1) // WGM10
-        .applyRegValue(mcuRegisterAccess, M16Reg.TCCR1A); // , phase correct PWM, non-inverted
+        .applyRegValue(mcuRegisterAccess, M32U4Reg.TCCR1A); // , phase correct PWM, non-inverted
 
-        new RegBitSetter<M16Reg>()
+        new RegBitSetter<M32U4Reg>()
             .set(4, 0) // WGM13
             .set(3, 0) // WGM12
             .set(2, 0) // CS12
             .set(1, 0) // CS11
             .set(0, 1) // CS10
-        .applyRegValue(mcuRegisterAccess, M16Reg.TCCR1B); // no prescaling, 14kHz, phase correct PWM
+        .applyRegValue(mcuRegisterAccess, M32U4Reg.TCCR1B); // no prescaling, ~30kHz, phase correct PWM
 
 
-        mcuRegisterAccess.writeReg(M16Reg.TCCR1A, BinUtils.asNumber("10100001"));
-        mcuRegisterAccess.writeReg(M16Reg.TCCR1B, BinUtils.asNumber("00000001"));
 
-        mcuRegisterAccess.writeReg(M16Reg.OCR1AH, BinUtils.asNumber("00000000"));
-        mcuRegisterAccess.writeReg(M16Reg.OCR1AL, BinUtils.asNumber("00000000"));
+        mcuRegisterAccess.writeReg(M32U4Reg.TCCR1A, BinUtils.asNumber("10100001"));
+        mcuRegisterAccess.writeReg(M32U4Reg.TCCR1B, BinUtils.asNumber("00000001"));
 
-        mcuRegisterAccess.writeReg(M16Reg.OCR1BH, BinUtils.asNumber("00000000"));
-        mcuRegisterAccess.writeReg(M16Reg.OCR1BL, BinUtils.asNumber("00000000"));
+        mcuRegisterAccess.writeReg(M32U4Reg.OCR1AH, BinUtils.asNumber("00000000"));
+        mcuRegisterAccess.writeReg(M32U4Reg.OCR1AL, BinUtils.asNumber("00000000"));
 
-        mcuRegisterAccess.writeReg(M16Reg.DDRB, BinUtils.asNumber("00011000"));
-        mcuRegisterAccess.writeReg(M16Reg.DDRD, BinUtils.asNumber("00110000"));
+        mcuRegisterAccess.writeReg(M32U4Reg.OCR1BH, BinUtils.asNumber("00000000"));
+        mcuRegisterAccess.writeReg(M32U4Reg.OCR1BL, BinUtils.asNumber("00000000"));
 
+        mcuRegisterAccess.writeReg(M32U4Reg.DDRB,   BinUtils.asNumber("01100000"));
+        //mcuRegisterAccess.writeReg(M32U4Reg.DDRD, BinUtils.asNumber("00110000"));
 
 
     }
@@ -170,7 +169,7 @@ Fpwm = Fclk/(2*0x100*N), N = 1,8,64,256,1024
         return drives.get(channel);
     }
 
-    void setRegOneBit(M16Reg reg, int bit, int value) throws InterruptedException, IOException, McuCommunicationException {
+    void setRegOneBit(M32U4Reg reg, int bit, int value) throws InterruptedException, IOException, McuCommunicationException {
 
         RegBitSetter regBitSetter = new RegBitSetter();
 
@@ -183,16 +182,16 @@ Fpwm = Fclk/(2*0x100*N), N = 1,8,64,256,1024
         writeReg(reg, regValue);
     }
 
-    void writeReg(M16Reg reg, int value) throws InterruptedException, McuCommunicationException, IOException {
+    void writeReg(M32U4Reg reg, int value) throws InterruptedException, McuCommunicationException, IOException {
         mcuRegisterAccess.writeReg(reg, value);
     }
 
 
-    int readReg(M16Reg reg) throws InterruptedException, McuCommunicationException, IOException {
+    int readReg(M32U4Reg reg) throws InterruptedException, McuCommunicationException, IOException {
         return mcuRegisterAccess.readReg(reg);
     }
 
-    private void setPortRegBit(M16Reg reg, int bit, int value) throws InterruptedException, McuCommunicationException, IOException {
+    private void setPortRegBit(M32U4Reg reg, int bit, int value) throws InterruptedException, McuCommunicationException, IOException {
 
         CommandResponse response;
 
