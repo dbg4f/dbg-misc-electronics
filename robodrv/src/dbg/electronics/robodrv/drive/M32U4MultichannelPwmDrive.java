@@ -14,8 +14,18 @@ import static dbg.electronics.robodrv.mcu.McuCommand.createCommand;
 public class M32U4MultichannelPwmDrive {
 
 
-    public static final int DIR_PIN_A = 4;
-    public static final int DIR_PIN_B = 3;
+    /*
+    OC1A, board pins: ~9;   PE6: pin 7
+    OC1B, board pin: ~10;   PB4: pin 8
+
+
+     DRV:
+      7  8  ~9  ~10
+    GND
+     */
+
+    public static final int DIR_PIN_A = 6;
+    public static final int DIR_PIN_B = 4;
     private final SynchronousExecutor executor;
     private final McuRegisterAccess<M32U4Reg> mcuRegisterAccess;
 
@@ -62,7 +72,7 @@ public class M32U4MultichannelPwmDrive {
 
     public void init() throws InterruptedException, IOException, McuCommunicationException {
 
-        McuPwmDrive driveTimerA = new McuPwmDrive(M32U4Reg.PORTB, DIR_PIN_A, M32U4Reg.OCR1AL);
+        McuPwmDrive driveTimerA = new McuPwmDrive(M32U4Reg.PORTE, DIR_PIN_A, M32U4Reg.OCR1AL);
         McuPwmDrive driveTimerB = new McuPwmDrive(M32U4Reg.PORTB, DIR_PIN_B, M32U4Reg.OCR1BL);
 
         drives.put(0, driveTimerA);
@@ -159,8 +169,9 @@ Fpwm = Fclk/(2*0x100*N), N = 1,8,64,256,1024
         mcuRegisterAccess.writeReg(M32U4Reg.OCR1BH, BinUtils.asNumber("00000000"));
         mcuRegisterAccess.writeReg(M32U4Reg.OCR1BL, BinUtils.asNumber("00000000"));
 
-        mcuRegisterAccess.writeReg(M32U4Reg.DDRB,   BinUtils.asNumber("01100000"));
-        //mcuRegisterAccess.writeReg(M32U4Reg.DDRD, BinUtils.asNumber("00110000"));
+        //mcuRegisterAccess.writeReg(M32U4Reg.DDRB,   BinUtils.asNumber("01100000"));
+        mcuRegisterAccess.writeReg(M32U4Reg.DDRE,   BinUtils.asNumber("01000000"));
+        mcuRegisterAccess.writeReg(M32U4Reg.DDRB,   BinUtils.asNumber("01110000"));
 
 
     }

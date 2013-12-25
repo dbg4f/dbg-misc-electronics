@@ -9,15 +9,19 @@ import dbg.electronics.robodrv.mcu.ChannelStatus;
 import dbg.electronics.robodrv.mcu.ChannelStatusListener;
 import dbg.electronics.robodrv.mcu.McuReportListener;
 import dbg.electronics.robodrv.mcu.ProtocolState;
+import org.apache.log4j.Logger;
 
 public class DriveState implements McuReportListener, MultilineReportable {
 
+
+    private static final Logger log = Logger.getLogger(DriveState.class);
 
     private static final Range BYTE_RANGE = new Range(0, 255);
 
     private HeadController headController;
     private ProtocolState protocolState;
     private ChannelStatus channelStatus;
+    private int currentRawPos;
     private int steeringAngle; // +/- degrees
     private int pwrCurrent;  // milliampers
     private int pwrVoltage;  // millivolts
@@ -65,7 +69,7 @@ public class DriveState implements McuReportListener, MultilineReportable {
         //System.out.println("channel = " + channel + " value " + value);
 
         /*
-        0 - V?
+        0 - V?        m32u4 - position
         1 - current
         2 - V?
         3 - position
@@ -80,9 +84,16 @@ public class DriveState implements McuReportListener, MultilineReportable {
             headController.update(MasterParameterType.POWER_CURRENT, unsignedValue, BYTE_RANGE);
 
         }
-        if (channel == 3) {
-            //sampleValueWithHistory2.update(unsignedValue);
-            //headController.update(MasterParameterType.STEERING_ANGLE, unsignedValue, BYTE_RANGE);
+        if (channel == 0) {
+            sampleValueWithHistory2.update(unsignedValue);
+            headController.update(MasterParameterType.STEERING_ANGLE, unsignedValue, BYTE_RANGE);
+
+            if (unsignedValue != currentRawPos) {
+                log.info(String.format("pos changed %d -> %d", currentRawPos, unsignedValue));
+            }
+
+            currentRawPos = unsignedValue;
+
         }
     }
 
@@ -91,8 +102,8 @@ public class DriveState implements McuReportListener, MultilineReportable {
 
         int unsignedValue = (0xFF & value);
 
-        sampleValueWithHistory2.update(unsignedValue);
-        headController.update(MasterParameterType.STEERING_ANGLE, unsignedValue, BYTE_RANGE);
+        //sampleValueWithHistory2.update(unsignedValue);
+        //headController.update(MasterParameterType.STEERING_ANGLE, unsignedValue, BYTE_RANGE);
 
 
         System.out.println("unsignedValue = " + unsignedValue);
