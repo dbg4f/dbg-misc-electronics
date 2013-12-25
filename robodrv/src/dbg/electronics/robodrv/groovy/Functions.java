@@ -1,8 +1,10 @@
 package dbg.electronics.robodrv.groovy;
 
 
+import dbg.electronics.robodrv.drive.DriveState;
 import dbg.electronics.robodrv.drive.M16MultichannelPwmDrive;
 import dbg.electronics.robodrv.drive.M32U4MultichannelPwmDrive;
+import dbg.electronics.robodrv.drive.MotorDrive;
 import dbg.electronics.robodrv.graphics.ValueWithHistory;
 import dbg.electronics.robodrv.logging.ValueHistorySerializer;
 import dbg.electronics.robodrv.mcu.*;
@@ -27,6 +29,8 @@ public class Functions extends Script {
     private static M32U4MultichannelPwmDrive drive2;
     private static List<ValueWithHistory> valueWithHistoryList;
     private static ValueHistorySerializer serializer;
+    private static DriveState driveState;
+
 
     public void setSocketCommunicator(McuSocketCommunicator socketCommunicator) {
         Functions.socketCommunicator = socketCommunicator;
@@ -56,6 +60,11 @@ public class Functions extends Script {
         Functions.serializer = serializer;
     }
 
+
+    public void setDriveState(DriveState driveState) {
+        Functions.driveState = driveState;
+    }
+
     public String echo(int value) {
         try {
             return "ECHO res=" + executor.execute(createCommand(ECHO, 1)).getResult();
@@ -64,6 +73,61 @@ public class Functions extends Script {
             //e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             return "ERROR: " + e.getMessage();
         }
+    }
+
+    public String pos(int pos) {
+        return pos2(pos, 250);
+    }
+
+    public String pos2(int pos, int pwm) {
+
+        try {
+
+            int initial = driveState.getCurrentRawPos();
+
+            int current = initial;
+
+            int delta = pos - current;
+
+            boolean dir = delta > 0;
+
+            // ts = System.currentTimeMillis();
+
+            MotorDrive motorDrive = drive2.getChannelDrive(1);
+
+            motorDrive.setDirection(dir);
+            motorDrive.setPwm(pwm);
+
+            boolean mustGrow = (pos > current);
+
+            for(int i=0; i<1000; i++) {
+
+                Thread.sleep(2);
+
+                current = driveState.getCurrentRawPos();
+
+                boolean mustStop = mustGrow ? (current >= pos) : (current <= pos);
+
+                if (mustStop) {
+                    motorDrive.setPwm(0);
+                    Thread.sleep(100);
+                    int end = driveState.getCurrentRawPos();
+                    return String.format("target=%d (current=%d/%d), count=%d, from %d to %d, pwm=%d", pos, current, end, i, initial, current, pwm);
+                }
+
+
+            }
+
+            return String.format("TIMEOUT target=%d (current=%d), from %d to %d, pwm=%d", pos, current, initial, current, pwm);
+
+        } catch (Exception e) {
+            System.out.println("ERROR: " + e.getMessage());
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            return "ERROR: " + e.getMessage();
+        }
+
+
+
     }
 
     public String read(String reg) {

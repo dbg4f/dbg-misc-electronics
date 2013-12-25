@@ -10,6 +10,7 @@
         <property name="executor" ref="synchronousExecutor"/>
         <property name="drive" ref="drive"/>
         <property name="drive2" ref="drive32u4"/>
+        <property name="driveState" ref="driveState"/>
         <property name="valueWithHistoryList">
             <list>
                 <ref bean="testValue1"/>

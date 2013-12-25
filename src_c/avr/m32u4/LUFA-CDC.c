@@ -128,6 +128,7 @@ typedef struct struct_adc_context
 {
     ADC_BUFFER adc_buffers[ADC_CHANNELS_IN_USE];
     uint8_t avg_values[ADC_CHANNELS_IN_USE];
+    uint8_t reported_values[ADC_CHANNELS_IN_USE];
     uint8_t adc_buf_index;
     uint8_t valuations_count;
     uint8_t updated;
@@ -166,9 +167,9 @@ static RESP_CONTEXT resp_context;
 
 
 static uint8_t crcUpdate(uint8_t crc, uint8_t data);
-static void TxContextSendNext(PTX_CONTEXT p_tx_context);
+static void TxContextSendNext();
 static uint8_t send_with_crc(uint8_t crc, uint8_t data);
-
+static uint8_t IsAdcSnapshotChanged(PADC_CONTEXT p_adc_context);
 
 // -----------------------------------------------------------------------------------------------------------------
 static uint8_t adc_buf_avg(PADC_BUFFER p_adc_buffer)
@@ -253,6 +254,27 @@ static void tx_ct_snapshot(PCT_CONTEXT p_ct_context)
 
 }
 
+// -----------------------------------------------------------------------------------------------------------------
+static uint8_t IsAdcSnapshotChanged(PADC_CONTEXT p_adc_context)
+{
+	uint8_t i = 0;
+	for (i=0; i<ADC_CHANNELS_IN_USE; i++)
+    {            
+		if (p_adc_context->reported_values[i] != p_adc_context->avg_values[i])
+		{
+			return 1;
+		}
+		
+		if (i == 0)
+		{
+			break; // TODO: only ADC0 in use
+		}
+    }
+    
+    return 0;
+	
+}
+
 
 // -----------------------------------------------------------------------------------------------------------------
 static void tx_adc_snapshot(PADC_CONTEXT p_adc_context)
@@ -271,6 +293,7 @@ static void tx_adc_snapshot(PADC_CONTEXT p_adc_context)
         for (i=0; i<ADC_CHANNELS_IN_USE; i++)
         {
             crc = send_with_crc(crc, p_adc_context->avg_values[i]);
+            p_adc_context->reported_values[i] = p_adc_context->avg_values[i];
         }
 
         crc = send_with_crc(crc, crc);
@@ -290,6 +313,7 @@ static void adc_ctx_init(PADC_CONTEXT p_adc_context)
     {
         adc_buf_init(&p_adc_context->adc_buffers[i]);
         p_adc_context->avg_values[i] = 0;
+        p_adc_context->reported_values[i] = 0;
     }
 
     p_adc_context->adc_buf_index = 0;
@@ -405,7 +429,7 @@ static void send_resp2(uint8_t byte1, uint8_t byte2, uint8_t sequence)
 
 
 // -----------------------------------------------------------------------------------------------------------------
-static void TxContextSendNext(PTX_CONTEXT p_tx_context)
+static void TxContextSendNext()
 {
 
     if (tx_context.enabled) // send snapshots only in asynch mode
@@ -424,7 +448,7 @@ static void TxContextSendNext(PTX_CONTEXT p_tx_context)
             tx_resp_snapshot(&resp_context);
         }
 
-        if (adc_context.updated)
+        if (adc_context.updated && IsAdcSnapshotChanged(&adc_context))
         {
             tx_adc_snapshot(&adc_context);
         }
@@ -902,7 +926,7 @@ int main(void)
 		}
 
 
-        TxContextSendNext(&tx_context);
+        TxContextSendNext();
 
 		uint16_t BufferCount = RingBuffer_GetCount(&Response_Buffer);
 		if (BufferCount)
