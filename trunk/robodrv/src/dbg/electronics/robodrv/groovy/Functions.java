@@ -105,10 +105,10 @@ public class Functions extends Script {
 
 
     public String pulse(int msec) throws InterruptedException {
-        pwm(0, 255);
+        pwm(1, 255);
         Thread.sleep(msec);
-        pwm(0, 0);
-        Thread.sleep(1200);
+        pwm(1, 0);
+        Thread.sleep(2200);
         freeze();
         return "pulse " + msec;
     }
@@ -159,6 +159,7 @@ public class Functions extends Script {
 
     public String dir(int channel, int value) {
         try {
+            M32U4MultichannelPwmDrive drive = drive2;
             drive.getChannelDrive(channel).setDirection(value != 0);
             return "dir[" + channel + "] = " + (value != 0);
         }
