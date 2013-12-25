@@ -128,8 +128,12 @@ public class DriveState implements McuReportListener, MultilineReportable {
         return new String[] {
                 "Channel  " + channelStatus,
                 "Protocol " + protocolState,
-                "pwr      " + pwrCurrent
+                "pos      " + currentRawPos
         };
+    }
+
+    public int getCurrentRawPos() {
+        return currentRawPos;
     }
 
     public ProtocolState getProtocolState() {
