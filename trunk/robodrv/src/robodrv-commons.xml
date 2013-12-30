@@ -93,6 +93,8 @@
         </property>
         <property name="stickX" ref="testValueStickX"/>
         <property name="stickY" ref="testValueStickY"/>
+        <property name="functions" ref="groovyFunctions"/>
+        <property name="driveState" ref="driveState"/>
     </bean>
 
     <bean id="headController" class="dbg.electronics.robodrv.head.HeadController" init-method="init">

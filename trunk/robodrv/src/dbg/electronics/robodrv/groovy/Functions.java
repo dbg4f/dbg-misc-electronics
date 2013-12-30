@@ -80,6 +80,10 @@ public class Functions extends Script {
     }
 
     public String pos2(int pos, int pwm) {
+        return pos3(pos, pwm, 7);
+    }
+
+    public String pos3(int pos, int pwm, int gap) {
 
         try {
 
@@ -106,7 +110,9 @@ public class Functions extends Script {
 
                 current = driveState.getCurrentRawPos();
 
-                boolean mustStop = mustGrow ? (current >= pos) : (current <= pos);
+                int posWithClearance = mustGrow ? pos - gap : pos + gap;
+
+                boolean mustStop = mustGrow ? (current >= posWithClearance) : (current <= posWithClearance);
 
                 if (mustStop) {
                     motorDrive.setPwm(0);
