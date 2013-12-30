@@ -22,6 +22,7 @@ public class DriveState implements McuReportListener, MultilineReportable {
     private ProtocolState protocolState;
     private ChannelStatus channelStatus;
     private int currentRawPos;
+    private int currentTargetPos = 180;
     private int steeringAngle; // +/- degrees
     private int pwrCurrent;  // milliampers
     private int pwrVoltage;  // millivolts
@@ -41,6 +42,14 @@ public class DriveState implements McuReportListener, MultilineReportable {
 
     public void setHeadController(HeadController headController) {
         this.headController = headController;
+    }
+
+    public int getCurrentTargetPos() {
+        return currentTargetPos;
+    }
+
+    public void setCurrentTargetPos(int currentTargetPos) {
+        this.currentTargetPos = currentTargetPos;
     }
 
     public class ProtocolStateUpdater implements ChannelStatusListener<ProtocolState> {
@@ -126,9 +135,10 @@ public class DriveState implements McuReportListener, MultilineReportable {
     @Override
     public String[] toStringArray() {
         return new String[] {
-                "Channel  " + channelStatus,
-                "Protocol " + protocolState,
-                "pos      " + currentRawPos
+                "Channel    " + channelStatus,
+                "Protocol   " + protocolState,
+                "currentPos " + currentRawPos,
+                "targetPos  " + currentTargetPos
         };
     }
 

@@ -6,7 +6,7 @@ public class PidTest {
 
     public static void main(String[] args) {
 
-        PidRegulator regulator = new PidRegulator(new PidWeights(5, 0.1, 10), new RangeRestriction(0, 255));
+        PidRegulator regulator = new PidRegulator(new PidWeights(8, 1, 5), new RangeRestriction(0, 255));
 
         double currentPos = 150;
         double commandPos = 180;
