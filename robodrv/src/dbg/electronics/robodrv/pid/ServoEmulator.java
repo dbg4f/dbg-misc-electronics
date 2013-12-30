@@ -37,13 +37,21 @@ public class ServoEmulator implements MotorDrive {
 
         }
 
+        boolean isMaxReached(int pos) {
+            return pos >= posMax;
+        }
+
+        boolean isMinReached(int pos) {
+            return pos <= posMin;
+        }
+
 
     }
 
     private int position;
     private int pwm;
     private int speed; // pos/sec
-    private boolean forward;
+    private boolean forward = true;
     private Setup setup = new Setup(140, 225);
 
     public ServoEmulator(int position) {
@@ -63,78 +71,106 @@ public class ServoEmulator implements MotorDrive {
 
     @Override
     public void setPwm(int value) throws InterruptedException, IOException, McuCommunicationException {
-        this.pwm = pwm;
+        this.pwm = value;
     }
 
     public int getPosition() {
         return position;
     }
 
+    public void recalculate(int dt) {
 
-    public void recalculate(int millisecElapsed) {
-        if (pwm == 0) {
-            return;
-        }
+        int signV = forward ? 1 : -1;
 
-        if (position > setup.posMax || position < setup.posMin) {
-            speed = 0;
-            return;
-        }
+        int v1 = setup.getRegularSpeed(pwm);
 
-        int regularSpeed = setup.getRegularSpeed(pwm);
+        int dv = v1 - speed;
 
-        int movementSign = forward ? 1 : -1;
+        int ta = Math.abs(dv) * 1000 / setup.acceleration; // msec
 
-        if (speed == regularSpeed) {
-            position += movementSign * (speed * millisecElapsed) / 1000;
-            return;
-        }
+        int signA = dv > 0 ? 1 : -1;
 
-        int deltaSpeed = regularSpeed - speed;
+        if (ta < dt) {
 
-        int accelerationSign = (deltaSpeed > 0) ? 1 : -1;
+            int pos1 = position + signV * lawDistance(0, speed, signA * setup.acceleration, ta);
 
-        int timeToReachSpeedMsec = (Math.abs(deltaSpeed) * 1000/ setup.acceleration);
+            speed = v1;
 
-        if (timeToReachSpeedMsec >= millisecElapsed) {
+            position = pos1 + signV * lawDistance(0, v1, 0, dt - ta);
 
-            speed += accelerationSign * (setup.acceleration * millisecElapsed) / 1000;
-
-            //position +=
 
         }
         else {
 
-            int regularMotionTime = millisecElapsed - timeToReachSpeedMsec;
+            position = position + signV * lawDistance(position, speed, signA * setup.acceleration, dt);
 
-            speed = regularSpeed;
-
-
-
-
+            speed = lawSpeed(speed, signA * setup.acceleration, dt);
 
         }
 
+        if(forward && setup.isMaxReached(position)) {
+           speed = 0;
+           position = setup.posMax;
+        }
 
-
-
+        if (!forward && setup.isMinReached(position)) {
+            speed = 0;
+            position = setup.posMin;
+        }
 
     }
 
+    private int lawSpeed(int v0, int a, int dt) {
+        return v0 + a * dt / 1000;
+    }
+
+    private int lawDistance(int d0, int v0, int a, int dt) {
+        return d0 + v0 * dt / 1000 + a * dt * dt / (2 * 1000 * 1000);
+    }
 
 
 
     public static void main(String[] args) throws InterruptedException, McuCommunicationException, IOException {
-        ServoEmulator emulator = new ServoEmulator(100);
+        ServoEmulator emulator = new ServoEmulator(140);
         Setup s = new Setup(100, 200);
 
         emulator.setPwm(255);
         emulator.recalculate(100);
+        int pos2 = emulator.getPosition();
+        System.out.println("pos2 = " + pos2);
 
-        //int pos2 = emulator.getPosition()
+        emulator.recalculate(100);
+        pos2 = emulator.getPosition();
+        System.out.println("pos3 = " + pos2);
+
+        emulator.setPwm(0);
+        emulator.recalculate(100);
+        pos2 = emulator.getPosition();
+        System.out.println("pos4 = " + pos2);
+
+        emulator.setPwm(255);
+        emulator.setDirection(false);
+        emulator.recalculate(100);
+        pos2 = emulator.getPosition();
+        System.out.println("pos5 = " + pos2);
+
+        emulator.recalculate(100);
+        pos2 = emulator.getPosition();
+        System.out.println("pos6 = " + pos2);
+
+
 
     }
 
 
-
+    @Override
+    public String toString() {
+        return "ServoEmulator{" +
+                "position=" + position +
+                ", pwm=" + pwm +
+                ", speed=" + speed +
+                ", forward=" + forward +
+                ", setup=" + setup +
+                '}';
+    }
 }
