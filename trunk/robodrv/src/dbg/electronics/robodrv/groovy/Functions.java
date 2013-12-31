@@ -5,6 +5,7 @@ import dbg.electronics.robodrv.drive.DriveState;
 import dbg.electronics.robodrv.drive.M16MultichannelPwmDrive;
 import dbg.electronics.robodrv.drive.M32U4MultichannelPwmDrive;
 import dbg.electronics.robodrv.drive.MotorDrive;
+import dbg.electronics.robodrv.graphics.TimeSeries;
 import dbg.electronics.robodrv.graphics.ValueWithHistory;
 import dbg.electronics.robodrv.logging.ValueHistorySerializer;
 import dbg.electronics.robodrv.mcu.*;
@@ -13,10 +14,15 @@ import static dbg.electronics.robodrv.mcu.CommandCode.ENABLE_ADC;
 import static dbg.electronics.robodrv.mcu.CommandCode.ECHO;
 import static dbg.electronics.robodrv.mcu.McuCommand.createCommand;
 
+import dbg.electronics.robodrv.pid.PidRegulator;
+import dbg.electronics.robodrv.pid.PidWeights;
+import dbg.electronics.robodrv.pid.RangeRestriction;
+import dbg.electronics.robodrv.pid.ServoEmulator;
 import dbg.electronics.robodrv.util.BinUtils;
 import groovy.lang.Script;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
@@ -104,7 +110,7 @@ public class Functions extends Script {
 
             boolean mustGrow = (pos > current);
 
-            for(int i=0; i<1000; i++) {
+            for (int i = 0; i < 1000; i++) {
 
                 Thread.sleep(2);
 
@@ -133,14 +139,12 @@ public class Functions extends Script {
         }
 
 
-
     }
 
     public String read(String reg) {
         try {
             return reg + "=" + mcuRegisterAccess.readReg(M16Reg.valueOf(reg));
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             return "ERROR: " + e.getMessage();
         }
@@ -161,12 +165,70 @@ public class Functions extends Script {
         return "unfrozen";
     }
 
+
+    public void runPid(int K) throws InterruptedException, McuCommunicationException, IOException {
+
+        List<TimeSeries> res = new ArrayList<TimeSeries>();
+        List<TimeSeries> ref = new ArrayList<TimeSeries>();
+
+        ServoEmulator emulator = new ServoEmulator(140);
+
+        PidRegulator regulator = new PidRegulator(new PidWeights(K, 0, 0), new RangeRestriction(0, 255));
+
+        int commandPos = 180;
+
+        System.out.println("regulator = " + regulator);
+
+        int time = 0;
+        int dt = 10;
+
+
+        for (int i = 0; i < 100; i++) {
+            emulator.recalculate(dt);
+            time += dt;
+
+            int position = emulator.getPosition();
+
+            int value = (int) regulator.getValue(commandPos - position);
+
+            emulator.setDirection(value > 0);
+
+            emulator.setPwm(Math.abs(value));
+
+            System.out.println(time + " = " + emulator + " " + regulator.getLastTriplet());
+
+            res.add(new TimeSeries(time*3, position));
+            ref.add(new TimeSeries(time*3, commandPos));
+
+        }
+
+
+        freeze();
+
+        valueWithHistoryList.get(0).setSnapshot(ref);
+        valueWithHistoryList.get(1).setSnapshot(res);
+
+    }
+
+
+    public String pid(int K) {
+
+        try {
+            runPid(K);
+            return "PID OK, K= " + K;
+        } catch (Exception e) {
+            e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
+            return "ERROR: " + e.getMessage();
+        }
+
+    }
+
+
     public String write(String reg, String value) {
         try {
             mcuRegisterAccess.writeReg(M16Reg.valueOf(reg), BinUtils.asNumber(value));
             return reg + "<=" + value;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             return "ERROR: " + e.getMessage();
         }
@@ -232,8 +294,7 @@ public class Functions extends Script {
             M32U4MultichannelPwmDrive drive = drive2;
             drive.getChannelDrive(channel).setDirection(value != 0);
             return "dir[" + channel + "] = " + (value != 0);
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return e.getMessage();
         }
@@ -245,8 +306,7 @@ public class Functions extends Script {
             M32U4MultichannelPwmDrive drive = drive2;
             drive.getChannelDrive(channel).setPwm(value);
             return "pwm[" + channel + "] = " + value;
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return e.getMessage();
         }
