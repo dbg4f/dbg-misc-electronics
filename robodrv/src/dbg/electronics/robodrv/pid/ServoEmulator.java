@@ -4,6 +4,8 @@ import dbg.electronics.robodrv.drive.MotorDrive;
 import dbg.electronics.robodrv.mcu.McuCommunicationException;
 
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class ServoEmulator implements MotorDrive {
 
@@ -48,7 +50,7 @@ public class ServoEmulator implements MotorDrive {
 
     }
 
-    private int position;
+    private double position;
     private int pwm;
     private int speed; // pos/sec
     private boolean forward = true;
@@ -75,7 +77,7 @@ public class ServoEmulator implements MotorDrive {
     }
 
     public int getPosition() {
-        return position;
+        return (int)Math.round(position);
     }
 
     public void recalculate(int dt) {
@@ -92,74 +94,97 @@ public class ServoEmulator implements MotorDrive {
 
         if (ta < dt) {
 
-            int pos1 = position + signV * lawDistance(0, speed, signA * setup.acceleration, ta);
+            double posAcceleration = acceleratedMovement(signV, ta, signA);
 
             speed = v1;
 
-            position = pos1 + signV * lawDistance(0, v1, 0, dt - ta);
+            position = posAcceleration + signV * lawDistance(v1, 0, dt - ta);
 
 
         }
         else {
 
-            position = position + signV * lawDistance(position, speed, signA * setup.acceleration, dt);
+            position = acceleratedMovement(signV, dt, signA);
 
             speed = lawSpeed(speed, signA * setup.acceleration, dt);
 
         }
 
-        if(forward && setup.isMaxReached(position)) {
-           speed = 0;
-           position = setup.posMax;
-        }
+        checkUpperLimit();
 
-        if (!forward && setup.isMinReached(position)) {
+        checkLowerLimit();
+
+        position = roundPosition();
+
+    }
+
+    private double roundPosition() {
+        return new BigDecimal(position).setScale(2, RoundingMode.HALF_EVEN).doubleValue();
+    }
+
+    private double acceleratedMovement(int signV, int ta, int signA) {
+        return position + signV * lawDistance(speed, signA * setup.acceleration, ta);
+    }
+
+    private void checkLowerLimit() {
+        if (!forward && setup.isMinReached(getPosition())) {
             speed = 0;
             position = setup.posMin;
         }
+    }
 
+    private void checkUpperLimit() {
+        if(forward && setup.isMaxReached(getPosition())) {
+           speed = 0;
+           position = setup.posMax;
+        }
     }
 
     private int lawSpeed(int v0, int a, int dt) {
         return v0 + a * dt / 1000;
     }
 
-    private int lawDistance(int d0, int v0, int a, int dt) {
-        return d0 + v0 * dt / 1000 + a * dt * dt / (2 * 1000 * 1000);
+    private double lawDistance(int v0, int a, int dt) {
+        return (double)(v0 * dt)/ 1000 + (double)(a * dt * dt) / (2 * 1000 * 1000);
     }
 
 
 
     public static void main(String[] args) throws InterruptedException, McuCommunicationException, IOException {
         ServoEmulator emulator = new ServoEmulator(140);
-        Setup s = new Setup(100, 200);
 
-        emulator.setPwm(255);
-        emulator.recalculate(100);
-        int pos2 = emulator.getPosition();
-        System.out.println("pos2 = " + pos2);
+        PidRegulator regulator = new PidRegulator(new PidWeights(10, 0, 0), new RangeRestriction(0, 255));
 
-        emulator.recalculate(100);
-        pos2 = emulator.getPosition();
-        System.out.println("pos3 = " + pos2);
+        int commandPos = 180;
 
-        emulator.setPwm(0);
-        emulator.recalculate(100);
-        pos2 = emulator.getPosition();
-        System.out.println("pos4 = " + pos2);
+        System.out.println("regulator = " + regulator);
 
-        emulator.setPwm(255);
-        emulator.setDirection(false);
-        emulator.recalculate(100);
-        pos2 = emulator.getPosition();
-        System.out.println("pos5 = " + pos2);
+        int time = 0;
+        int dt = 10;
 
-        emulator.recalculate(100);
-        pos2 = emulator.getPosition();
-        System.out.println("pos6 = " + pos2);
+
+        time = move(emulator, regulator, time, dt, 100, commandPos);
 
 
 
+    }
+
+    private static int move(ServoEmulator emulator, PidRegulator regulator, int time, int dt, int iterations, int commandPos) throws InterruptedException, McuCommunicationException, IOException {
+        for (int i=0; i< iterations; i++) {
+            emulator.recalculate(dt);
+            time += dt;
+
+            int value = (int)regulator.getValue(commandPos - emulator.getPosition());
+
+            emulator.setDirection(value > 0);
+
+            emulator.setPwm(Math.abs(value));
+
+            System.out.println(time + " = " + emulator + " " + regulator.getLastTriplet());
+
+
+        }
+        return time;
     }
 
 
@@ -170,7 +195,6 @@ public class ServoEmulator implements MotorDrive {
                 ", pwm=" + pwm +
                 ", speed=" + speed +
                 ", forward=" + forward +
-                ", setup=" + setup +
                 '}';
     }
 }
