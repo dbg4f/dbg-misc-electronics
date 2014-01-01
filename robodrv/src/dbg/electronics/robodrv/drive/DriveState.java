@@ -73,6 +73,10 @@ public class DriveState implements McuReportListener, MultilineReportable {
     public ChannelStatusUpdater channelStatusUpdater = new ChannelStatusUpdater();
 
 
+    public void updateValueWithHistory(int value) {
+        sampleValueWithHistory.update(value);
+    }
+
     @Override
     public void onAdcValue(int channel, byte value) {
         //System.out.println("channel = " + channel + " value " + value);
@@ -88,9 +92,9 @@ public class DriveState implements McuReportListener, MultilineReportable {
         int unsignedValue = (0xFF & value);
 
         if (channel == 1) {
-            pwrCurrent = value;
-            sampleValueWithHistory.update(unsignedValue);
-            headController.update(MasterParameterType.POWER_CURRENT, unsignedValue, BYTE_RANGE);
+            //pwrCurrent = value;
+            //sampleValueWithHistory.update(unsignedValue);
+            //headController.update(MasterParameterType.POWER_CURRENT, unsignedValue, BYTE_RANGE);
 
         }
         if (channel == 0) {

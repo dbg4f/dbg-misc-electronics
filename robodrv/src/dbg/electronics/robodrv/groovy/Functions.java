@@ -20,6 +20,7 @@ import dbg.electronics.robodrv.pid.RangeRestriction;
 import dbg.electronics.robodrv.pid.ServoEmulator;
 import dbg.electronics.robodrv.util.BinUtils;
 import groovy.lang.Script;
+import org.apache.log4j.Logger;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -28,14 +29,17 @@ import java.util.List;
 
 public class Functions extends Script {
 
+    private static final Logger log = Logger.getLogger(Functions.class);
+
     private static McuRegisterAccess<M16Reg> mcuRegisterAccess;
     private static McuSocketCommunicator socketCommunicator;
     private static SynchronousExecutor executor;
     private static M16MultichannelPwmDrive drive;
-    private static M32U4MultichannelPwmDrive drive2;
+    public static M32U4MultichannelPwmDrive drive2;
     private static List<ValueWithHistory> valueWithHistoryList;
     private static ValueHistorySerializer serializer;
     private static DriveState driveState;
+    public static boolean adc = false;
 
 
     public void setSocketCommunicator(McuSocketCommunicator socketCommunicator) {
@@ -166,6 +170,71 @@ public class Functions extends Script {
     }
 
 
+    public String runPid2(int K, int commandPos) throws InterruptedException, McuCommunicationException, IOException {
+
+        unfreeze();
+
+        log.info("PID sample: K=" + K + " cmd pos=" + commandPos + " current pos=" + driveState.getCurrentRawPos());
+
+        PidRegulator regulator = new PidRegulator(new PidWeights(K, 0, 0), new RangeRestriction(0, 255));
+
+
+        int time = 0;
+        int dt = 10;
+
+        M32U4MultichannelPwmDrive drive = drive2;
+
+        int currentError = 0;
+
+        MotorDrive motorDrive = drive2.getChannelDrive(1);
+
+        for (int i = 0; i < 150; i++) {
+
+            Thread.sleep(dt);
+
+            time += dt;
+
+            int position = driveState.getCurrentRawPos();
+
+            currentError = commandPos - position;
+
+            int pidResultValue = (int) regulator.getValue(currentError);
+
+            motorDrive.setDirection(pidResultValue > 0);
+
+            int pwmValue = Math.abs(pidResultValue);
+
+            if (pwmValue > 255) {
+                pwmValue = 255;
+            }
+
+            motorDrive.setPwm(pwmValue);
+
+            log.info(String.format("PID: t=%d c=%d, err=%d, reg=%d", commandPos, position, currentError, pidResultValue));
+
+            driveState.updateValueWithHistory(commandPos);
+
+            if (currentError == 0) {
+               // break;
+            }
+
+
+        }
+
+        regulator.reset();
+
+        freeze();
+
+        String result = String.format("PID K=%d time=%d err=%d t=%d", K, time, currentError, commandPos);
+
+        motorDrive.setPwm(0);
+
+        log.info("PID finished: " + result);
+
+        return result;
+
+    }
+
     public void runPid(int K) throws InterruptedException, McuCommunicationException, IOException {
 
         List<TimeSeries> res = new ArrayList<TimeSeries>();
@@ -211,11 +280,10 @@ public class Functions extends Script {
     }
 
 
-    public String pid(int K) {
+    public String pid(int K, int commandPos) {
 
         try {
-            runPid(K);
-            return "PID OK, K= " + K;
+            return runPid2(K, commandPos);
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             return "ERROR: " + e.getMessage();
@@ -269,6 +337,7 @@ public class Functions extends Script {
     public String adc() {
         try {
             executor.sendOnly(createCommand(ENABLE_ADC));
+            Functions.adc = true;
             return "ADC enabled";
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.

@@ -5,6 +5,7 @@ import dbg.electronics.robodrv.EventListener;
 import dbg.electronics.robodrv.GenericThread;
 import dbg.electronics.robodrv.Range;
 import dbg.electronics.robodrv.drive.DriveState;
+import dbg.electronics.robodrv.drive.MotorDrive;
 import dbg.electronics.robodrv.graphics.MultiBufferFullScreen;
 import dbg.electronics.robodrv.graphics.ValueWithHistory;
 import dbg.electronics.robodrv.groovy.Functions;
@@ -14,6 +15,9 @@ import dbg.electronics.robodrv.hid.InputRangedControl;
 import dbg.electronics.robodrv.hid.StickDriver;
 import dbg.electronics.robodrv.logging.LoggerFactory;
 import dbg.electronics.robodrv.logging.SimpleLogger;
+import dbg.electronics.robodrv.pid.PidRegulator;
+import dbg.electronics.robodrv.pid.PidWeights;
+import dbg.electronics.robodrv.pid.RangeRestriction;
 
 import java.util.List;
 
@@ -59,7 +63,7 @@ public class Orchestrator implements FailureListener, EventListener<Event>, Inpu
             thread.launch();
         }
 
-        //new Thread(new Steering()).start();
+        new Thread(new Steering()).start();
 
 
     }
@@ -69,23 +73,61 @@ public class Orchestrator implements FailureListener, EventListener<Event>, Inpu
         @Override
         public void run() {
 
+
+            // TODO: restrict reversals count and speed (relay jitter)
+            // TODO: restrict reg interval cycles count (timeout)
+            // TODO: detect HID signal jitter
+
+
+            PidRegulator regulator = new PidRegulator(new PidWeights(30, 0, 0), new RangeRestriction(0, 255));
+
+            int currentError = 0;
+
+            MotorDrive motorDrive = null;
+
             while(!Thread.currentThread().isInterrupted()) {
 
-                int currentRawPos = driveState.getCurrentRawPos();
-                int currentTargetPosSnapshot = currentTargetPos;
-                if (Math.abs(currentTargetPosSnapshot - currentRawPos) > 7) {
-                    log.info(String.format("Apply %d -> %d", currentRawPos, currentTargetPosSnapshot));
-                    functions.pos(currentTargetPosSnapshot);
-                    log.info(String.format("Complete %d -> %d (curr=%d, target=%d)", currentRawPos, currentTargetPosSnapshot, driveState.getCurrentRawPos(), currentTargetPos));
-                }
-                else {
-                    try {
-                        Thread.sleep(20);
-                    } catch (InterruptedException e) {
-                        break;
-                    }
+                if (!Functions.adc) {
+                    continue;
                 }
 
+                try {
+
+                int position = driveState.getCurrentRawPos();
+
+                int commandPos = driveState.getCurrentTargetPos();
+
+                currentError = commandPos - position;
+
+                int pidResultValue = (int) regulator.getValue(currentError);
+
+                if (motorDrive == null) {
+                    motorDrive = Functions.drive2.getChannelDrive(1);
+                    continue;
+                }
+
+                motorDrive.setDirection(pidResultValue > 0);
+
+                int pwmValue = Math.abs(pidResultValue);
+
+                if (pwmValue > 255) {
+                    pwmValue = 255;
+                }
+
+                motorDrive.setPwm(pwmValue);
+
+                log.info(String.format("PID: t=%d c=%d, err=%d, reg=%d", commandPos, position, currentError, pidResultValue));
+
+                driveState.updateValueWithHistory(commandPos);
+
+
+                Thread.sleep(10);
+
+
+                } catch (Exception e) {
+                    log.error("End of steering cycle due to error : " + e.getMessage(), e);
+                    break;
+                }
 
             }
 
