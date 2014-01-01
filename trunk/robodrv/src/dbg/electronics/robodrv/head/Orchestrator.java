@@ -6,18 +6,16 @@ import dbg.electronics.robodrv.GenericThread;
 import dbg.electronics.robodrv.Range;
 import dbg.electronics.robodrv.drive.DriveState;
 import dbg.electronics.robodrv.drive.MotorDrive;
-import dbg.electronics.robodrv.graphics.MultiBufferFullScreen;
 import dbg.electronics.robodrv.graphics.ValueWithHistory;
 import dbg.electronics.robodrv.groovy.Functions;
-import dbg.electronics.robodrv.hid.HidEventFileReader;
 import dbg.electronics.robodrv.hid.InputControlListener;
 import dbg.electronics.robodrv.hid.InputRangedControl;
 import dbg.electronics.robodrv.hid.StickDriver;
 import dbg.electronics.robodrv.logging.LoggerFactory;
 import dbg.electronics.robodrv.logging.SimpleLogger;
-import dbg.electronics.robodrv.pid.PidRegulator;
-import dbg.electronics.robodrv.pid.PidWeights;
-import dbg.electronics.robodrv.pid.RangeRestriction;
+import dbg.electronics.robodrv.controllers.PidController;
+import dbg.electronics.robodrv.controllers.PidWeights;
+import dbg.electronics.robodrv.controllers.RangeRestriction;
 
 import java.util.List;
 
@@ -74,12 +72,9 @@ public class Orchestrator implements FailureListener, EventListener<Event>, Inpu
         public void run() {
 
 
-            // TODO: restrict reversals count and speed (relay jitter)
-            // TODO: restrict reg interval cycles count (timeout)
-            // TODO: detect HID signal jitter
 
 
-            PidRegulator regulator = new PidRegulator(new PidWeights(30, 0, 0), new RangeRestriction(0, 255));
+            PidController regulator = new PidController(new PidWeights(30, 0, 0), new RangeRestriction(0, 255));
 
             int currentError = 0;
 

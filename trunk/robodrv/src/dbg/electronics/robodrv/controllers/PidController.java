@@ -1,8 +1,8 @@
-package dbg.electronics.robodrv.pid;
+package dbg.electronics.robodrv.controllers;
 
 /**
  */
-public class PidRegulator {
+public class PidController {
 
     private PidWeights weights;
     private RangeRestriction integralRestriction;
@@ -12,11 +12,11 @@ public class PidRegulator {
     private int iterations;
     private PidValuesTriplet lastTriplet;
 
-    public PidRegulator(PidWeights weights) {
+    public PidController(PidWeights weights) {
         this.weights = weights;
     }
 
-    public PidRegulator(PidWeights weights, RangeRestriction integralRestriction) {
+    public PidController(PidWeights weights, RangeRestriction integralRestriction) {
         this.weights = weights;
         this.integralRestriction = integralRestriction;
     }
@@ -62,7 +62,7 @@ public class PidRegulator {
 
     @Override
     public String toString() {
-        return "PidRegulator{" +
+        return "PidController{" +
                 "weights=" + weights +
                 ", integralRestriction=" + integralRestriction +
                 ", integral=" + integral +

@@ -14,10 +14,10 @@ import static dbg.electronics.robodrv.mcu.CommandCode.ENABLE_ADC;
 import static dbg.electronics.robodrv.mcu.CommandCode.ECHO;
 import static dbg.electronics.robodrv.mcu.McuCommand.createCommand;
 
-import dbg.electronics.robodrv.pid.PidRegulator;
-import dbg.electronics.robodrv.pid.PidWeights;
-import dbg.electronics.robodrv.pid.RangeRestriction;
-import dbg.electronics.robodrv.pid.ServoEmulator;
+import dbg.electronics.robodrv.controllers.PidController;
+import dbg.electronics.robodrv.controllers.PidWeights;
+import dbg.electronics.robodrv.controllers.RangeRestriction;
+import dbg.electronics.robodrv.emulator.ServoEmulator;
 import dbg.electronics.robodrv.util.BinUtils;
 import groovy.lang.Script;
 import org.apache.log4j.Logger;
@@ -176,7 +176,7 @@ public class Functions extends Script {
 
         log.info("PID sample: K=" + K + " cmd pos=" + commandPos + " current pos=" + driveState.getCurrentRawPos());
 
-        PidRegulator regulator = new PidRegulator(new PidWeights(K, 0, 0), new RangeRestriction(0, 255));
+        PidController regulator = new PidController(new PidWeights(K, 0, 0), new RangeRestriction(0, 255));
 
 
         int time = 0;
@@ -242,7 +242,7 @@ public class Functions extends Script {
 
         ServoEmulator emulator = new ServoEmulator(140);
 
-        PidRegulator regulator = new PidRegulator(new PidWeights(K, 0, 0), new RangeRestriction(0, 255));
+        PidController regulator = new PidController(new PidWeights(K, 0, 0), new RangeRestriction(0, 255));
 
         int commandPos = 180;
 
