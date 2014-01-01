@@ -1,7 +1,10 @@
-package dbg.electronics.robodrv.pid;
+package dbg.electronics.robodrv.emulator;
 
 import dbg.electronics.robodrv.drive.MotorDrive;
 import dbg.electronics.robodrv.mcu.McuCommunicationException;
+import dbg.electronics.robodrv.controllers.PidController;
+import dbg.electronics.robodrv.controllers.PidWeights;
+import dbg.electronics.robodrv.controllers.RangeRestriction;
 
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -153,7 +156,7 @@ public class ServoEmulator implements MotorDrive {
     public static void main(String[] args) throws InterruptedException, McuCommunicationException, IOException {
         ServoEmulator emulator = new ServoEmulator(140);
 
-        PidRegulator regulator = new PidRegulator(new PidWeights(10, 0, 0), new RangeRestriction(0, 255));
+        PidController regulator = new PidController(new PidWeights(10, 0, 0), new RangeRestriction(0, 255));
 
         int commandPos = 180;
 
@@ -169,7 +172,7 @@ public class ServoEmulator implements MotorDrive {
 
     }
 
-    private static int move(ServoEmulator emulator, PidRegulator regulator, int time, int dt, int iterations, int commandPos) throws InterruptedException, McuCommunicationException, IOException {
+    private static int move(ServoEmulator emulator, PidController regulator, int time, int dt, int iterations, int commandPos) throws InterruptedException, McuCommunicationException, IOException {
         for (int i=0; i< iterations; i++) {
             emulator.recalculate(dt);
             time += dt;
