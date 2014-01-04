@@ -61,7 +61,7 @@ public class Orchestrator implements FailureListener, EventListener<Event>, Inpu
             thread.launch();
         }
 
-        new Thread(new Steering()).start();
+        //new Thread(new Steering()).start();
 
 
     }

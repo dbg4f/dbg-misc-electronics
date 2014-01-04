@@ -170,17 +170,17 @@ public class Functions extends Script {
     }
 
 
-    public String runPid2(int K, int commandPos) throws InterruptedException, McuCommunicationException, IOException {
+    public String runPid2(int P, int I, int commandPos) throws InterruptedException, McuCommunicationException, IOException {
 
         unfreeze();
 
-        log.info("PID sample: K=" + K + " cmd pos=" + commandPos + " current pos=" + driveState.getCurrentRawPos());
+        log.info("PID sample: P=" + P + " I=" + I + " cmd pos=" + commandPos + " current pos=" + driveState.getCurrentRawPos());
 
-        PidController regulator = new PidController(new PidWeights(K, 0, 0), new RangeRestriction(0, 255));
+        PidController regulator = new PidController(new PidWeights(P, I, 0), new RangeRestriction(-255, 255));
 
 
         int time = 0;
-        int dt = 10;
+        int dt = 1;
 
         M32U4MultichannelPwmDrive drive = drive2;
 
@@ -188,7 +188,7 @@ public class Functions extends Script {
 
         MotorDrive motorDrive = drive2.getChannelDrive(1);
 
-        for (int i = 0; i < 150; i++) {
+        for (int i = 0; i < 250; i++) {
 
             Thread.sleep(dt);
 
@@ -225,7 +225,7 @@ public class Functions extends Script {
 
         freeze();
 
-        String result = String.format("PID K=%d time=%d err=%d t=%d", K, time, currentError, commandPos);
+        String result = String.format("PID K=%d time=%d err=%d t=%d", P, time, currentError, commandPos);
 
         motorDrive.setPwm(0);
 
@@ -235,14 +235,14 @@ public class Functions extends Script {
 
     }
 
-    public void runPid(int K) throws InterruptedException, McuCommunicationException, IOException {
+    public void runPid(int P, int D) throws InterruptedException, McuCommunicationException, IOException {
 
         List<TimeSeries> res = new ArrayList<TimeSeries>();
         List<TimeSeries> ref = new ArrayList<TimeSeries>();
 
         ServoEmulator emulator = new ServoEmulator(140);
 
-        PidController regulator = new PidController(new PidWeights(K, 0, 0), new RangeRestriction(0, 255));
+        PidController regulator = new PidController(new PidWeights(P, 0, D), new RangeRestriction(0, 255));
 
         int commandPos = 180;
 
@@ -280,10 +280,10 @@ public class Functions extends Script {
     }
 
 
-    public String pid(int K, int commandPos) {
+    public String pid(int P, int I, int commandPos) {
 
         try {
-            return runPid2(K, commandPos);
+            return runPid2(P, I, commandPos);
         } catch (Exception e) {
             e.printStackTrace();  //To change body of catch statement use File | Settings | File Templates.
             return "ERROR: " + e.getMessage();
