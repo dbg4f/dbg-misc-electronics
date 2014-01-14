@@ -6,10 +6,11 @@ import java.net.Socket;
 public class Test2 {
 
 
-    public static void main(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException, InterruptedException {
 
 
-        Socket s = new Socket("127.0.0.1", 4444);
+        Socket s = new Socket("192.168.219.1", 5555);
+        //Socket s = new Socket("127.0.0.1", 5555);
 
         /*
 
@@ -23,8 +24,10 @@ public class Test2 {
 
          */
 
-        for (int i=0; i<10000; i++){
+        for (int i=0; i<100000; i++){
+            long time = System.currentTimeMillis();
             s.getOutputStream().write(new byte[] {0x55, 0x03, 0x01, 0x11, 0x01, 0x5C});
+            //Thread.sleep(2);
             StringBuffer buf = new StringBuffer();
             buf.append(s.getInputStream().read());
             buf.append(s.getInputStream().read());
@@ -32,9 +35,10 @@ public class Test2 {
             buf.append(s.getInputStream().read());
             buf.append(s.getInputStream().read());
             buf.append(s.getInputStream().read());
-
+            time = System.currentTimeMillis() - time;
             String x = buf.toString();
-            System.out.println(i + " " + x);
+            System.out.println(i + " " + x + " " + time);
+
 
             if (!x.equals("853171177")) {
                 break;
