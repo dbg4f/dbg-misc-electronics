@@ -15,7 +15,7 @@ public class SynchronousExecutor implements McuReportListener {
 
     private McuReportListener nextListener;
     
-    private int responseTimeoutSeconds = 1;
+    private int responseTimeoutSeconds = 2;
 
     private BlockingQueue<CommandResponse> responseBlockingQueue = new ArrayBlockingQueue<CommandResponse>(100);
 

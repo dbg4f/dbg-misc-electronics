@@ -9,15 +9,29 @@
         </layout>
     </appender>
 
+    <appender name="controller" class="org.apache.log4j.DailyRollingFileAppender">
+        <param name="file" value="logs/controller.log"/>
+        <layout class="org.apache.log4j.PatternLayout">
+            <param name="ConversionPattern" value="%d{yyyy.MM.dd HH:mm:ss.SSS} [%t] %-5p %c{1} - %m%n"/>
+        </layout>
+    </appender>
+
     <appender name="general-console" class="org.apache.log4j.ConsoleAppender">
         <layout class="org.apache.log4j.PatternLayout">
             <param name="ConversionPattern" value="%d{HH:mm:ss.SSS} [%t] %-5p %c{1} - %m%n"/>
         </layout>
     </appender>
 
+    <logger name="dbg.electronics.robodrv.controllers">
+        <level value="INFO" />
+        <appender-ref ref="controller"/>
+    </logger>
+
+
     <root>
         <level value="INFO"/>
         <appender-ref ref="general-console"/>
+        <!--<appender-ref ref="controller"/> -->
         <appender-ref ref="general"/>
     </root>
 

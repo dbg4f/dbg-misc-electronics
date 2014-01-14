@@ -4,6 +4,7 @@ import dbg.electronics.robodrv.Event;
 import dbg.electronics.robodrv.EventListener;
 import dbg.electronics.robodrv.GenericThread;
 import dbg.electronics.robodrv.Range;
+import dbg.electronics.robodrv.controllers.Steering;
 import dbg.electronics.robodrv.drive.DriveState;
 import dbg.electronics.robodrv.drive.MotorDrive;
 import dbg.electronics.robodrv.graphics.ValueWithHistory;
@@ -29,7 +30,7 @@ public class Orchestrator implements FailureListener, EventListener<Event>, Inpu
     private ValueWithHistory stickY;
 
     private Functions functions;
-    private DriveState driveState;
+    public DriveState driveState;
 
 
     public void setDriveState(DriveState driveState) {
@@ -61,72 +62,9 @@ public class Orchestrator implements FailureListener, EventListener<Event>, Inpu
             thread.launch();
         }
 
-        //new Thread(new Steering()).start();
+        new Thread(new Steering(this)).start();
 
 
-    }
-
-    public class Steering implements Runnable {
-
-        @Override
-        public void run() {
-
-
-
-
-            PidController regulator = new PidController(new PidWeights(30, 0, 0), new RangeRestriction(0, 255));
-
-            int currentError = 0;
-
-            MotorDrive motorDrive = null;
-
-            while(!Thread.currentThread().isInterrupted()) {
-
-                if (!Functions.adc) {
-                    continue;
-                }
-
-                try {
-
-                int position = driveState.getCurrentRawPos();
-
-                int commandPos = driveState.getCurrentTargetPos();
-
-                currentError = commandPos - position;
-
-                int pidResultValue = (int) regulator.getValue(currentError);
-
-                if (motorDrive == null) {
-                    motorDrive = Functions.drive2.getChannelDrive(1);
-                    continue;
-                }
-
-                motorDrive.setDirection(pidResultValue > 0);
-
-                int pwmValue = Math.abs(pidResultValue);
-
-                if (pwmValue > 255) {
-                    pwmValue = 255;
-                }
-
-                motorDrive.setPwm(pwmValue);
-
-                log.info(String.format("PID: t=%d c=%d, err=%d, reg=%d", commandPos, position, currentError, pidResultValue));
-
-                driveState.updateValueWithHistory(commandPos);
-
-
-                Thread.sleep(10);
-
-
-                } catch (Exception e) {
-                    log.error("End of steering cycle due to error : " + e.getMessage(), e);
-                    break;
-                }
-
-            }
-
-        }
     }
 
 
