@@ -1,6 +1,23 @@
 #include "avrpid.h"
+#include "avrdrv.h"
 
-uint8_t AVRPID_get_value(int8_t error)
+#define PID_CHANNEL 1
+
+uint8_t currentCommand = 0;
+
+void AVRPID_onClock(uint8_t currentPosition)
 {
-    return 0;
+	// NB! beware of ISR restrictions
+
+	
+	
+	DRV_setPwm(PID_CHANNEL, 0);
+	
+
+}
+
+
+void AVRPID_setCommand(uint8_t command)
+{
+	currentCommand = command;
 }
