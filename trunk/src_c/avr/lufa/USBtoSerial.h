@@ -44,6 +44,7 @@
 
 		#include "Descriptors.h"
 		#include "avrpid.h"
+		#include "avrdrv.h"
 
 		#include <LUFA/Drivers/Board/LEDs.h>
 		#include <LUFA/Drivers/Peripheral/Serial.h>

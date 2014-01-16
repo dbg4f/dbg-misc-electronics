@@ -72,14 +72,13 @@ public class ClockableController {
 
             int pidResultValue = (int) regulator.getValue(currentError);
 
-            setDirection(pidResultValue > 0);
-
             int pwmValue = Math.abs(pidResultValue);
 
             if (pwmValue > 255) {
                 pwmValue = 255;
             }
 
+            setDirection(pidResultValue > 0);
             setPwm(pwmValue);
 
             timeoutCounter--;

@@ -167,7 +167,7 @@ static RESP_CONTEXT resp_context;
 
 
 static uint8_t crcUpdate(uint8_t crc, uint8_t data);
-static void TxContextSendNext();
+static void TxContextSendNext(void);
 static uint8_t send_with_crc(uint8_t crc, uint8_t data);
 static uint8_t IsAdcSnapshotChanged(PADC_CONTEXT p_adc_context);
 
@@ -429,7 +429,7 @@ static void send_resp2(uint8_t byte1, uint8_t byte2, uint8_t sequence)
 
 
 // -----------------------------------------------------------------------------------------------------------------
-static void TxContextSendNext()
+static void TxContextSendNext(void)
 {
 
     if (tx_context.enabled) // send snapshots only in asynch mode
