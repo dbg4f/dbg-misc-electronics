@@ -91,6 +91,17 @@ public class Orchestrator implements FailureListener, EventListener<Event>, Inpu
         }
         else if (control.getName().equals(StickDriver.Control.AXIS_Y.name())) {
             stickY.update(value);
+
+            int unsignedValue = (0xFF & value);
+
+            Range stickRange = new Range(0, 255);
+
+            Range throttleRange = new Range(-255, 255);
+
+            int currentThrottleValue = stickRange.remapTo(unsignedValue, throttleRange);
+
+            driveState.setCurrentTractionTarget(currentThrottleValue);
+
         }
     }
 

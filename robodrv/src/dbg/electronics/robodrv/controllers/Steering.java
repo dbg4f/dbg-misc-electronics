@@ -47,7 +47,9 @@ public class Steering implements Runnable {
                 continue;
             }
 
-            controller.setMotorDrive(motorDrive);
+            controller.setMotorDriveSteering(motorDrive);
+            controller.setMotorDriveTraction(Functions.drive2.getChannelDrive(0));
+            controller.setTractionTarget(orchestrator.driveState.getCurrentTractionTarget());
 
             controller.onClock(commandPos, position);
 

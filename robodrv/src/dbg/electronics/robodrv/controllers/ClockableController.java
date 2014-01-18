@@ -13,19 +13,31 @@ public class ClockableController {
     public static final int CLOCK_PER_POSITION_TIMEOUT = 10;
     public static final int MAX_REV_COUNT = 3;
 
-    private MotorDrive motorDrive;
+    private MotorDrive motorDriveSteering;
+    private MotorDrive motorDriveTraction;
+
     private PidController regulator = new PidController(new PidWeights(30, 0, 0));
 
     private int savedCommand;
     private int timeoutCounter;
     private int reverseCounter;
     private int savedError;
+    private int lastTractionValue = 0;
+    private int tractionTarget = 0;
 
     private int savedPwm = 0;
     private boolean savedDirection ;
 
-    public void setMotorDrive(MotorDrive motorDrive) {
-        this.motorDrive = motorDrive;
+    public void setMotorDriveSteering(MotorDrive motorDriveSteering) {
+        this.motorDriveSteering = motorDriveSteering;
+    }
+
+    public void setMotorDriveTraction(MotorDrive motorDriveTraction) {
+        this.motorDriveTraction = motorDriveTraction;
+    }
+
+    public void setTractionTarget(int tractionTarget) {
+        this.tractionTarget = tractionTarget;
     }
 
     private void resetCounters(int currentError) {
@@ -45,7 +57,27 @@ public class ClockableController {
     }
 
 
+    private boolean inJitterZone(int target) {
+        return target <= 1 && target >= -1;
+    }
+
+    private void controlTraction() throws InterruptedException, McuCommunicationException, IOException {
+
+        if (lastTractionValue != tractionTarget && !inJitterZone(tractionTarget)) {
+
+            boolean dir = (tractionTarget > 0);
+            int pwm = Math.abs(tractionTarget);
+
+            motorDriveTraction.setDirection(dir);
+            motorDriveTraction.setPwm(pwm);
+
+        }
+
+    }
+
     public void onClock(int commandPosition, int actualPosition) throws Exception {
+
+        controlTraction();
 
         log.debug(String.format("clock cmd=%d, pos=%d, %s ", commandPosition, actualPosition, this));
 
@@ -106,12 +138,12 @@ public class ClockableController {
     }
 
     private void setDirection(boolean forward) throws InterruptedException, IOException, McuCommunicationException {
-        motorDrive.setDirection(forward);
+        motorDriveSteering.setDirection(forward);
         savedDirection = forward;
     }
 
     private void setPwm(int pwm) throws InterruptedException, IOException, McuCommunicationException {
-        motorDrive.setPwm(pwm);
+        motorDriveSteering.setPwm(pwm);
         if (savedPwm != pwm) {
             log.info(String.format("Pwm changed: %d->%d", savedPwm, pwm));
         }

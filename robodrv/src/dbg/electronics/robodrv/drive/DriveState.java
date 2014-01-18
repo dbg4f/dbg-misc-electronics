@@ -27,6 +27,7 @@ public class DriveState implements McuReportListener, MultilineReportable {
     private int pwrCurrent;  // milliampers
     private int pwrVoltage;  // millivolts
     private int signalVoltage; // millivolts
+    private int currentTractionTarget;
 
     private ValueWithHistory sampleValueWithHistory;
     private ValueWithHistory sampleValueWithHistory2;
@@ -174,4 +175,11 @@ public class DriveState implements McuReportListener, MultilineReportable {
         return signalVoltage;
     }
 
+    public int getCurrentTractionTarget() {
+        return currentTractionTarget;
+    }
+
+    public void setCurrentTractionTarget(int currentTractionTarget) {
+        this.currentTractionTarget = currentTractionTarget;
+    }
 }
