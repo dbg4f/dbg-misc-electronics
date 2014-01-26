@@ -9,5 +9,7 @@
     void AVRPID_onClock(uint8_t currentPosition);
     
     void AVRPID_setCommand(uint8_t command);
+    
+    void AVRPID_setupTimer(void);
 
 #endif
