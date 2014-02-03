@@ -5,6 +5,7 @@
     #include <avr/wdt.h>
     #include <avr/interrupt.h>
     #include <avr/power.h>
+    #include <stdlib.h>
 
     void AVRPID_onClock(uint8_t currentPosition);
     
