@@ -8,7 +8,11 @@ public enum CommandCode implements CodifierAware {
     SWITCH_WATCHDOG(0x18),
     RESET_WATCHDOG(0x19),
     SET_PORT_BITS(0x1B),
-    CLEAR_PORT_BITS(0x1C);
+    CLEAR_PORT_BITS(0x1C),
+    GET_TICK_COUNT 	(0x1D),
+    SET_REG_TARGET 	(0x1E),
+    DRV_SET_PWM		(0x1F),
+    DRV_SET_DIR		(0x20);
 
     CommandCode(int code) {
         this.code = code;

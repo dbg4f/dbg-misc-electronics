@@ -86,6 +86,12 @@ USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface =
 #define CMD_L1_WRITE_REG_MASK 	0x1A
 #define CMD_L1_SET_PORT_BITS 	0x1B
 #define CMD_L1_CLEAR_PORT_BITS 	0x1C
+#define CMD_L1_GET_TICK_COUNT 	0x1D
+#define CMD_L1_SET_REG_TARGET 	0x1E
+#define CMD_L1_DRV_SET_PWM		0x1F
+#define CMD_L1_DRV_SET_DIR		0x20
+
+
 
 #define RESP_UNKNOWN_CMD	0xEE
 #define RESP_OK	            0xAA
@@ -737,6 +743,8 @@ void set_port_bits(uint8_t reg, uint8_t mask, uint8_t sequence)
 void ExecExtCommand(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3, uint8_t sequence)
 {
 
+	uint16_t ticks;
+
     switch (cmd)
     {
     case CMD_L1_ECHO:
@@ -764,7 +772,26 @@ void ExecExtCommand(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3, 
         tx_init();
         ct_init();
         resp_init();
+        TICK_init();
         break;
+
+	case CMD_L1_GET_TICK_COUNT:
+		ticks = TICK_getCounter();
+		send_resp2(ticks>>8, ticks, sequence);
+		break;
+
+	case CMD_L1_SET_REG_TARGET:
+		AVRPID_setCommand(param);
+		send_resp2(param, param, sequence);
+        break;
+
+	case CMD_L1_DRV_SET_PWM:
+		DRV_setPwm(param, param2);
+		break;
+						
+	case CMD_L1_DRV_SET_DIR:
+		DRV_setDirection(param, param2);
+		break;
 
     default:
         send_resp2(RESP_UNKNOWN_CMD, param, sequence);

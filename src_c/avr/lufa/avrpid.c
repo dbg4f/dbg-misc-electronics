@@ -34,7 +34,7 @@ int16_t calc_regulator_value(int16_t currentError)
 
 	int16_t result;
 	
-	result = currentError << 5;
+	result = abs(currentError << 5); // x32
 
 	if (result > 255)
 	{
