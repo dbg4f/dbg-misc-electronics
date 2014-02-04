@@ -10,8 +10,7 @@ import dbg.electronics.robodrv.graphics.ValueWithHistory;
 import dbg.electronics.robodrv.logging.ValueHistorySerializer;
 import dbg.electronics.robodrv.mcu.*;
 
-import static dbg.electronics.robodrv.mcu.CommandCode.ENABLE_ADC;
-import static dbg.electronics.robodrv.mcu.CommandCode.ECHO;
+import static dbg.electronics.robodrv.mcu.CommandCode.*;
 import static dbg.electronics.robodrv.mcu.McuCommand.createCommand;
 
 import dbg.electronics.robodrv.controllers.PidController;
@@ -357,6 +356,40 @@ public class Functions extends Script {
 
     }
 
+    public String tick() {
+        try {
+
+            List<Integer> ticks = new ArrayList<Integer>();
+            List<Long> intervals = new ArrayList<Long>();
+
+            long ts = System.currentTimeMillis();
+            for (int i=0; i<10; i++) {
+                ticks.add(getTickCount());
+                intervals.add(System.currentTimeMillis() - ts);
+            }
+
+            String s = "TICKS=" + ticks + " INTERVALS=" + intervals;
+            System.out.println("s = " + s);
+            return s;
+        }
+        catch (Exception e) {
+            e.printStackTrace();
+            return e.getMessage();
+        }
+    }
+
+    private int getTickCount() throws IOException, InterruptedException, McuCommunicationException {
+        return executor.execute(createCommand(GET_TICK_COUNT)).getResultWord();
+    }
+
+
+    public void d2(int channel, int value) throws InterruptedException, McuCommunicationException, IOException {
+        executor.execute(createCommand(DRV_SET_DIR, channel, value));
+    }
+
+    public void p2(int channel, int value) throws InterruptedException, McuCommunicationException, IOException {
+        executor.execute(createCommand(DRV_SET_PWM, channel, value));
+    }
 
     public String dir(int channel, int value) {
         try {

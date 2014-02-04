@@ -773,6 +773,7 @@ void ExecExtCommand(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3, 
         ct_init();
         resp_init();
         TICK_init();
+        DRV_init();
         break;
 
 	case CMD_L1_GET_TICK_COUNT:
@@ -787,10 +788,12 @@ void ExecExtCommand(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3, 
 
 	case CMD_L1_DRV_SET_PWM:
 		DRV_setPwm(param, param2);
+		send_resp2(param, param2, sequence);
 		break;
 						
 	case CMD_L1_DRV_SET_DIR:
 		DRV_setDirection(param, param2);
+		send_resp2(param, param2, sequence);
 		break;
 
     default:
