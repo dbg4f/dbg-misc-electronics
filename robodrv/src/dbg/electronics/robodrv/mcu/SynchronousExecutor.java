@@ -46,7 +46,7 @@ public class SynchronousExecutor implements McuReportListener {
         long execTime = System.currentTimeMillis() - ts;
         
         if (response == null) {
-            throw new McuCommunicationException("Timeout for command " + cmd + " " + cmd.toRawBytesString());
+            throw new McuCommunicationException("Timeout for command " + cmd + ": " + cmd.toRawBytesString());
         }
 
         response.setExecTime(execTime);

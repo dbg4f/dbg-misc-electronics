@@ -14,15 +14,36 @@ void DRV_setPwm(uint8_t channel, uint8_t value)
 	
 }
 
+
+
 void DRV_setDirection(uint8_t channel, uint8_t value)
 {
 	if (channel == 0) 
 	{
-		//PORTE.6 = value;
+		//PORTE.6 = value;		
+		if (value) 
+		{
+			PORTE |= (1<<PE6);
+		}
+		else
+		{
+			PORTE &= ~((1<<PE6));
+		}
+		
+		
 	}
 	else if (channel == 1)
 	{
 		//PORTB.4 = value;
+		if (value) 
+		{
+			PORTB |= (1<<PB4);
+		}
+		else
+		{
+			PORTB &= ~((1<<PB4));
+		}
+		
 	}
 
 }
