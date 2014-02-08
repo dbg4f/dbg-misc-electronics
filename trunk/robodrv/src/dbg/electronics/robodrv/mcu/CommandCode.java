@@ -12,7 +12,8 @@ public enum CommandCode implements CodifierAware {
     GET_TICK_COUNT 	(0x1D),
     SET_REG_TARGET 	(0x1E),
     DRV_SET_PWM		(0x1F),
-    DRV_SET_DIR		(0x20);
+    DRV_SET_DIR		(0x20),
+    ADC_VALUE		(0x21);
 
     CommandCode(int code) {
         this.code = code;

@@ -383,13 +383,30 @@ public class Functions extends Script {
     }
 
 
-    public void d2(int channel, int value) throws InterruptedException, McuCommunicationException, IOException {
+    public String d2(int channel, int value) throws InterruptedException, McuCommunicationException, IOException {
         executor.execute(createCommand(DRV_SET_DIR, channel, value));
+        return "DIR[" + channel + "] = " + value;
     }
 
-    public void p2(int channel, int value) throws InterruptedException, McuCommunicationException, IOException {
+    public String p2(int channel, int value) throws InterruptedException, McuCommunicationException, IOException {
         executor.execute(createCommand(DRV_SET_PWM, channel, value));
+        return "PWM[" + channel + "] = " + value;
     }
+
+    public String reg(int value) throws InterruptedException, McuCommunicationException, IOException {
+        executor.execute(createCommand(SET_REG_TARGET, value));
+        return "REG=" + value;
+    }
+
+    public String adcval(int channel) throws InterruptedException, McuCommunicationException, IOException {
+        CommandResponse response = executor.execute(createCommand(ADC_VALUE, channel));
+        return "ADC[" + channel + "] = " + String.format("%02X", response.getResult()&0xFF);
+    }
+
+
+
+
+
 
     public String dir(int channel, int value) {
         try {

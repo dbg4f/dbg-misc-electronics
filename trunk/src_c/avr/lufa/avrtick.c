@@ -1,4 +1,8 @@
 #include "avrtick.h"
+#include "USBtoSerial.h"
+#include "avrpid.h"
+
+#define ADC_POSITION_CHANNEL 0
 
 uint16_t counter = 0;
 
@@ -18,6 +22,7 @@ void TICK_init(void)
 void TICK_onTimer(void)
 {
 	counter++;
+	AVRPID_onClock(ADC_getValue(ADC_POSITION_CHANNEL));
 }
 
 ISR(TIMER0_OVF_vect) {

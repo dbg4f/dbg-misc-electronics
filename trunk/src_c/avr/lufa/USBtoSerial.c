@@ -90,6 +90,7 @@ USB_ClassInfo_CDC_Device_t VirtualSerial_CDC_Interface =
 #define CMD_L1_SET_REG_TARGET 	0x1E
 #define CMD_L1_DRV_SET_PWM		0x1F
 #define CMD_L1_DRV_SET_DIR		0x20
+#define CMD_L1_ADC_VALUE		0x21
 
 
 
@@ -258,6 +259,12 @@ static void tx_ct_snapshot(PCT_CONTEXT p_ct_context)
     }
 
 
+}
+
+
+uint8_t ADC_getValue(uint8_t channel)
+{
+	return adc_context.avg_values[channel];
 }
 
 // -----------------------------------------------------------------------------------------------------------------
@@ -794,6 +801,10 @@ void ExecExtCommand(uint8_t cmd, uint8_t param, uint8_t param2, uint8_t param3, 
 	case CMD_L1_DRV_SET_DIR:
 		DRV_setDirection(param, param2);
 		send_resp2(param, param2, sequence);
+		break;
+
+	case CMD_L1_ADC_VALUE:		
+		send_resp2(ADC_getValue(param), param2, sequence);
 		break;
 
     default:
