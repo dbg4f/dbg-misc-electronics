@@ -76,5 +76,7 @@
 
 		void EVENT_CDC_Device_LineEncodingChanged(USB_ClassInfo_CDC_Device_t* const CDCInterfaceInfo);
 
+		uint8_t ADC_getValue(uint8_t channel);
+
 #endif
 

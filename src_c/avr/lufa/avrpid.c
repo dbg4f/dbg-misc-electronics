@@ -4,7 +4,7 @@
 #define PID_CHANNEL 1
 
 // TODO: ~1 second
-#define REG_TIMEOUT_PER_CYCELE 100 
+#define REG_TIMEOUT_PER_CYCELE 1000 
 
 #define MAX_REVERSALS_PER_CYCLE 3
 
